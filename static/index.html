@@ -1,0 +1,1191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ace Studio</title>
+<style>
+/*
+  Material 3. Every color role below is generated at runtime from one seed
+  color (see the "Dynamic color" script), so these are only first-paint
+  fallbacks for the baseline scheme. Fonts are local only: no internet on the
+  camera's Wi-Fi.
+*/
+:root {
+  --primary: #65558F; --on-primary: #FFFFFF; --primary-container: #E9DDFF; --on-primary-container: #22005D;
+  --secondary: #625B71; --secondary-container: #E8DEF8; --on-secondary-container: #1E192B;
+  --tertiary: #7E5260; --tertiary-container: #FFD9E3; --on-tertiary-container: #31101D;
+  --error: #BA1A1A; --on-error: #FFFFFF; --error-container: #FFDAD6; --on-error-container: #410002;
+  --surface: #FEF7FF; --surface-container-lowest: #FFFFFF; --surface-container-low: #F8F1FA;
+  --surface-container: #F2ECF4; --surface-container-high: #ECE6EE; --surface-container-highest: #E6E0E9;
+  --on-surface: #1D1B20; --on-surface-variant: #49454E; --outline: #7A757F; --outline-variant: #CAC4CF;
+  --inverse-surface: #322F35; --inverse-on-surface: #F5EFF7; --inverse-primary: #CFBDFE;
+  --ok: #1B6D3A; --ok-container: #A4F4B4; --on-ok-container: #00210B;
+
+  --font: "Google Sans Text", "Google Sans", "Roboto", "Inter", "Cantarell", "Noto Sans", system-ui, sans-serif;
+  --font-display: "Google Sans Display", "Google Sans", "Roboto", "Inter", "Cantarell", system-ui, sans-serif;
+  --ease: cubic-bezier(.2, 0, 0, 1);           /* M3 emphasized */
+  --ease-spring: cubic-bezier(.34, 1.4, .64, 1); /* expressive overshoot */
+  --e1: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
+  --e2: 0 1px 2px rgba(0,0,0,.3), 0 2px 6px 2px rgba(0,0,0,.15);
+  --e3: 0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--surface); color: var(--on-surface);
+  font: 400 14px/20px var(--font); letter-spacing: .01em;
+  -webkit-font-smoothing: antialiased; overflow: hidden;
+  transition: background-color .4s var(--ease), color .4s var(--ease);
+}
+button, select, input { font: inherit; color: inherit; letter-spacing: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+[hidden] { display: none !important; }
+svg { flex: none; }
+
+/* State layers: an overlay in the content color, 8% hover / 10% press */
+.sl { position: relative; overflow: hidden; isolation: isolate; }
+.sl::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; transition: opacity .15s linear; pointer-events: none; border-radius: inherit; z-index: -1; }
+.sl:hover:not(:disabled)::before { opacity: .08; }
+.sl:active:not(:disabled)::before { opacity: .1; }
+
+/* Type scale */
+.display-s { font: 400 36px/44px var(--font-display); letter-spacing: 0; }
+.headline-s { font: 400 24px/32px var(--font-display); }
+.title-l { font: 400 22px/28px var(--font-display); }
+.title-m { font: 500 16px/24px var(--font); letter-spacing: .01em; }
+.label-l { font: 500 14px/20px var(--font); letter-spacing: .01em; }
+.label-m { font: 500 12px/16px var(--font); letter-spacing: .04em; }
+.body-s { font: 400 12px/16px var(--font); letter-spacing: .03em; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; padding: 0 24px; border-radius: 20px; border: 0;
+  font: 500 14px/20px var(--font); white-space: nowrap; background: none;
+  transition: box-shadow .2s var(--ease), border-radius .25s var(--ease);
+}
+.btn svg { width: 18px; height: 18px; }
+.btn.filled { background: var(--primary); color: var(--on-primary); }
+.btn.filled:hover:not(:disabled) { box-shadow: var(--e1); }
+.btn.tonal { background: var(--secondary-container); color: var(--on-secondary-container); }
+.btn.outlined { border: 1px solid var(--outline-variant); color: var(--on-surface-variant); }
+.btn.text { color: var(--primary); padding: 0 12px; }
+.btn.danger { background: var(--error); color: var(--on-error); }
+.btn.small { height: 32px; padding: 0 14px; border-radius: 16px; font-size: 13px; }
+.btn:active:not(:disabled) { border-radius: 12px; }  /* expressive press: corners tighten */
+.btn:disabled { opacity: .38; cursor: default; }
+.icon-btn { width: 40px; height: 40px; border-radius: 20px; border: 0; background: none; display: grid; place-items: center; color: var(--on-surface-variant); }
+.icon-btn svg { width: 24px; height: 24px; }
+
+/* ---------- App frame: navigation rail + content ---------- */
+.app { display: grid; grid-template-columns: 88px minmax(0, 1fr); height: 100%; }
+.rail { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 0 20px; background: var(--surface); }
+.brand { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; margin-bottom: 28px;
+  background: var(--tertiary-container); color: var(--on-tertiary-container); box-shadow: var(--e1); }
+.brand svg { width: 28px; height: 28px; }
+.nav { display: grid; justify-items: center; gap: 4px; width: 80px; padding: 0 0 12px; border: 0; background: none; color: var(--on-surface-variant); }
+.nav .ind { width: 56px; height: 32px; border-radius: 16px; display: grid; place-items: center; position: relative; transition: background-color .25s var(--ease); }
+.nav .ind svg { width: 24px; height: 24px; }
+.nav .ind::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; transition: opacity .15s; }
+.nav:hover:not(:disabled) .ind::before { opacity: .08; }
+.nav[aria-pressed="true"] { color: var(--on-surface); }
+.nav[aria-pressed="true"] .ind { background: var(--secondary-container); color: var(--on-secondary-container); }
+.nav[aria-pressed="true"] .lbl { font-weight: 700; }
+.nav:disabled { opacity: .38; cursor: default; }
+.nav .lbl { font: 500 12px/16px var(--font); letter-spacing: .04em; }
+.nav .badge { position: absolute; top: -2px; left: 32px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--error); color: var(--on-error); font: 500 11px/16px var(--font); }
+.rail-spacer { flex: 1; }
+
+.content { display: grid; grid-template-rows: 64px minmax(0, 1fr); min-height: 0; background: var(--surface); }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 0 16px 0 8px; min-width: 0; }
+.topbar .title-l { margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status { display: flex; gap: 8px; flex-wrap: nowrap; overflow: hidden; }
+.assist { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; border-radius: 8px; border: 1px solid var(--outline-variant); color: var(--on-surface); font: 500 13px/20px var(--font); white-space: nowrap; }
+.assist svg { width: 18px; height: 18px; color: var(--primary); }
+
+main { position: relative; min-height: 0; margin: 0 16px 16px 0; border-radius: 28px; background: var(--surface-container-low); overflow: hidden; }
+.view { position: absolute; inset: 0; overflow: auto; }
+
+/* ---------- Connect ---------- */
+.connect { display: grid; place-items: center; padding: 24px; }
+.connect-card { width: min(560px, 100%); }
+.hero { width: 72px; height: 72px; border-radius: 22px; display: grid; place-items: center; background: var(--primary-container); color: var(--on-primary-container); margin-bottom: 20px; }
+.hero svg { width: 36px; height: 36px; }
+.connect h1 { margin: 0 0 8px; font: 400 32px/40px var(--font-display); }
+.connect .lead { margin: 0 0 24px; color: var(--on-surface-variant); font-size: 16px; line-height: 24px; max-width: 52ch; }
+.list { background: var(--surface-container-lowest); border-radius: 20px; overflow: hidden; margin-bottom: 24px; }
+.li { display: grid; grid-template-columns: 40px 1fr; gap: 16px; align-items: start; padding: 14px 20px; }
+.li + .li { border-top: 1px solid var(--outline-variant); }
+.avatar { width: 40px; height: 40px; border-radius: 20px; display: grid; place-items: center; background: var(--primary-container); color: var(--on-primary-container); font: 500 16px var(--font); }
+.li b { display: block; font: 500 16px/24px var(--font); }
+.li span { color: var(--on-surface-variant); }
+code { font: 13px ui-monospace, "Roboto Mono", "DejaVu Sans Mono", monospace; background: var(--surface-container-high); padding: 1px 6px; border-radius: 6px; }
+.connect-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.hint { color: var(--on-surface-variant); }
+.alert { margin-top: 16px; padding: 14px 16px; border-radius: 16px; background: var(--error-container); color: var(--on-error-container); }
+.spinner { width: 20px; height: 20px; border-radius: 50%; border: 3px solid currentColor; border-right-color: transparent; animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Live ---------- */
+.live { display: grid; grid-template-columns: minmax(0, 1fr) 312px; gap: 12px; padding: 12px; overflow: hidden; }
+.finder { position: relative; background: #000; border-radius: 20px; overflow: hidden; display: grid; place-items: center; min-height: 0; transition: box-shadow .3s var(--ease); }
+.finder.rec { box-shadow: inset 0 0 0 4px var(--error); }
+.finder img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.grid-lines { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .2s;
+  background:
+    linear-gradient(to right, transparent calc(33.33% - .5px), rgba(255,255,255,.35) calc(33.33% - .5px), rgba(255,255,255,.35) calc(33.33% + .5px), transparent calc(33.33% + .5px), transparent calc(66.66% - .5px), rgba(255,255,255,.35) calc(66.66% - .5px), rgba(255,255,255,.35) calc(66.66% + .5px), transparent calc(66.66% + .5px)),
+    linear-gradient(to bottom, transparent calc(33.33% - .5px), rgba(255,255,255,.35) calc(33.33% - .5px), rgba(255,255,255,.35) calc(33.33% + .5px), transparent calc(33.33% + .5px), transparent calc(66.66% - .5px), rgba(255,255,255,.35) calc(66.66% - .5px), rgba(255,255,255,.35) calc(66.66% + .5px), transparent calc(66.66% + .5px)); }
+.finder.show-grid .grid-lines { opacity: 1; }
+.osd { position: absolute; left: 12px; right: 12px; top: 12px; display: flex; gap: 8px; pointer-events: none; }
+.osd-chip { height: 28px; padding: 0 12px; border-radius: 14px; display: inline-flex; align-items: center; gap: 6px; background: rgba(0,0,0,.55); color: #fff; font: 500 12px/16px var(--font); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.idle, .waiting { text-align: center; color: #C9C5D0; padding: 24px; display: grid; justify-items: center; gap: 16px; }
+.idle svg { width: 48px; height: 48px; color: #8E8A96; }
+.idle p { margin: 0; font-size: 16px; }
+
+.panel { display: flex; flex-direction: column; gap: 16px; padding: 20px; border-radius: 20px; background: var(--surface-container-lowest); min-height: 0; overflow: auto; }
+.readout { display: grid; gap: 2px; padding: 4px 4px 0; }
+.readout .top { display: flex; justify-content: space-between; color: var(--on-surface-variant); }
+.readout .display-s { transition: color .3s; }
+.readout.rec .display-s { color: var(--error); }
+.readout .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--error); margin-right: 6px; animation: blink 1.2s steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
+
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--outline); border-radius: 20px; overflow: hidden; height: 40px; }
+.seg button { border: 0; background: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: 500 14px var(--font); color: var(--on-surface); }
+.seg button + button { border-left: 1px solid var(--outline); }
+.seg button svg { width: 18px; height: 18px; display: none; }
+.seg button[aria-pressed="true"] { background: var(--secondary-container); color: var(--on-secondary-container); }
+.seg button[aria-pressed="true"] svg { display: block; }
+.seg button:disabled { opacity: .38; cursor: default; }
+
+.shutter-wrap { display: grid; justify-items: center; gap: 8px; padding: 6px 0; }
+.shutter {
+  width: 96px; height: 96px; border: 0; border-radius: 48px; display: grid; place-items: center;
+  background: var(--error); color: var(--on-error); box-shadow: var(--e3);
+  transition: border-radius .35s var(--ease-spring), background-color .3s var(--ease), transform .15s var(--ease);
+}
+.shutter i { width: 30px; height: 30px; border-radius: 15px; background: currentColor; transition: border-radius .35s var(--ease-spring), width .35s var(--ease-spring), height .35s var(--ease-spring); }
+.shutter.photo { background: var(--primary); color: var(--on-primary); }
+.shutter.photo i { width: 34px; height: 34px; border-radius: 17px; background: transparent; border: 4px solid currentColor; }
+.shutter.rec { border-radius: 28px; }            /* circle morphs into a rounded square */
+.shutter.rec i { width: 26px; height: 26px; border-radius: 6px; }
+.shutter:active:not(:disabled) { transform: scale(.94); }
+.shutter:disabled { opacity: .38; cursor: default; box-shadow: none; }
+.shutter-label { color: var(--on-surface-variant); }
+
+/* Outlined select / text fields */
+.field { position: relative; }
+.field label { position: absolute; left: 12px; top: -8px; padding: 0 4px; background: var(--surface-container-lowest); color: var(--on-surface-variant); font: 400 12px/16px var(--font); }
+.field select, .field input { width: 100%; height: 56px; border: 1px solid var(--outline); border-radius: 4px; background: transparent; padding: 0 16px; font-size: 16px; outline: none; appearance: none; -webkit-appearance: none; }
+.field select { padding-right: 40px; background-image: linear-gradient(45deg, transparent 50%, var(--on-surface-variant) 50%), linear-gradient(135deg, var(--on-surface-variant) 50%, transparent 50%); background-position: calc(100% - 21px) 26px, calc(100% - 16px) 26px; background-size: 5px 5px; background-repeat: no-repeat; }
+.field select:focus, .field input:focus { border: 2px solid var(--primary); padding: 0 15px; }
+.field select:focus + label, .field input:focus + label { color: var(--primary); }
+.field select:disabled, .field input:disabled { opacity: .38; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.supporting { color: var(--on-surface-variant); padding: 4px 16px 0; }
+.group { display: grid; gap: 16px; }
+.group-title { color: var(--on-surface-variant); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+.chip {
+  height: 32px; padding: 0 16px 0 12px; border-radius: 8px; border: 1px solid var(--outline-variant); background: none;
+  display: inline-flex; align-items: center; gap: 8px; font: 500 14px/20px var(--font); color: var(--on-surface-variant); white-space: nowrap;
+}
+.chip svg { width: 18px; height: 18px; color: var(--primary); }
+.chip[aria-pressed="true"] { background: var(--secondary-container); color: var(--on-secondary-container); border-color: transparent; }
+.chip[aria-pressed="true"] svg { color: currentColor; }
+
+/* ---------- Library ---------- */
+.library { display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
+.lib-head { display: flex; align-items: center; gap: 8px; padding: 16px 20px 8px; flex-wrap: wrap; }
+.lib-head .title-m { margin-right: auto; }
+.lib-head .title-m small { color: var(--on-surface-variant); font-weight: 400; margin-left: 8px; }
+.filter { height: 32px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--outline-variant); background: none; display: inline-flex; align-items: center; gap: 8px; font: 500 14px var(--font); color: var(--on-surface-variant); }
+.filter svg { width: 18px; height: 18px; display: none; }
+.filter[aria-pressed="true"] { padding-left: 8px; background: var(--secondary-container); color: var(--on-secondary-container); border-color: transparent; }
+.filter[aria-pressed="true"] svg { display: block; }
+.scroller { overflow: auto; padding: 0 20px 120px; }
+.day { display: flex; align-items: baseline; gap: 12px; margin: 20px 4px 12px; }
+.day h3 { margin: 0; font: 400 22px/28px var(--font-display); }
+.day button { height: 28px; }
+.sheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 12px; }
+.tile { position: relative; border: 0; padding: 0; background: var(--surface-container-lowest); border-radius: 16px; text-align: left; overflow: hidden; transition: border-radius .25s var(--ease), box-shadow .2s var(--ease); }
+.tile:hover { box-shadow: var(--e1); }
+.thumb { aspect-ratio: 16/9; position: relative; overflow: hidden; background: var(--surface-container-highest); display: grid; place-items: center; color: var(--on-surface-variant); transition: margin .25s var(--ease), border-radius .25s var(--ease); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .25s; }
+.thumb img.loaded { opacity: 1; }
+.thumb .ph { position: absolute; font: 500 12px var(--font); text-transform: uppercase; letter-spacing: .08em; }
+.thumb .dur { position: absolute; right: 8px; bottom: 8px; height: 24px; padding: 0 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; background: rgba(0,0,0,.6); color: #fff; font: 500 12px/16px var(--font); }
+.thumb .dur svg { width: 14px; height: 14px; }
+.badges { position: absolute; left: 8px; top: 8px; display: flex; gap: 4px; flex-wrap: wrap; }
+.tag { height: 24px; padding: 0 8px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; font: 500 12px/16px var(--font); }
+.tag svg { width: 14px; height: 14px; }
+.tag.ok { background: var(--ok-container); color: var(--on-ok-container); }
+.tag.warn { background: var(--error-container); color: var(--on-error-container); }
+.tag.share { background: var(--tertiary-container); color: var(--on-tertiary-container); }
+.tile .cap { display: flex; justify-content: space-between; padding: 10px 12px 12px; color: var(--on-surface-variant); }
+.tile .cap b { font-weight: 500; color: var(--on-surface); }
+.check { position: absolute; right: 10px; top: 10px; width: 24px; height: 24px; border-radius: 12px; border: 2px solid #fff; background: rgba(0,0,0,.25); display: grid; place-items: center; opacity: 0; transition: opacity .15s; }
+.check svg { width: 16px; height: 16px; color: var(--on-primary); opacity: 0; }
+.tile:hover .check, .has-selection .check { opacity: 1; }
+/* selected: the image insets and its corners grow, like Google Photos */
+.tile[aria-pressed="true"] { background: var(--secondary-container); }
+.tile[aria-pressed="true"] .thumb { margin: 10px 10px 0; border-radius: 12px; }
+.tile[aria-pressed="true"] .check { opacity: 1; background: var(--primary); border-color: var(--primary); }
+.tile[aria-pressed="true"] .check svg { opacity: 1; }
+.empty { padding: 72px 24px; text-align: center; color: var(--on-surface-variant); font-size: 16px; }
+
+/* Floating toolbar for the selection */
+.tray {
+  position: absolute; left: 50%; bottom: 20px; transform: translate(-50%, 24px); opacity: 0; pointer-events: none;
+  display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 8px; border-radius: 28px;
+  background: var(--primary-container); color: var(--on-primary-container); box-shadow: var(--e3);
+  transition: opacity .2s var(--ease), transform .35s var(--ease-spring); white-space: nowrap;
+}
+.tray.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.tray .count { padding: 0 12px 0 4px; font: 500 14px var(--font); }
+.tray .icon-btn { color: var(--on-primary-container); }
+.tray .btn.text { color: var(--on-primary-container); }
+
+/* ---------- Side sheet: transfers ---------- */
+.scrim { position: absolute; inset: 0; background: rgba(0,0,0,.32); opacity: 0; pointer-events: none; transition: opacity .25s var(--ease); z-index: 4; }
+.scrim.show { opacity: 1; pointer-events: auto; }
+.drawer {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(380px, 100%); z-index: 5;
+  background: var(--surface-container-low); border-radius: 28px 0 0 28px; box-shadow: var(--e1);
+  transform: translateX(105%); visibility: hidden; transition: transform .35s var(--ease), visibility 0s .35s;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.drawer.open { transform: none; visibility: visible; transition: transform .35s var(--ease); }
+.drawer header { display: flex; align-items: center; justify-content: space-between; padding: 20px 12px 12px 24px; }
+.drawer h2 { margin: 0; font: 400 22px/28px var(--font-display); }
+.jobs { overflow: auto; padding: 0 12px; }
+.job { padding: 12px; border-radius: 16px; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; }
+.job + .job { margin-top: 4px; }
+.job-name { font: 500 14px/20px var(--font); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.job-sub { grid-column: 1 / -1; color: var(--on-surface-variant); display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+.job.failed .job-sub { color: var(--error); }
+.job.done .job-sub span:first-child { color: var(--ok); }
+/* M3 linear progress: indicator, gap, track, stop dot */
+.progress { grid-column: 1 / -1; position: relative; height: 4px; margin-top: 8px; }
+.progress .track { position: absolute; inset: 0; border-radius: 2px; background: var(--secondary-container); }
+.progress .bar { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--primary); transition: width .3s var(--ease); box-shadow: 4px 0 0 var(--surface-container-low); }
+.progress .stop { position: absolute; right: 0; top: 0; width: 4px; height: 4px; border-radius: 2px; background: var(--primary); }
+.job.share .progress .bar, .job.share .progress .stop { background: var(--tertiary); }
+.job.share .progress .track { background: var(--tertiary-container); }
+.drawer footer { display: flex; justify-content: space-between; gap: 8px; padding: 16px 24px 24px; flex-wrap: wrap; }
+
+/* ---------- Snackbar ---------- */
+.toasts { position: fixed; left: 104px; bottom: 24px; display: grid; gap: 8px; z-index: 30; width: min(480px, calc(100% - 128px)); }
+.toast { min-height: 48px; padding: 14px 16px; border-radius: 4px; background: var(--inverse-surface); color: var(--inverse-on-surface); box-shadow: var(--e3); animation: snack .3s var(--ease); }
+.toast.error { background: var(--error); color: var(--on-error); }
+@keyframes snack { from { opacity: 0; transform: translateY(12px); } }
+
+/* ---------- Dialogs ---------- */
+dialog { border: 0; padding: 0; background: transparent; color: var(--on-surface); max-width: none; }
+dialog::backdrop { background: rgba(0,0,0,.32); }
+dialog[open] .dlg { animation: dlg .35s var(--ease); }
+@keyframes dlg { from { opacity: 0; transform: translateY(-16px) scale(.98); } }
+.dlg { background: var(--surface-container-high); border-radius: 28px; padding: 24px; box-shadow: var(--e3); }
+dialog.viewer { width: min(980px, 92vw); }
+.viewer img { width: 100%; max-height: 66vh; object-fit: contain; display: block; border-radius: 16px; background: #000; }
+.viewer h2 { margin: 0 0 16px; font: 400 24px/32px var(--font-display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vfoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; flex-wrap: wrap; }
+.vfoot .info { color: var(--on-surface-variant); }
+.vfoot .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+dialog.palette { width: min(400px, 92vw); }
+.palette h2 { margin: 0 0 8px; font: 400 24px/32px var(--font-display); }
+.palette p { margin: 0 0 20px; color: var(--on-surface-variant); }
+.swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.swatch { aspect-ratio: 1; border-radius: 50%; border: 0; padding: 0; position: relative; overflow: hidden; box-shadow: var(--e1); transition: border-radius .3s var(--ease-spring); }
+.swatch span { position: absolute; inset: 0; display: grid; grid-template: 1fr 1fr / 1fr 1fr; }
+.swatch[aria-pressed="true"] { border-radius: 16px; box-shadow: 0 0 0 3px var(--surface-container-high), 0 0 0 5px var(--primary); }
+.swatch.cam { display: grid; place-items: center; background: var(--surface-container-highest); color: var(--on-surface-variant); }
+.swatch.cam img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.swatch.cam svg { width: 26px; height: 26px; position: relative; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); color: #fff; }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Latency test: the whole window flashes so the camera can see it */
+.lat { position: fixed; inset: 0; z-index: 40; background: #000; color: #E6E0E9; display: grid; place-items: center; }
+.lat.flash { background: #fff; }
+.lat.flash .lat-card { visibility: hidden; }
+.lat-card { text-align: center; max-width: 520px; padding: 24px; display: grid; justify-items: center; gap: 12px; }
+.lat-card h2 { margin: 0; font: 400 28px/36px var(--font-display); }
+.lat-card p { margin: 0; color: #CAC4D0; font-size: 16px; line-height: 24px; }
+.lat-card .result { font: 400 57px/64px var(--font-display); }
+.lat-card .btn.text { color: #D0BCFF; }
+.lat-peek { position: fixed; right: 16px; bottom: 16px; width: 200px; border-radius: 12px; background: #111; }
+
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) 80px; }
+  .rail { grid-row: 2; flex-direction: row; justify-content: space-around; padding: 12px 0 16px; background: var(--surface-container); }
+  .brand, .rail-spacer { display: none; }
+  .nav { width: auto; padding: 0; }
+  main { margin: 0; border-radius: 0; }
+  .status .opt { display: none; }
+  .live { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; overflow: auto; }
+  .toasts { left: 16px; width: calc(100% - 32px); bottom: 96px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+<style id="dyn"></style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="rail" aria-label="Navigation">
+    <div class="brand" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3.5"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 6l1.5-2.5h5L16 6"/></svg>
+    </div>
+    <button class="nav" id="tabLive" aria-pressed="true" disabled>
+      <span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="6" width="13.5" height="12" rx="3"/><path d="M16 10.5 21.5 7.5v9L16 13.5"/></svg></span>
+      <span class="lbl">Live</span>
+    </button>
+    <button class="nav" id="tabLib" aria-pressed="false" disabled>
+      <span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span>
+      <span class="lbl">Library</span>
+    </button>
+    <button class="nav" id="openJobs" aria-pressed="false">
+      <span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span class="badge num" id="jobBadge" hidden>0</span></span>
+      <span class="lbl">Transfers</span>
+    </button>
+    <div class="rail-spacer"></div>
+    <button class="nav" id="paletteBtn" aria-pressed="false" title="Colors">
+      <span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.9 1.8-1.8 0-1.3-1-1.7-1-2.8 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15" cy="7.5" r="1.2" fill="currentColor"/></svg></span>
+      <span class="lbl">Colors</span>
+    </button>
+  </nav>
+
+  <section class="content">
+    <header class="topbar">
+      <span class="title-l" id="topTitle">Ace Studio</span>
+      <div class="status num" id="statusLcd" hidden>
+        <span class="assist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3.5"/><circle cx="12" cy="12.5" r="3.5"/></svg><span id="lcdModel"></span></span>
+        <span class="assist"><span class="batt" id="batt"><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="17" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="20.5" y="10" width="2" height="4" rx="1" fill="currentColor"/><rect id="battFill" x="5" y="9.5" width="12" height="5" rx="1" fill="currentColor"/></svg></span><span id="lcdBatt"></span></span>
+        <span class="assist opt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 7v3M12 7v3M15 8v2"/></svg><span id="lcdCard"></span></span>
+        <span class="assist opt" id="tempChip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14V5a2 2 0 1 1 4 0v9a4 4 0 1 1-4 0z"/></svg><span id="lcdTemp"></span></span>
+      </div>
+      <button class="btn text sl" id="disconnectBtn" hidden>Disconnect</button>
+    </header>
+
+    <main>
+      <!-- Connect -->
+      <section class="view connect" id="viewConnect">
+        <div class="connect-card">
+          <div class="hero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9.5a14 14 0 0 1 19 0M5.5 12.8a9.5 9.5 0 0 1 13 0M8.6 16a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></svg></div>
+          <h1>Connect your Ace Pro 2</h1>
+          <p class="lead">The camera makes its own Wi-Fi network. Join it from this laptop and you can see the live view, record, and copy your clips.</p>
+          <div class="list">
+            <div class="li"><span class="avatar">1</span><div><b>Turn on the camera's Wi-Fi</b><span>Swipe down on the camera's screen and switch on Wi-Fi.</span></div></div>
+            <div class="li"><span class="avatar">2</span><div><b>Join its network from Zorin</b><span>Open the Wi-Fi menu at the top right and pick the network named after your camera. The password is in the camera's Wi-Fi settings.</span></div></div>
+            <div class="li"><span class="avatar">3</span><div><b>Connect</b><span>Ace Studio looks for the camera at <code id="hostText">192.168.42.1</code>.</span></div></div>
+          </div>
+          <div class="connect-actions">
+            <button class="btn filled sl" id="connectBtn">Connect</button>
+            <span class="hint" id="connectHint"></span>
+          </div>
+          <div class="alert" id="connectErr" hidden></div>
+        </div>
+      </section>
+
+      <!-- Live -->
+      <section class="view live" id="viewLive" hidden>
+        <div class="finder" id="finder">
+          <img id="stream" alt="Live view from the camera" hidden>
+          <div class="grid-lines"></div>
+          <div class="osd" id="osd" hidden>
+            <span class="osd-chip num" id="osdStats"></span>
+            <span class="osd-chip num" id="osdLatency" hidden></span>
+          </div>
+          <div class="idle" id="idle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="6" width="13.5" height="12" rx="3"/><path d="M16 10.5 21.5 7.5v9L16 13.5"/></svg>
+            <p>Live view is off to save the camera's battery.</p>
+            <button class="btn filled sl" id="previewOn">Turn on live view</button>
+          </div>
+          <div class="waiting" id="waiting" hidden><span class="spinner" style="color:#D0BCFF"></span>Waiting for the first picture from the camera</div>
+        </div>
+
+        <aside class="panel" aria-label="Camera controls">
+          <div class="readout num" id="railLcd">
+            <div class="top label-l"><span id="lcdMode">Video</span><span id="lcdRight">Ready</span></div>
+            <div class="display-s" id="timecode">00:00:00</div>
+            <div class="body-s" id="lcdSub" style="color:var(--on-surface-variant)">&nbsp;</div>
+          </div>
+
+          <div class="seg" role="group" aria-label="Capture mode">
+            <button id="modeVideo" class="sl" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Video</button>
+            <button id="modePhoto" class="sl" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Photo</button>
+          </div>
+
+          <div class="shutter-wrap">
+            <button class="shutter sl" id="shutter" aria-label="Start recording"><i></i></button>
+            <span class="shutter-label label-l" id="shutterLabel">Record</span>
+          </div>
+
+          <div class="group" id="timerField">
+            <div class="field">
+              <select id="stopAfter">
+                <option value="0">No limit</option>
+                <option value="30">30 seconds</option>
+                <option value="60">1 minute</option>
+                <option value="300">5 minutes</option>
+                <option value="600">10 minutes</option>
+                <option value="1200">20 minutes</option>
+                <option value="1800">30 minutes</option>
+                <option value="3600">1 hour</option>
+              </select>
+              <label for="stopAfter">Stop recording after</label>
+            </div>
+          </div>
+
+          <div class="group" id="intervalField" hidden>
+            <span class="label-l group-title">Interval photos</span>
+            <div class="row2">
+              <div class="field"><input id="ivEvery" class="num" type="number" min="2" value="5"><label for="ivEvery">Every (seconds)</label></div>
+              <div class="field"><input id="ivCount" class="num" type="number" min="0" value="0"><label for="ivCount">How many</label></div>
+            </div>
+            <span class="body-s supporting" style="margin-top:-12px">0 keeps going until you stop it</span>
+            <button class="btn tonal sl" id="ivBtn">Start interval</button>
+          </div>
+
+          <div class="chips">
+            <button class="chip sl" id="gridBtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.2 4.5v15M14.8 4.5v15M3.5 9.5h17M3.5 14.5h17"/></svg>Grid</button>
+            <button class="chip sl" id="previewToggle" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Live view</button>
+            <button class="chip sl" id="latBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M10 3h4"/></svg>Delay test</button>
+          </div>
+        </aside>
+      </section>
+
+      <!-- Library -->
+      <section class="view library" id="viewLib" hidden>
+        <div class="lib-head">
+          <span class="title-m">On the camera<small class="num" id="libCount"></small></span>
+          <button class="filter sl" data-filter="all" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>All</button>
+          <button class="filter sl" data-filter="video" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Videos</button>
+          <button class="filter sl" data-filter="photo" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Photos</button>
+          <button class="filter sl" data-filter="new" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Not copied</button>
+          <button class="icon-btn sl" id="refreshLib" aria-label="Refresh" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
+        </div>
+        <div class="scroller" id="scroller"><div id="sheet"></div></div>
+        <div class="tray" id="tray">
+          <button class="icon-btn sl" id="trayClear" aria-label="Clear selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          <span class="count num" id="trayText"></span>
+          <button class="btn text sl" id="trayShare" hidden>Make share copies</button>
+          <button class="btn filled sl" id="trayDownload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>Copy to computer</button>
+        </div>
+      </section>
+
+      <!-- Transfers side sheet -->
+      <div class="scrim" id="scrim"></div>
+      <aside class="drawer" id="drawer" aria-label="Transfers">
+        <header>
+          <h2>Transfers</h2>
+          <button class="icon-btn sl" id="closeDrawer" aria-label="Close transfers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </header>
+        <div class="jobs" id="jobs"></div>
+        <footer>
+          <button class="btn text sl" id="clearJobs">Clear finished</button>
+          <span style="display:flex;gap:8px">
+            <button class="btn outlined sl small" id="openShare">Share folder</button>
+            <button class="btn tonal sl small" id="openFolder">Copies folder</button>
+          </span>
+        </footer>
+      </aside>
+    </main>
+  </section>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<dialog class="viewer" id="viewer">
+  <div class="dlg">
+    <h2 id="viewerWhen"></h2>
+    <img id="viewerImg" alt="">
+    <div class="vfoot">
+      <span class="info num" id="viewerMeta"></span>
+      <div class="acts">
+        <button class="btn text sl" id="viewerClose">Close</button>
+        <button class="btn tonal sl" id="viewerShare" hidden>Make share copy</button>
+        <button class="btn filled sl" id="viewerCopy">Copy to computer</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="palette" id="palette">
+  <div class="dlg">
+    <h2>Colors</h2>
+    <p>Pick a color and the whole app is themed from it. "From your camera" uses the colors of your latest shot.</p>
+    <div class="swatches" id="swatches"></div>
+    <div class="dlg-actions"><button class="btn text sl" id="paletteClose">Done</button></div>
+  </div>
+</dialog>
+
+<div class="lat" id="lat" hidden>
+  <div class="lat-card">
+    <h2>Measure live view delay</h2>
+    <p id="latText"></p>
+    <div class="result num" id="latResult" hidden></div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="btn text" id="latClose">Close</button>
+      <button class="btn filled" id="latStart" style="background:#D0BCFF;color:#381E72">Start</button>
+    </div>
+  </div>
+  <img class="lat-peek" id="latPeek" alt="Live view">
+</div>
+
+<script>
+/* ======================================================================
+   Dynamic color: build Material 3 light and dark schemes from one seed.
+   Tones are made in OKLCH (a perceptual space), which keeps contrast
+   steady as the hue changes, close to Material's own HCT approach.
+   ====================================================================== */
+const Color = (() => {
+  const lin = c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const gam = c => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+  function hexToOklch(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => lin(v / 255));
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    const L = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s;
+    const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+    const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+    return { L, C: Math.hypot(A, B), H: (Math.atan2(B, A) * 180 / Math.PI + 360) % 360 };
+  }
+  function oklchToRgb(L, C, H) {
+    const a = C * Math.cos(H * Math.PI / 180), b = C * Math.sin(H * Math.PI / 180);
+    const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+    const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+    const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+    return [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+            -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+            -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s];
+  }
+  const inGamut = rgb => rgb.every(v => v >= -1e-4 && v <= 1 + 1e-4);
+  // Material "tone" (0 black – 100 white) → a hex color at that tone, chroma reduced to fit sRGB.
+  function tone(t, C, H) {
+    const L = Math.pow(t / 100, 0.83);
+    let lo = 0, hi = C, rgb = oklchToRgb(L, C, H);
+    if (!inGamut(rgb)) {
+      for (let i = 0; i < 18; i++) { const mid = (lo + hi) / 2; inGamut(oklchToRgb(L, mid, H)) ? lo = mid : hi = mid; }
+      rgb = oklchToRgb(L, lo, H);
+    }
+    return "#" + rgb.map(v => Math.round(Math.min(1, Math.max(0, gam(Math.min(1, Math.max(0, v))))) * 255).toString(16).padStart(2, "0")).join("");
+  }
+  function scheme(seed) {
+    const { C, H } = hexToOklch(seed);
+    const P = t => tone(t, Math.min(Math.max(C, 0.09), 0.17), H);
+    const S = t => tone(t, Math.min(C * 0.35, 0.05), H);
+    const T = t => tone(t, Math.min(Math.max(C * 0.6, 0.06), 0.12), (H + 60) % 360);
+    const N = t => tone(t, 0.008, H);
+    const V = t => tone(t, 0.02, H);
+    const E = t => tone(t, 0.17, 27);
+    const G = t => tone(t, 0.12, 150);
+    const light = {
+      primary: P(40), "on-primary": P(100), "primary-container": P(90), "on-primary-container": P(10),
+      secondary: S(40), "secondary-container": S(90), "on-secondary-container": S(10),
+      tertiary: T(40), "tertiary-container": T(90), "on-tertiary-container": T(10),
+      error: E(40), "on-error": E(100), "error-container": E(90), "on-error-container": E(10),
+      surface: N(98), "surface-container-lowest": N(100), "surface-container-low": N(96),
+      "surface-container": N(94), "surface-container-high": N(92), "surface-container-highest": N(90),
+      "on-surface": N(10), "on-surface-variant": V(30), outline: V(50), "outline-variant": V(80),
+      "inverse-surface": N(20), "inverse-on-surface": N(95), "inverse-primary": P(80),
+      ok: G(40), "ok-container": G(90), "on-ok-container": G(10),
+    };
+    const dark = {
+      primary: P(80), "on-primary": P(20), "primary-container": P(30), "on-primary-container": P(90),
+      secondary: S(80), "secondary-container": S(30), "on-secondary-container": S(90),
+      tertiary: T(80), "tertiary-container": T(30), "on-tertiary-container": T(90),
+      error: E(80), "on-error": E(20), "error-container": E(30), "on-error-container": E(90),
+      surface: N(6), "surface-container-lowest": N(4), "surface-container-low": N(10),
+      "surface-container": N(12), "surface-container-high": N(17), "surface-container-highest": N(22),
+      "on-surface": N(90), "on-surface-variant": V(80), outline: V(60), "outline-variant": V(30),
+      "inverse-surface": N(90), "inverse-on-surface": N(20), "inverse-primary": P(40),
+      ok: G(80), "ok-container": G(30), "on-ok-container": G(90),
+    };
+    return { light, dark };
+  }
+  const css = o => Object.entries(o).map(([k, v]) => `--${k}:${v};`).join("");
+  function apply(seed) {
+    const { light, dark } = scheme(seed);
+    document.getElementById("dyn").textContent =
+      `:root{${css(light)}color-scheme:light}` +
+      `@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${css(dark)}color-scheme:dark}}` +
+      `:root[data-theme="dark"]{${css(dark)}color-scheme:dark}`;
+    return { light, dark };
+  }
+  return { apply, scheme, hexToOklch };
+})();
+
+const SEEDS = ["#6750A4", "#00639B", "#006A6A", "#386A20", "#8E4E00", "#B3261E", "#984061"];
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+const theme = { choice: store.get("ace.seed") || "camera", cameraSeed: null };
+function applyTheme() {
+  const seed = theme.choice === "camera" ? (theme.cameraSeed || SEEDS[0]) : theme.choice;
+  Color.apply(seed);
+}
+// Most vivid color in an image, for "From your camera"
+function seedFromImage(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const cv = document.createElement("canvas"); cv.width = 24; cv.height = 14;
+        const ctx = cv.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, 24, 14);
+        const d = ctx.getImageData(0, 0, 24, 14).data;
+        const bins = new Map();
+        for (let i = 0; i < d.length; i += 4) {
+          const hex = "#" + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, "0")).join("");
+          const { L, C, H } = Color.hexToOklch(hex);
+          if (L < 0.2 || L > 0.95 || C < 0.04) continue;
+          const key = Math.round(H / 20);
+          const b = bins.get(key) || { w: 0, hex };
+          b.w += C; if (C > (b.c || 0)) { b.c = C; b.hex = hex; }
+          bins.set(key, b);
+        }
+        let best = null; for (const b of bins.values()) if (!best || b.w > best.w) best = b;
+        resolve(best ? best.hex : null);
+      } catch { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+applyTheme();
+
+/* ====================================================================== */
+const $ = (id) => document.getElementById(id);
+const state = { status: {}, files: [], selected: new Set(), filter: "all", view: "connect", jobs: [], anchor: null, latency: null };
+
+async function api(path, body) {
+  const opts = body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const r = await fetch(path, opts);
+  let data = {};
+  try { data = await r.json(); } catch {}
+  if (!r.ok || data.ok === false) throw new Error(data.error || `Request failed (${r.status})`);
+  return data;
+}
+function toast(msg, kind = "") {
+  const el = document.createElement("div");
+  el.className = "toast " + kind; el.textContent = msg;
+  $("toasts").append(el);
+  setTimeout(() => el.remove(), kind === "error" ? 6000 : 3500);
+}
+const fmtBytes = (b) => {
+  if (b == null) return "";
+  const u = ["B", "KB", "MB", "GB", "TB"]; let i = 0;
+  while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+  return (i >= 3 ? b.toFixed(1) : Math.round(b)) + " " + u[i];
+};
+const fmtDur = (s) => {
+  s = Math.max(0, Math.floor(s));
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0");
+};
+const tc = (s) => [Math.floor(s / 3600), Math.floor(s % 3600 / 60), Math.floor(s % 60)].map(n => String(n).padStart(2, "0")).join(":");
+const thumbUrl = (p) => `/api/thumb?path=${encodeURIComponent(p)}`;
+const localDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const ICON = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
+  done: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  laptop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4M8.2 13.2l7.6 4"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.1"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+};
+
+/* ---------- Views ---------- */
+const TITLES = { connect: "Ace Studio", live: "Live", library: "Library" };
+function show(view) {
+  state.view = view;
+  $("viewConnect").hidden = view !== "connect";
+  $("viewLive").hidden = view !== "live";
+  $("viewLib").hidden = view !== "library";
+  $("tabLive").setAttribute("aria-pressed", view === "live");
+  $("tabLib").setAttribute("aria-pressed", view === "library");
+  $("topTitle").textContent = TITLES[view];
+  if (view === "library" && !state.files.length) loadFiles();
+}
+$("tabLive").onclick = () => show("live");
+$("tabLib").onclick = () => show("library");
+
+/* ---------- Status ---------- */
+function renderStatus() {
+  const s = state.status, on = !!s.connected;
+  $("statusLcd").hidden = !on;
+  $("tabLive").disabled = $("tabLib").disabled = !on;
+  $("disconnectBtn").hidden = !on;
+  $("hostText").textContent = s.host && s.host !== "demo" ? s.host : "192.168.42.1";
+  if (on) {
+    $("lcdModel").textContent = (s.model || "Camera").replace(/^Insta360\s*/i, "");
+    const b = s.battery;
+    $("battFill").setAttribute("width", Math.max(0.5, 12 * (b ?? 0) / 100));
+    $("batt").style.color = b != null && b <= 15 ? "var(--error)" : "";
+    $("lcdBatt").textContent = b == null ? "—" : b + "%" + (s.charging ? " · charging" : "");
+    $("lcdCard").textContent = s.total ? `${fmtBytes(s.free)} free` : (s.card && s.card !== "STOR_CS_PASS" ? "Check card" : "—");
+    $("lcdTemp").textContent = s.temp != null ? `${s.temp} °C` : "";
+    $("tempChip").hidden = s.temp == null;
+    if (state.view === "connect") show("live");
+    if (theme.choice === "camera" && !theme.cameraSeed && !state.loadingFiles && !state.triedSeed) { state.triedSeed = true; loadFiles(true); }
+  } else if (state.view !== "connect") show("connect");
+
+  const rec = !!s.recording, photo = s.mode === "photo";
+  const iv = s.interval && s.interval.running ? s.interval : null;
+  $("modeVideo").setAttribute("aria-pressed", !photo);
+  $("modePhoto").setAttribute("aria-pressed", photo);
+  $("modeVideo").disabled = $("modePhoto").disabled = rec || !!iv;
+  const sh = $("shutter");
+  sh.classList.toggle("photo", photo); sh.classList.toggle("rec", rec);
+  sh.disabled = !!iv;
+  sh.setAttribute("aria-label", photo ? "Take photo" : rec ? "Stop recording" : "Start recording");
+  $("shutterLabel").textContent = photo ? "Take photo" : rec ? "Stop" : "Record";
+  $("finder").classList.toggle("rec", rec);
+  $("railLcd").classList.toggle("rec", rec);
+  $("timerField").hidden = photo;
+  $("intervalField").hidden = !photo;
+  $("stopAfter").disabled = rec;
+  $("ivBtn").textContent = iv ? "Stop interval" : "Start interval";
+  $("ivBtn").className = iv ? "btn danger sl" : "btn tonal sl";
+  $("ivEvery").disabled = $("ivCount").disabled = !!iv;
+  if (s.interval && s.interval.error && !s.interval.running && state.lastIvErr !== s.interval.error) {
+    state.lastIvErr = s.interval.error; toast(s.interval.error, "error");
+  }
+
+  const pv = !!s.preview, st = s.preview_stats || {};
+  $("idle").hidden = pv;
+  $("waiting").hidden = !pv || !st.waiting;
+  $("osd").hidden = !pv || st.waiting;
+  $("previewToggle").setAttribute("aria-pressed", pv);
+  const codec = { h264: "H.264", hevc: "H.265", demo: "Demo", auto: "Auto" }[st.codec] || "";
+  $("osdStats").textContent = [st.fps != null ? `${st.fps} fps` : "", codec, st.kbps ? `${(st.kbps / 1000).toFixed(1)} Mbps` : ""].filter(Boolean).join(" · ");
+  $("osdLatency").hidden = state.latency == null;
+  if (state.latency != null) $("osdLatency").textContent = `Delay ≈ ${state.latency} ms`;
+  const img = $("stream");
+  if (pv && img.hidden) { img.src = "/stream.mjpg?t=" + Date.now(); img.hidden = false; }
+  if (!pv && !img.hidden) { img.removeAttribute("src"); img.hidden = true; }
+  renderLcd();
+}
+
+function renderLcd() {
+  const s = state.status, now = Date.now() / 1000;
+  const photo = s.mode === "photo", iv = s.interval && s.interval.running ? s.interval : null;
+  $("lcdMode").textContent = photo ? (iv ? "Interval photos" : "Photo") : "Video";
+  if (s.recording && s.recording_since) {
+    $("timecode").textContent = tc(now - s.recording_since);
+    $("lcdRight").innerHTML = '<span class="dot"></span>Recording';
+    $("lcdSub").textContent = s.stop_at ? `Stops in ${fmtDur(s.stop_at - now)}` : "No time limit";
+  } else if (iv) {
+    $("timecode").textContent = `${iv.taken}${iv.count ? " of " + iv.count : ""}`;
+    $("lcdRight").textContent = "Running";
+    $("lcdSub").textContent = `Next photo in ${Math.max(0, Math.ceil(iv.next_at - now))} s`;
+  } else {
+    $("timecode").textContent = photo ? "Ready" : "00:00:00";
+    $("lcdRight").textContent = s.connected ? "Ready" : "Offline";
+    const sa = Number($("stopAfter").value);
+    $("lcdSub").textContent = photo ? " " : sa ? `Will stop after ${fmtDur(sa)}` : " ";
+  }
+}
+async function poll() { try { state.status = await api("/api/status"); renderStatus(); } catch {} }
+
+/* ---------- Connect ---------- */
+$("connectBtn").onclick = async () => {
+  const btn = $("connectBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Connecting';
+  $("connectErr").hidden = true;
+  $("connectHint").textContent = "This can take up to 30 seconds.";
+  try {
+    state.status = await api("/api/connect", {});
+    renderStatus(); show("live");
+    toast("Connected to " + (state.status.model || "the camera"));
+  } catch (e) {
+    $("connectErr").hidden = false;
+    $("connectErr").textContent = e.message + " Make sure Zorin is joined to the camera's Wi-Fi, not your home network.";
+  } finally {
+    btn.disabled = false; btn.textContent = "Connect"; $("connectHint").textContent = "";
+  }
+};
+$("disconnectBtn").onclick = async () => { await api("/api/disconnect", {}); state.files = []; poll(); };
+
+/* ---------- Live ---------- */
+async function setPreview(on) {
+  try { await api("/api/preview", { on }); }
+  catch (e) { toast(e.message + " Recording and copying still work.", "error"); }
+  poll();
+}
+$("previewOn").onclick = () => setPreview(true);
+$("previewToggle").onclick = () => setPreview(!state.status.preview);
+$("gridBtn").onclick = () => {
+  const on = $("gridBtn").getAttribute("aria-pressed") !== "true";
+  $("gridBtn").setAttribute("aria-pressed", on);
+  $("finder").classList.toggle("show-grid", on);
+};
+async function setMode(mode) {
+  if (state.status.mode === mode) return;
+  try { await api("/api/mode", { mode }); } catch (e) { toast(e.message, "error"); }
+  poll();
+}
+$("modeVideo").onclick = () => setMode("video");
+$("modePhoto").onclick = () => setMode("photo");
+$("stopAfter").onchange = renderLcd;
+
+$("shutter").onclick = async () => {
+  const s = state.status, sh = $("shutter");
+  sh.disabled = true;
+  try {
+    if (s.mode === "photo") { await api("/api/photo", {}); toast("Photo taken"); }
+    else {
+      const start = !s.recording;
+      const r = await api("/api/record", { action: start ? "start" : "stop", stop_after: Number($("stopAfter").value) });
+      state.status = { ...s, ...r };
+      renderStatus();
+      if (!start) toast("Video saved on the camera");
+      else if (r.stop_at) toast(`Recording. It stops by itself after ${fmtDur(Number($("stopAfter").value))}.`);
+    }
+    state.files = [];
+  } catch (e) { toast(e.message, "error"); }
+  finally { sh.disabled = false; poll(); }
+};
+
+$("ivBtn").onclick = async () => {
+  const running = state.status.interval && state.status.interval.running;
+  try {
+    if (running) { await api("/api/interval", { action: "stop" }); toast(`Interval stopped after ${state.status.interval.taken} photos`); }
+    else {
+      await api("/api/interval", { action: "start", every: Number($("ivEvery").value) || 5, count: Number($("ivCount").value) || 0 });
+      toast("Interval photos started");
+    }
+    state.files = [];
+  } catch (e) { toast(e.message, "error"); }
+  poll();
+};
+
+/* ---------- Latency test ---------- */
+// The window flashes white; we sample the live view's brightness every
+// animation frame and time how long each flash takes to appear in it.
+const LAT_INTRO = "Point the camera at this screen, close enough that the screen fills most of the picture. The screen flashes white a few times and Ace Studio times how long each flash takes to show up in the live view.";
+const lat = { running: false };
+$("latBtn").onclick = () => {
+  if (!state.status.preview) { toast("Turn on live view first."); return; }
+  $("lat").hidden = false; $("latResult").hidden = true;
+  $("latText").textContent = LAT_INTRO;
+  $("latStart").hidden = false; $("latStart").textContent = "Start";
+  $("latPeek").src = "/stream.mjpg?t=" + Date.now();
+};
+$("latClose").onclick = () => { lat.running = false; $("lat").hidden = true; $("lat").classList.remove("flash"); $("latPeek").removeAttribute("src"); };
+function brightness(img, ctx) {
+  try {
+    ctx.drawImage(img, 0, 0, 32, 18);
+    const d = ctx.getImageData(0, 0, 32, 18).data;
+    let sum = 0;
+    for (let i = 0; i < d.length; i += 4) sum += d[i] + d[i + 1] + d[i + 2];
+    return sum / (d.length / 4) / 3;
+  } catch { return null; }
+}
+const nextFrame = () => new Promise(r => requestAnimationFrame(r));
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+$("latStart").onclick = async () => {
+  if (lat.running) return;
+  lat.running = true;
+  $("latStart").hidden = true; $("latResult").hidden = true;
+  const img = $("latPeek");
+  const cv = document.createElement("canvas"); cv.width = 32; cv.height = 18;
+  const ctx = cv.getContext("2d", { willReadFrequently: true });
+  const results = [];
+  $("latText").textContent = "Hold the camera still…";
+  await sleep(1500);
+  for (let n = 0; n < 6 && lat.running; n++) {
+    const base = [];
+    for (let t = performance.now(); performance.now() - t < 500;) { await nextFrame(); const b = brightness(img, ctx); if (b != null) base.push(b); }
+    base.sort((a, b) => a - b);
+    const b0 = base.length ? base[Math.floor(base.length / 2)] : 0;
+    $("lat").classList.add("flash");
+    const t0 = performance.now();
+    let hit = null;
+    while (performance.now() - t0 < 2000 && lat.running) {
+      await nextFrame();
+      const b = brightness(img, ctx);
+      if (b != null && b > b0 + 35) { hit = performance.now() - t0; break; }
+    }
+    $("lat").classList.remove("flash");
+    if (hit != null) results.push(Math.round(hit));
+    $("latText").textContent = `Flash ${n + 1} of 6: ${hit != null ? Math.round(hit) + " ms" : "not seen"}`;
+    await sleep(900);
+  }
+  if (!lat.running) return;
+  lat.running = false;
+  $("latStart").hidden = false; $("latStart").textContent = "Run again";
+  if (results.length < 3) {
+    $("latText").textContent = "The camera didn't see enough flashes. Move it closer so the screen fills the picture, dim the room lights, and try again.";
+    return;
+  }
+  results.sort((a, b) => a - b);
+  const med = results[Math.floor(results.length / 2)];
+  state.latency = med;
+  $("latResult").hidden = false;
+  $("latResult").textContent = `${med} ms`;
+  $("latText").textContent = `Live view delay, middle of ${results.length} flashes (range ${results[0]}–${results[results.length - 1]} ms). This includes the camera, Wi-Fi, decoding and your screen.`;
+  renderStatus();
+};
+
+/* ---------- Library ---------- */
+async function loadFiles(quiet) {
+  if (!quiet) $("sheet").innerHTML = '<p class="empty">Reading the memory card…</p>';
+  state.loadingFiles = true;
+  try {
+    const d = await api("/api/files");
+    state.files = d.files;
+    if (!quiet || state.view === "library") renderFiles();
+    updateCameraSeed();
+  } catch (e) {
+    if (quiet) return;
+    $("sheet").innerHTML = ""; const p = document.createElement("p"); p.className = "empty"; p.textContent = e.message; $("sheet").append(p);
+  } finally { state.loadingFiles = false; }
+}
+async function updateCameraSeed() {
+  const latest = state.files[0];
+  if (!latest || theme.loadingSeed) return;
+  if (theme.seedFrom === latest.path) return;
+  theme.loadingSeed = true;
+  const seed = await seedFromImage(thumbUrl(latest.path));
+  theme.loadingSeed = false;
+  theme.seedFrom = latest.path;
+  if (seed) { theme.cameraSeed = seed; if (theme.choice === "camera") applyTheme(); renderSwatches(); }
+}
+$("refreshLib").onclick = () => loadFiles();
+document.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => {
+  state.filter = b.dataset.filter;
+  document.querySelectorAll("[data-filter]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  renderFiles();
+});
+function visibleFiles() {
+  return state.files.filter(f => state.filter === "all" || (state.filter === "new" ? !f.downloaded : f.kind === state.filter));
+}
+const io = new IntersectionObserver((entries) => {
+  for (const en of entries) {
+    if (!en.isIntersecting) continue;
+    const img = en.target; io.unobserve(img);
+    img.onload = () => { img.classList.add("loaded"); img.parentElement.querySelector(".ph")?.remove(); };
+    img.onerror = () => img.remove();
+    img.src = img.dataset.src;
+  }
+}, { root: $("scroller"), rootMargin: "300px" });
+
+function renderFiles() {
+  const files = visibleFiles(), sheet = $("sheet");
+  sheet.innerHTML = "";
+  const v = state.files.filter(f => f.kind === "video").length, p = state.files.length - v;
+  $("libCount").textContent = `${v} video${v === 1 ? "" : "s"}, ${p} photo${p === 1 ? "" : "s"}`;
+  if (!files.length) {
+    const e = document.createElement("p"); e.className = "empty";
+    e.textContent = state.files.length ? "Nothing matches this filter." : "The memory card is empty. Record something from Live.";
+    sheet.append(e); renderTray(); return;
+  }
+  const groups = new Map();
+  for (const f of files) {
+    const k = f.taken ? f.taken.slice(0, 10) : "unknown";
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(f);
+  }
+  const now = new Date(), today = localDay(now), yest = localDay(new Date(now - 864e5));
+  for (const [day, list] of groups) {
+    const head = document.createElement("div"); head.className = "day";
+    const h = document.createElement("h3");
+    const d = new Date(day + "T12:00");
+    h.textContent = day === today ? "Today" : day === yest ? "Yesterday" : day === "unknown" ? "Unknown date" :
+      d.toLocaleDateString(undefined, d.getFullYear() === now.getFullYear() ? { weekday: "short", day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" });
+    const all = document.createElement("button"); all.className = "btn text small sl"; all.textContent = "Select all";
+    all.onclick = () => { list.forEach(f => state.selected.add(f.path)); syncSelection(); };
+    head.append(h, all);
+    const grid = document.createElement("div"); grid.className = "sheet";
+    for (const f of list) grid.append(tile(f));
+    sheet.append(head, grid);
+  }
+  syncSelection();
+}
+
+function tile(f) {
+  const t = document.createElement("button");
+  t.className = "tile"; t.dataset.path = f.path;
+  const time = f.taken ? new Date(f.taken).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : f.name;
+  t.setAttribute("aria-label", `${f.kind} ${time} ${fmtBytes(f.size)}`);
+  const badges = [
+    f.downloaded ? `<span class="tag ok">${ICON.laptop}Copied</span>` : "",
+    f.incomplete ? `<span class="tag warn">${ICON.warn}Incomplete</span>` : "",
+    f.shared ? `<span class="tag share">${ICON.share}Share copy</span>` : "",
+  ].join("");
+  t.innerHTML = `
+    <div class="thumb">
+      <img alt="" data-src="${thumbUrl(f.path)}">
+      <span class="ph">${f.ext}</span>
+      <span class="badges">${badges}</span>
+      ${f.kind === "video" ? `<span class="dur num">${ICON.play}${f.duration ? fmtDur(f.duration) : "Video"}</span>` : ""}
+    </div>
+    <span class="check">${ICON.check}</span>
+    <div class="cap"><b class="num">${time}</b><span class="num">${fmtBytes(f.size)}</span></div>`;
+  io.observe(t.querySelector("img"));
+  t.onclick = (ev) => {
+    if (ev.target.closest(".check") || state.selected.size || ev.ctrlKey || ev.shiftKey) {
+      if (ev.shiftKey && state.anchor) {
+        const ps = visibleFiles().map(x => x.path);
+        const [a, b] = [ps.indexOf(state.anchor), ps.indexOf(f.path)].sort((x, y) => x - y);
+        ps.slice(a, b + 1).forEach(p => state.selected.add(p));
+      } else state.selected.has(f.path) ? state.selected.delete(f.path) : state.selected.add(f.path);
+      state.anchor = f.path; syncSelection();
+    } else openViewer(f);
+  };
+  return t;
+}
+function syncSelection() {
+  document.querySelectorAll(".tile").forEach(t => t.setAttribute("aria-pressed", state.selected.has(t.dataset.path)));
+  $("sheet").classList.toggle("has-selection", state.selected.size > 0);
+  renderTray();
+}
+function renderTray() {
+  const sel = state.files.filter(f => state.selected.has(f.path));
+  const bytes = sel.reduce((a, f) => a + (f.size || 0), 0);
+  $("trayText").textContent = `${sel.length} selected · ${fmtBytes(bytes)}`;
+  $("tray").classList.toggle("show", sel.length > 0);
+  const copied = sel.filter(f => f.downloaded);
+  $("trayShare").hidden = !copied.length;
+  $("trayShare").textContent = copied.length === sel.length ? "Make share copies" : `Share copies (${copied.length})`;
+}
+$("trayClear").onclick = () => { state.selected.clear(); syncSelection(); };
+$("trayDownload").onclick = () => startDownload([...state.selected]);
+$("trayShare").onclick = () => startShare(state.files.filter(f => state.selected.has(f.path) && f.downloaded).map(f => f.name));
+
+function openDrawer(open) {
+  $("drawer").classList.toggle("open", open);
+  $("scrim").classList.toggle("show", open);
+  $("openJobs").setAttribute("aria-pressed", open);
+}
+async function startDownload(paths) {
+  if (!paths.length) return;
+  try {
+    await api("/api/download", { paths });
+    state.selected.clear(); syncSelection(); pollJobs(); openDrawer(true);
+    toast(`Copying ${paths.length} file${paths.length > 1 ? "s" : ""} to this computer`);
+  } catch (e) { toast(e.message, "error"); }
+}
+async function startShare(names) {
+  if (!names.length) return;
+  try {
+    await api("/api/share", { names });
+    state.selected.clear(); syncSelection(); pollJobs(); openDrawer(true);
+    toast(`Making ${names.length} share cop${names.length > 1 ? "ies" : "y"} (1080p, small file size)`);
+  } catch (e) { toast(e.message, "error"); }
+}
+
+/* Viewer */
+let viewerFile = null;
+function openViewer(f) {
+  viewerFile = f;
+  $("viewerImg").src = thumbUrl(f.path);
+  $("viewerWhen").textContent = f.taken ? new Date(f.taken).toLocaleString(undefined, { weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" }) : f.name;
+  $("viewerMeta").textContent = [f.name, fmtBytes(f.size), f.duration ? fmtDur(f.duration) : "", f.downloaded ? "Copied" : f.incomplete ? "Copy is incomplete" : ""].filter(Boolean).join(" · ");
+  $("viewerCopy").textContent = f.downloaded ? "Copy again" : "Copy to computer";
+  $("viewerShare").hidden = !f.downloaded;
+  $("viewerShare").textContent = f.shared ? "Make share copy again" : "Make share copy";
+  $("viewer").showModal();
+}
+$("viewerClose").onclick = () => $("viewer").close();
+$("viewer").onclick = (e) => { if (e.target === $("viewer")) $("viewer").close(); };
+$("viewerCopy").onclick = () => { $("viewer").close(); startDownload([viewerFile.path]); };
+$("viewerShare").onclick = () => { $("viewer").close(); startShare([viewerFile.name]); };
+
+/* Colors */
+function renderSwatches() {
+  const box = $("swatches"); box.innerHTML = "";
+  const cam = document.createElement("button");
+  cam.className = "swatch cam"; cam.title = "From your camera"; cam.setAttribute("aria-label", "From your camera");
+  cam.setAttribute("aria-pressed", theme.choice === "camera");
+  if (state.files[0]) { const i = new Image(); i.alt = ""; i.src = thumbUrl(state.files[0].path); i.onerror = () => i.remove(); cam.append(i); }
+  cam.insertAdjacentHTML("beforeend", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3.5"/><circle cx="12" cy="12.5" r="3.5"/></svg>');
+  cam.onclick = () => { theme.choice = "camera"; store.set("ace.seed", "camera"); applyTheme(); renderSwatches(); };
+  box.append(cam);
+  for (const seed of SEEDS) {
+    const { light } = Color.scheme(seed);
+    const b = document.createElement("button");
+    b.className = "swatch"; b.setAttribute("aria-label", "Theme color " + seed); b.setAttribute("aria-pressed", theme.choice === seed);
+    b.innerHTML = `<span><i style="background:${light.primary}"></i><i style="background:${light["primary-container"]}"></i><i style="background:${light["tertiary-container"]}"></i><i style="background:${light["secondary-container"]}"></i></span>`;
+    b.onclick = () => { theme.choice = seed; store.set("ace.seed", seed); applyTheme(); renderSwatches(); };
+    box.append(b);
+  }
+}
+$("paletteBtn").onclick = () => { renderSwatches(); $("palette").showModal(); };
+$("paletteClose").onclick = () => $("palette").close();
+$("palette").onclick = (e) => { if (e.target === $("palette")) $("palette").close(); };
+
+/* ---------- Transfers ---------- */
+$("openJobs").onclick = () => openDrawer(!$("drawer").classList.contains("open"));
+$("closeDrawer").onclick = () => openDrawer(false);
+$("scrim").onclick = () => openDrawer(false);
+$("openFolder").onclick = () => api("/api/open-folder", {});
+$("openShare").onclick = () => api("/api/open-folder", { share: true });
+$("clearJobs").onclick = async () => { await api("/api/jobs/clear", {}); pollJobs(); };
+
+function renderJobs() {
+  const jobs = state.jobs;
+  const active = jobs.filter(j => j.state === "queued" || j.state === "running").length;
+  $("jobBadge").hidden = !active; $("jobBadge").textContent = active;
+  const box = $("jobs");
+  if (!jobs.length) { box.innerHTML = '<p class="empty">Select clips in the Library, then choose Copy to computer.</p>'; return; }
+  box.innerHTML = "";
+  for (const j of jobs) {
+    const share = j.kind === "share";
+    const pct = share ? j.done : (j.total ? Math.min(100, j.done / j.total * 100) : 0);
+    const el = document.createElement("div");
+    el.className = `job ${j.state}${share ? " share" : ""}`;
+    const label = share
+      ? { queued: "Share copy · waiting", running: `Share copy · ${Math.round(pct)}%`, done: `Share copy ready · ${fmtBytes(j.size)}`, cancelled: "Cancelled", failed: j.error || "Failed" }[j.state]
+      : { queued: "Waiting", running: `${Math.round(pct)}% · ${fmtBytes(j.speed)}/s`, done: "Copied and checked", cancelled: "Cancelled", failed: j.error || "Failed" }[j.state];
+    const right = share ? "" : `${fmtBytes(j.done)}${j.total ? " of " + fmtBytes(j.total) : ""}`;
+    const showBar = j.state === "running" || j.state === "queued";
+    el.innerHTML = `<span class="job-name"></span>
+      ${showBar ? `<button class="icon-btn sl" aria-label="Cancel">${ICON.x}</button>` : j.state === "done" ? `<span style="color:var(--ok);width:24px;height:24px">${ICON.done}</span>` : "<span></span>"}
+      <div class="job-sub num"><span></span><span>${right}</span></div>
+      ${showBar ? `<div class="progress"><span class="track"></span><span class="bar" style="width:${pct}%"></span><span class="stop"></span></div>` : ""}`;
+    el.querySelector(".job-name").textContent = share ? j.out : j.name;
+    el.querySelector(".job-sub span").textContent = label;
+    const c = el.querySelector(".icon-btn"); if (c) c.onclick = () => api("/api/jobs/cancel", { id: j.id }).then(pollJobs);
+    box.append(el);
+  }
+}
+let prevDone = "";
+async function pollJobs() {
+  try {
+    const d = await api("/api/jobs");
+    state.jobs = d.jobs;
+    const doneKey = d.jobs.filter(j => j.state === "done").map(j => j.id).join(",");
+    if (doneKey !== prevDone && prevDone !== "" && state.view === "library") {
+      try { const f = await api("/api/files"); state.files = f.files; renderFiles(); } catch {}
+    }
+    prevDone = doneKey || prevDone;
+    renderJobs();
+  } catch {}
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.target.closest("input, select, textarea") || $("viewer").open || $("palette").open || !$("lat").hidden) return;
+  if (state.view === "live" && e.code === "Space" && !e.repeat) { e.preventDefault(); $("shutter").click(); }
+  if (e.key === "Escape") { openDrawer(false); if (state.selected.size) { state.selected.clear(); syncSelection(); } }
+  if (state.view === "library" && (e.ctrlKey || e.metaKey) && e.key === "a") { e.preventDefault(); visibleFiles().forEach(f => state.selected.add(f.path)); syncSelection(); }
+});
+
+poll(); pollJobs();
+setInterval(poll, 1500);
+setInterval(pollJobs, 1000);
+setInterval(renderLcd, 250);
+</script>
+</body>
+</html>

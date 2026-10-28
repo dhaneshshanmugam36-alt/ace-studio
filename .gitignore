@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Downloads in progress and share-copy temp files
+*.part
+.part-*
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
