@@ -9,7 +9,7 @@ Insta360 doesn't make software for Linux. Ace Studio fills part of that gap.
 > "Insta360" and "Ace Pro 2" are trademarks of their owner and are used here only to say which
 > camera this app works with. Use at your own risk.
 
-![Live view with recording timer](docs/screenshots/live.png)
+![Live view from the camera](docs/screenshots/live.png)
 
 ## Features
 
@@ -26,11 +26,10 @@ Insta360 doesn't make software for Linux. Ace Studio fills part of that gap.
 - **Material 3 design** with colors generated from one seed color, or taken from your latest shot.
   Follows your system's light or dark mode.
 
-| Library | Colors | Dark mode |
+| Library | Colors | Copying to your computer |
 |---|---|---|
-| ![Library](docs/screenshots/library.png) | ![Colors](docs/screenshots/colors.png) | ![Dark mode](docs/screenshots/live-dark.png) |
+| ![Library](docs/screenshots/library.png) | ![Colors](docs/screenshots/colors.png) | ![Copying](docs/screenshots/transfers.png) |
 
-*Screenshots are from demo mode, which uses test images instead of a real camera.*
 
 ## Tested on
 
