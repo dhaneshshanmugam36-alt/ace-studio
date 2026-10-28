@@ -41,7 +41,7 @@ THUMB_DIR = CACHE_DIR / "thumbs"
 log = logging.getLogger("ace-studio")
 
 NAME_RE = re.compile(
-    r"^(?P<kind>VID|IMG|LRV|PRO_VID|PRO_LRV|PRO_IMG)_(?P<date>\d{8})_(?P<time>\d{6})_(?P<lens>\d{2})_(?P<idx>\d{3})",
+    r"^(?P<kind>VID|IMG|LRV|PRO_VID|PRO_LRV|PRO_IMG)_(?P<date>\d{8})_(?P<time>\d{6})(?:_(?P<lens>\d{2}))?_(?P<idx>\d{3})",
     re.I,
 )
 VIDEO_EXT = {".mp4", ".mov", ".insv"}
