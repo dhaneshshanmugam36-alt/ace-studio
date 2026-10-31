@@ -1,106 +1,147 @@
-# Ace Studio
+<p align="center"><img src="docs/screenshots/banner.png" alt="Ace Studio on a Linux laptop and Ace Looks on a phone" width="900"></p>
 
-**An unofficial Linux desktop app for the Insta360 Ace Pro 2.** See the live view, record, and copy
-your clips to your computer over the camera's own Wi-Fi or a USB cable, then give copies a film look.
+<h1 align="center">Ace Studio + Ace Looks</h1>
+
+<p align="center">
+  <b>Ace Studio</b>: a free Linux app for the Insta360 Ace Pro 2.<br>
+  <b>Ace Looks</b>: 32 film looks and a film camera for your phone. No app store, no account, no uploads.
+</p>
+
+<p align="center">
+  <a href="https://github.com/dhaneshshanmugam36-alt/ace-studio/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/dhaneshshanmugam36-alt/ace-studio?label=release"></a>
+  <a href="LICENSE"><img alt="Licence GPL-3.0" src="https://img.shields.io/badge/licence-GPL--3.0-blue"></a>
+  <img alt="Linux" src="https://img.shields.io/badge/desktop-Linux-informational">
+  <a href="https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/"><img alt="Phone app" src="https://img.shields.io/badge/phone-open%20Ace%20Looks-F2B66D"></a>
+</p>
+
+---
+
+## Which one do I need?
+
+| | 📱 **Ace Looks** | 💻 **Ace Studio** |
+|---|---|---|
+| **For** | Anyone with an Android phone | Insta360 Ace Pro 2 owners on Linux |
+| **Does** | Film looks on your photos, film camera with live looks | Live view, record, copy clips over Wi-Fi or USB, film looks |
+| **Needs a camera?** | No, works with any photo | Yes, an Insta360 Ace Pro 2 |
+| **Get it** | **[Open Ace Looks](https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/)** in Chrome, then *Install app* | `git clone` + `./install.sh` ([steps below](#-ace-studio-linux-desktop-app)) |
+| **Cost** | Free | Free |
+
+Both are free and open source, and they share the same 32 film looks, so a photo comes out the same on the phone and on the computer.
+
+---
+
+## 📱 Ace Looks (phone app)
+
+<p align="center">
+  <img src="docs/screenshots/phone-editor.png" width="200" alt="Editing a photo with Golden Hour">
+  <img src="docs/screenshots/phone-mono.png" width="200" alt="Classic Grain black and white">
+  <img src="docs/screenshots/phone-camera.png" width="200" alt="Film camera with a live look">
+  <img src="docs/screenshots/phone-home.png" width="200" alt="Home screen">
+</p>
+
+### Get it (1 minute)
+
+1. On your Android phone, open **[dhaneshshanmugam36-alt.github.io/ace-studio/phone/](https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/)** in **Chrome**.
+2. Tap **⋮** (top right) → **Install app** (or *Add to Home screen*).
+3. Open **Ace Looks** from your home screen. It works offline from then on.
+
+Updates arrive by themselves the next time you open it with internet.
+
+### What it does
+
+- **Film camera:** see the film look live while you shoot. Swipe to change looks, tap to focus, pinch to zoom.
+  Daylight shots use the camera's full-resolution stills. In the dark, **Night mode** merges 8 frames to cut
+  noise, and **Smart HDR** brings out shadows. Every shot saves with the look *and* as a clean original.
+- **Your photos:** choose photos from your gallery, use your phone's own camera app, or share photos to Ace Looks
+  from the gallery.
+- **For you:** the 4 looks that suit each photo (people, landscape, sky, night, indoor) show first.
+- **Simple controls:** hold the photo to compare with the original, set the **strength**, and use **Adjust** for
+  light, contrast, warmth and grain. **Auto fix** and natural skin tones are on by default.
+- **Save** one look, your favourites, the suggested looks, or **all 32**, at full resolution, with the photo's
+  date, camera and location kept. Files are named like `IMG_1124 SN.jpg` (`SN` = Soft Negative).
+- **Private:** everything runs on your phone. Photos are never uploaded anywhere.
+
+> Works best in Chrome on Android. Other browsers may not support every camera feature.
+> For the hardest light (very dark scenes), your phone's own camera app still wins; use **Use my phone's camera app**
+> on the home screen and the photo comes straight into Ace Looks.
+
+---
+
+## 💻 Ace Studio (Linux desktop app)
+
+<p align="center"><img src="docs/screenshots/live.png" width="760" alt="Ace Studio live view"></p>
 
 Insta360 doesn't make software for Linux. Ace Studio fills part of that gap.
 
-> **Unofficial.** Ace Studio is not affiliated with, endorsed by, or supported by Insta360.
-> "Insta360" and "Ace Pro 2" are trademarks of their owner and are used here only to say which
-> camera this app works with. Use at your own risk.
+### Install
 
-![Live view from the camera](docs/screenshots/live.png)
+You need a Debian/Ubuntu-based distro (Zorin, Ubuntu, Pop!_OS, Mint, Debian), Fedora, or an Arch-based distro,
+with Python 3.10 or newer. Run this on your normal internet, **not** the camera's Wi-Fi:
 
-## Features
+```bash
+git clone https://github.com/dhaneshshanmugam36-alt/ace-studio.git
+cd ace-studio
+./install.sh
+```
 
-**Shooting**
-- **Live view** with a framing grid and frame-rate / codec readout, plus a **delay test**
-- **Record and take photos**, timed recording (30 seconds to 1 hour) and interval photos
-- **Battery, free card space and temperature** at a glance
+Then open **Ace Studio** from your app menu. Try it without a camera: `ace-studio --demo`
 
-**Connecting**
-- **Connects by itself** as soon as your computer joins the camera's Wi-Fi
-- **Reconnects after drops** and picks up where it left off: live view comes back and copies resume
-- **USB mode**: plug the camera in and browse and copy its card with no Wi-Fi at all
-- **Camera clock**: set it from your computer's time zone when connecting, or leave it alone
+- **Update:** `cd ace-studio && git pull && ./install.sh` (settings, notes and copies are kept)
+- **Remove:** `./uninstall.sh` (your copied clips are kept)
 
-**Library and copying**
-- Everything on the card, grouped by day, with **search, sort and filters**
-- **Copy all new** in one click; each copy is checked against the camera's file size
-- **Folders by date**, readable **date-and-time file names**, and **backup to a second drive**
-- **Favourites, notes, tags and trips** to find clips later
-- **Duplicate check**: spots clips you already have elsewhere on your computer
-- **Card overview**: how much is copied, how much isn't, and how much space is left
-- **Photo and video details** (exposure, ISO, codec, frame rate and more)
-- **Share copies**: small 1080p versions (2048 px for photos) for WhatsApp or Telegram
-- A **reminder before disconnecting** if anything isn't copied yet
-- **Delete from the camera** to free up the card, with a check that stops you deleting what isn't copied
+### Use
 
-**Film looks**
-- 32 colour looks, each built as a proper 3D colour table (the kind pro editors use) and
-  processed in 16-bit, with film-style highlight roll-off, mid-tone grain, red glow around lights
-  on the night looks, and soft vignettes. Each one shows what it's inspired by:
+1. Turn on the camera's Wi-Fi (swipe down on the camera's screen).
+2. Join the camera's Wi-Fi network from your computer. The password is in the camera's Wi-Fi settings.
+3. Ace Studio connects by itself.
 
-  | Look | Inspired by | | Look | Inspired by |
-  |---|---|---|---|---|
-  | Golden Portrait `GP` | Kodak Portra 400 | | Night Tungsten `NT` | CineStill 800T |
-  | Sunny Gold `SG` | Kodak Gold 200 | | Clean Cinema `CC` | CineStill 50D |
-  | Bright Landscape `BL` | Kodak Ektar 100 | | Cine Daylight `CD` | Kodak Vision3 250D |
-  | Pastel Portrait `PP` | Fujifilm Pro 400H | | Positive `PO` | Ricoh GR Positive Film |
-  | Soft Negative `SN` | Fujifilm Classic Negative | | Negative Snap `NS` | Ricoh GR Negative Film |
-  | Warm Memory `WM` | Fujifilm Nostalgic Neg | | Bleach Bypass `BB` | Ricoh GR Bleach Bypass |
-  | Daylight Portrait `DP` | Kodak Portra 160 | | Rangefinder Natural `RN` | Leica standard colour |
-  | Everyday Green `EG` | Fujifilm Superia 400 | | Rangefinder Chrome `RC` | Leica Looks Chrome |
-  | Warm Everyday `WE` | Kodak Ultramax 400 | | Silver Mono `SM` | Leica Monochrom |
-  | Golden Hour `GH` | Kodak ColorPlus 200 | | Fine Mono `FM` | Fujifilm Acros |
-  | Summer Red `SR` | Agfa Vista 200 | | Classic Grain `CG` | Kodak Tri-X 400 |
-  | Muted Chrome `MC` | Fujifilm Classic Chrome | | Hard Mono `HM` | Ricoh GR Hi-Contrast B&W |
-  | Velvet Slide `VS` | Fujifilm Velvia 50 | | Street Mono `ST` | Ilford HP5 Plus |
-  | Iconic Slide `IS` | Kodak Kodachrome 64 | | Instant Photo `IP` | Polaroid 600 |
-  | Vivid Slide `VI` | Fujifilm Velvia 100 | | Purple Dream `PD` | LomoChrome Purple |
-  | Cine Flat `CF` | Fujifilm Eterna | | Ember `EM` | Harman Phoenix 200 |
+Or plug the camera in with a USB cable and choose **Open Library**.
 
-- **For you:** Ace Studio looks at each photo (people, greenery, sky, night, indoor light) and
-  puts the 4 looks that suit it first
-- **Auto fix:** brightness and colour cast are fixed before the look goes on (photos)
-- **Natural skin:** strong looks never turn faces orange, green or purple
-- **Favourites:** star the looks you use most so they stay at the front
-- Apply one look, or **all 32 at once**, or pick one for every new copy
-- Looks are added to **new copies**, all in one `Looks` folder with a short code in the file name.
-  Your originals are never changed.
+Copies go to `~/Downloads/Ace Pro 2`, with `Pictures` and `Videos` folders (change it in Settings).
+Film-look copies go to the `Looks` folder with the look's code in the name.
 
-**Comfort**
-- **Settings** page, a short **welcome guide**, and **keyboard shortcuts** (press <kbd>?</kbd>)
-- **Light, dark or system theme**, with Material 3 colours from one seed colour or your latest shot
-- **English and Bahasa Melayu**
-- Remembers the window size and the last tab you used
-- Tells you when a new version is out
+### Features
+
+**Shooting:** live view with grid and delay test · record and take photos · timed recording and interval photos ·
+battery, card space and temperature at a glance
+
+**Connecting:** connects by itself · reconnects after Wi-Fi drops and resumes copies · USB mode · camera clock from
+your computer
+
+**Library and copying:** search, sort, filters · **Copy all new** with size checks · folders by date and readable
+file names · backup to a second drive · favourites, notes, tags and trips · duplicate check · card overview ·
+photo and video details · small share copies for WhatsApp · reminder before disconnecting · delete from the
+camera with a safety check
+
+**Film looks:** all 32 looks, For you suggestions, Auto fix, natural skin, favourites, apply one or all 32
+
+**Comfort:** settings page, welcome guide, keyboard shortcuts (<kbd>?</kbd>), light/dark theme with Material 3
+colours, English and Bahasa Melayu, update notices
 
 | Library | Film looks | Settings |
 |---|---|---|
 | ![Library](docs/screenshots/library.png) | ![Film looks](docs/screenshots/looks.png) | ![Settings](docs/screenshots/settings.png) |
 
-## Ace Looks for your phone
+<details>
+<summary><b>More: keyboard shortcuts, options, tested distros, how it works</b></summary>
 
-The same 32 film looks also run on your phone, for photos:
-**[dhaneshshanmugam36-alt.github.io/ace-studio/phone](https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/)**
+### Keyboard
 
-- Open it in Chrome on Android and choose **Install app** (or Add to Home screen). It then works offline.
-- **Film camera:** see the film look live while you shoot. Swipe to change looks, tap to focus,
-  pinch to zoom. Daylight shots use the camera's full-resolution stills; in low light, **Night mode**
-  merges 8 frames to cut noise, and **Smart HDR** brings out shadows. It saves the photo with the
-  look and the clean original.
-- Or use **your phone's own camera app** and the photo comes straight into Ace Looks.
-- Pick photos and the looks that suit them show first. Hold the photo to compare, set the strength,
-  and use **Adjust** for light, contrast, warmth and grain.
-- **Save** one look, your favourites, the suggested looks, or **all 32**, at full resolution with the photo's date, camera and location
-  kept. Files are named like `IMG_1124 SN.jpg`, same as on the computer.
-- Once installed, you can share photos from your gallery straight to Ace Looks.
-- Everything runs on the phone. Photos are never uploaded anywhere.
+<kbd>Space</kbd> records or takes a photo · <kbd>L</kbd> live view · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> switch
+tabs · <kbd>/</kbd> search · <kbd>N</kbd> copy all new · <kbd>F</kbd> favourite · <kbd>Delete</kbd> delete from
+camera · <kbd>Ctrl</kbd>+<kbd>A</kbd> select all · <kbd>Esc</kbd> clear · <kbd>?</kbd> all shortcuts
 
-The phone and the computer use the same recipe file (`looks.json`), so a look comes out the same on both.
+### Options
 
-## Tested on
+```
+ace-studio --demo                  # try it with a pretend camera
+ace-studio --camera 192.168.42.1   # camera address, if yours is different
+ace-studio --save-dir ~/Footage    # where copies go, for this run only
+ace-studio --browser               # open in your browser instead of the app window
+ace-studio --debug                 # detailed log (useful for bug reports)
+```
+
+### Tested on
 
 | | Status |
 |---|---|
@@ -113,62 +154,7 @@ The phone and the computer use the same recipe file (`looks.json`), so a look co
 
 If you try it on something not listed, please [open an issue](../../issues) and say how it went.
 
-## Install
-
-You need a Debian/Ubuntu-based distro, Fedora, or an Arch-based distro, with Python 3.10 or newer.
-Run this while you're on your normal internet connection, **not** the camera's Wi-Fi:
-
-```bash
-git clone https://github.com/dhaneshshanmugam36-alt/ace-studio.git
-cd ace-studio
-./install.sh
-```
-
-Then open **Ace Studio** from your app menu. To try the interface without a camera:
-
-```bash
-ace-studio --demo
-```
-
-**Updating:** `cd ace-studio && git pull && ./install.sh`. Your settings, notes and copies are kept.
-
-To remove it: `./uninstall.sh` (your copied clips are kept).
-
-## Use
-
-1. Turn on the camera's Wi-Fi (swipe down on the camera's screen).
-2. Join the camera's Wi-Fi network from your computer. The password is in the camera's Wi-Fi settings.
-3. Ace Studio connects by itself. (You can also press **Connect**.)
-
-Or plug the camera in with a USB cable and choose **Open Library** to copy straight from the card.
-
-Copies go to `~/Downloads/Ace Pro 2`, with pictures in `Pictures` and videos in `Videos`
-(change both in Settings). Share copies go to the `Share` folder inside it, and film-look copies
-to the `Looks` folder, with the look's code at the end of the name
-(`IMG_1124 SN.jpg` = Soft Negative). `Look codes.txt` in that folder lists every code.
-
-**Keyboard:** press <kbd>?</kbd> in the app for the full list. The main ones:
-<kbd>Space</kbd> records or takes a photo, <kbd>L</kbd> toggles live view, <kbd>1</kbd> <kbd>2</kbd>
-<kbd>3</kbd> switch tabs, <kbd>/</kbd> searches, <kbd>N</kbd> copies all new, <kbd>F</kbd> favourites
-the selection, <kbd>Ctrl</kbd>+<kbd>A</kbd> selects everything and <kbd>Esc</kbd> clears it.
-
-**Measuring live-view delay:** turn on live view, press **Delay test**, and point the camera at your
-screen so the screen fills most of the picture. The window flashes white six times and Ace Studio
-times how long each flash takes to appear in the live view.
-
-**If the Wi-Fi keeps dropping:** turn off Wi-Fi power saving, and stop your computer from jumping
-back to your home network while it's on the camera's.
-
-### Options
-
-```
-ace-studio --camera 192.168.42.1   # camera address, if yours is different
-ace-studio --save-dir ~/Footage    # where copies go, for this run only
-ace-studio --browser               # open in your browser instead of the app window
-ace-studio --debug                 # detailed log in the terminal (useful for bug reports)
-```
-
-## How it works
+### How it works
 
 Ace Studio runs a small local web server and shows its interface in a native window.
 It talks to the camera the same way Insta360's phone app does:
@@ -178,6 +164,66 @@ It talks to the camera the same way Insta360's phone app does:
 - **Files** over the camera's built-in web server, or straight from the card over USB
 - **Film looks** are ffmpeg colour filters applied to a new copy on your computer
 - **Live view** decoded with ffmpeg; the computer adds only around 10 ms of delay
+
+**If the Wi-Fi keeps dropping:** turn off Wi-Fi power saving, and stop your computer from jumping back to your home
+network while it's on the camera's.
+
+</details>
+
+---
+
+## 🎞️ The 32 film looks
+
+Each look is Ace Studio's own colour style, hand-tuned to resemble a classic film or camera mode. Every look is a
+proper 3D colour table processed in high precision, with film-style highlight roll-off, mid-tone grain, soft
+vignettes, and a red glow around lights on the cinema looks. The two letters are added to saved file names.
+
+| Look | Inspired by | | Look | Inspired by |
+|---|---|---|---|---|
+| Golden Portrait `GP` | Kodak Portra 400 | | Night Tungsten `NT` | CineStill 800T |
+| Sunny Gold `SG` | Kodak Gold 200 | | Clean Cinema `CC` | CineStill 50D |
+| Bright Landscape `BL` | Kodak Ektar 100 | | Cine Daylight `CD` | Kodak Vision3 250D |
+| Pastel Portrait `PP` | Fujifilm Pro 400H | | Positive `PO` | Ricoh GR Positive Film |
+| Soft Negative `SN` | Fujifilm Classic Negative | | Negative Snap `NS` | Ricoh GR Negative Film |
+| Warm Memory `WM` | Fujifilm Nostalgic Neg | | Bleach Bypass `BB` | Ricoh GR Bleach Bypass |
+| Daylight Portrait `DP` | Kodak Portra 160 | | Rangefinder Natural `RN` | Leica standard colour |
+| Everyday Green `EG` | Fujifilm Superia 400 | | Rangefinder Chrome `RC` | Leica Looks Chrome |
+| Warm Everyday `WE` | Kodak Ultramax 400 | | Silver Mono `SM` | Leica Monochrom |
+| Golden Hour `GH` | Kodak ColorPlus 200 | | Fine Mono `FM` | Fujifilm Acros |
+| Summer Red `SR` | Agfa Vista 200 | | Classic Grain `CG` | Kodak Tri-X 400 |
+| Muted Chrome `MC` | Fujifilm Classic Chrome | | Hard Mono `HM` | Ricoh GR Hi-Contrast B&W |
+| Velvet Slide `VS` | Fujifilm Velvia 50 | | Street Mono `ST` | Ilford HP5 Plus |
+| Iconic Slide `IS` | Kodak Kodachrome 64 | | Instant Photo `IP` | Polaroid 600 |
+| Vivid Slide `VI` | Fujifilm Velvia 100 | | Purple Dream `PD` | LomoChrome Purple |
+| Cine Flat `CF` | Fujifilm Eterna | | Ember `EM` | Harman Phoenix 200 |
+
+<sub>Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid, Agfa, Ilford, Harman and Lomography are trademarks of their owners.
+Ace Studio isn't affiliated with any of them; the names only say what each look is inspired by.</sub>
+
+---
+
+## FAQ
+
+**Is it really free? Any ads or accounts?**
+Yes, free. No ads, no accounts, no tracking.
+
+**Do my photos get uploaded?**
+No. Ace Looks runs completely on your phone, and Ace Studio runs on your computer.
+
+**Does Ace Looks work on iPhone?**
+It's built and tested for Chrome on Android. Safari on iPhone may open it, but the camera and saving may not work fully.
+
+**Will Ace Studio work with my other Insta360 camera?**
+Maybe. It's tested on the Ace Pro 2. The camera library it uses was built on the X3 and X4. Please
+[open an issue](https://github.com/dhaneshshanmugam36-alt/ace-studio/issues) and say how it went.
+
+**Does it work on Windows or macOS?**
+Ace Studio is Linux only for now. Ace Looks works in any modern browser.
+
+**Will it delete anything from my camera?**
+Only when you choose Delete, and it always asks first. It never changes the camera's firmware.
+
+---
 
 ## Limits
 
@@ -207,8 +253,8 @@ Ideas and bug reports are welcome in [Issues](../../issues).
 
 ## Reporting a bug
 
-Run `ace-studio --debug` in a terminal, reproduce the problem, and paste the terminal output into a
-new issue along with your distro, camera model and camera firmware version.
+[Open an issue](https://github.com/dhaneshshanmugam36-alt/ace-studio/issues/new/choose). For Ace Studio, run `ace-studio --debug`, repeat the problem, and paste the
+terminal output. For Ace Looks, say your phone model and Chrome version.
 
 ## Credits
 
@@ -223,3 +269,6 @@ new issue along with your distro, camera model and camera firmware version.
 
 [GPL-3.0-or-later](LICENSE), the same licence as the camera library it uses.
 This software comes with no warranty.
+
+> **Unofficial.** Not affiliated with, endorsed by, or supported by Insta360. "Insta360" and "Ace Pro 2" are
+> trademarks of their owner and are used only to say which camera this works with.
