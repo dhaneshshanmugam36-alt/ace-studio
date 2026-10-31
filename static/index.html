@@ -331,6 +331,150 @@ dialog.palette { width: min(400px, 92vw); }
   .toasts { left: 16px; width: calc(100% - 32px); bottom: 96px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ================= 2.0 additions ================= */
+.topbar .help { margin-left: 4px; }
+.update-chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border-radius: 8px; border: 0; background: var(--tertiary-container); color: var(--on-tertiary-container); font: 500 13px/20px var(--font); white-space: nowrap; }
+.src-chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 12px; background: var(--surface-container-highest); color: var(--on-surface-variant); font: 500 12px/16px var(--font); }
+.src-chip svg { width: 14px; height: 14px; }
+
+/* Reconnecting banner */
+.banner { position: absolute; left: 50%; top: 12px; transform: translate(-50%, -12px); opacity: 0; pointer-events: none; z-index: 6;
+  display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-radius: 24px; max-width: calc(100% - 32px);
+  background: var(--inverse-surface); color: var(--inverse-on-surface); box-shadow: var(--e3); transition: opacity .2s var(--ease), transform .3s var(--ease-spring); }
+.banner.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.banner .btn.text { color: var(--inverse-primary); }
+.banner .spinner { width: 18px; height: 18px; border-width: 2.5px; flex: none; }
+
+/* USB card on the connect page */
+.usb-card { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 20px; margin-top: 16px; background: var(--secondary-container); color: var(--on-secondary-container); }
+.usb-card svg { width: 28px; height: 28px; }
+.usb-card div { flex: 1; }
+.usb-card b { display: block; font: 500 16px/24px var(--font); }
+.auto-hint { display: inline-flex; align-items: center; gap: 10px; color: var(--on-surface-variant); }
+.auto-hint .spinner { width: 16px; height: 16px; border-width: 2px; color: var(--primary); }
+
+/* Library toolbar */
+.lib-head { row-gap: 8px; }
+.search { position: relative; flex: 1 1 220px; max-width: 360px; order: 0; }
+.search input { width: 100%; height: 40px; border-radius: 20px; border: 0; padding: 0 16px 0 44px; background: var(--surface-container-high); outline: none; font-size: 14px; }
+.search input:focus { box-shadow: inset 0 0 0 2px var(--primary); }
+.search svg { position: absolute; left: 14px; top: 10px; width: 20px; height: 20px; color: var(--on-surface-variant); }
+.mini-select { height: 32px; border-radius: 8px; border: 1px solid var(--outline-variant); background: none; padding: 0 28px 0 12px; font: 500 14px var(--font); color: var(--on-surface-variant); appearance: none; -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: calc(100% - 15px) 14px, calc(100% - 10px) 14px; background-size: 5px 5px; background-repeat: no-repeat; max-width: 200px; }
+.mini-select.on { background-color: var(--secondary-container); color: var(--on-secondary-container); border-color: transparent; }
+.lib-row2 { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; width: 100%; }
+.lib-row2 .grow { flex: 1; }
+.overview { display: flex; gap: 8px 24px; flex-wrap: wrap; align-items: center; padding: 14px 18px; margin: 8px 0 4px; border-radius: 20px; background: var(--surface-container-lowest); }
+.overview .stat { display: grid; }
+.overview .stat b { font: 400 22px/28px var(--font-display); }
+.overview .stat span { color: var(--on-surface-variant); font-size: 12px; }
+.overview .bar { flex: 1 1 200px; min-width: 160px; height: 8px; border-radius: 4px; background: var(--surface-container-highest); overflow: hidden; display: flex; }
+.overview .bar i { display: block; height: 100%; }
+.overview .acts { display: flex; gap: 8px; margin-left: auto; }
+.trip-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 14px; background: var(--tertiary-container); color: var(--on-tertiary-container); font: 500 13px var(--font); }
+.trip-chip svg { width: 16px; height: 16px; }
+
+/* tile extras */
+.star { position: absolute; left: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 14px; display: grid; place-items: center; background: rgba(0,0,0,.45); color: #FFD54F; }
+.star svg { width: 18px; height: 18px; }
+.tag.look { background: var(--surface-container-highest); color: var(--on-surface); padding: 0 6px; gap: 3px; }
+.tag.look i { width: 10px; height: 10px; border-radius: 5px; display: inline-block; }
+.tag.else { background: var(--secondary-container); color: var(--on-secondary-container); }
+.tile .cap .note { color: var(--on-surface-variant); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
+.tile-tags { display: flex; gap: 4px; flex-wrap: wrap; padding: 0 12px 10px; margin-top: -4px; }
+.tile-tags span { font: 500 11px/18px var(--font); padding: 0 8px; border-radius: 9px; background: var(--surface-container-high); color: var(--on-surface-variant); }
+
+/* Settings */
+.settings { padding: 8px 24px 48px; }
+.settings-inner { max-width: 760px; margin: 0 auto; }
+.settings h2 { font: 400 14px/20px var(--font); font-weight: 500; color: var(--primary); margin: 28px 16px 8px; letter-spacing: .02em; }
+.card { background: var(--surface-container-lowest); border-radius: 20px; overflow: hidden; }
+.srow { display: flex; align-items: center; gap: 16px; padding: 16px 20px; min-height: 72px; }
+.srow + .srow { border-top: 1px solid var(--outline-variant); }
+.srow .txt { flex: 1; min-width: 0; }
+.srow .txt b { display: block; font: 400 16px/24px var(--font); }
+.srow .txt span { display: block; color: var(--on-surface-variant); font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+.srow .ctl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.srow select, .srow input[type=text] { height: 40px; border-radius: 8px; border: 1px solid var(--outline); background: transparent; padding: 0 12px; font-size: 14px; outline: none; }
+.srow select:focus, .srow input[type=text]:focus { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.srow textarea { width: 100%; min-height: 72px; border-radius: 8px; border: 1px solid var(--outline); background: transparent; padding: 8px 12px; font: 14px/20px var(--font); color: inherit; resize: vertical; outline: none; }
+.srow.stack { flex-direction: column; align-items: stretch; }
+/* M3 switch */
+.switch { position: relative; width: 52px; height: 32px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+.switch .tr { position: absolute; inset: 0; border-radius: 16px; background: var(--surface-container-highest); border: 2px solid var(--outline); transition: background-color .2s var(--ease), border-color .2s; }
+.switch .th { position: absolute; left: 8px; top: 8px; width: 16px; height: 16px; border-radius: 8px; background: var(--outline); transition: all .25s var(--ease-spring); }
+.switch input:checked ~ .tr { background: var(--primary); border-color: var(--primary); }
+.switch input:checked ~ .th { left: 24px; top: 4px; width: 24px; height: 24px; border-radius: 12px; background: var(--on-primary); }
+.switch input:focus-visible ~ .tr { outline: 3px solid var(--primary); outline-offset: 2px; }
+.seg3 { display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--outline); border-radius: 20px; overflow: hidden; height: 40px; }
+.seg3 button { border: 0; background: none; padding: 0 16px; font: 500 14px var(--font); display: inline-flex; align-items: center; gap: 6px; }
+.seg3 button + button { border-left: 1px solid var(--outline); }
+.seg3 button[aria-pressed="true"] { background: var(--secondary-container); color: var(--on-secondary-container); }
+.settings .swatches { grid-template-columns: repeat(8, 40px); gap: 10px; margin: 0; }
+
+/* Dialog forms */
+.dlg h2 { margin: 0 0 8px; font: 400 24px/32px var(--font-display); }
+.dlg > p { margin: 0 0 20px; color: var(--on-surface-variant); }
+.dlg .field label { background: var(--surface-container-high); }
+.dlg .group { margin-bottom: 20px; }
+dialog.small { width: min(460px, 92vw); }
+dialog.mid { width: min(640px, 94vw); }
+.check-row { display: flex; gap: 12px; align-items: center; margin: 0 0 20px; }
+.check-row input { width: 18px; height: 18px; accent-color: var(--primary); }
+.tagpick { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Look picker */
+dialog.looks-dlg { width: min(1040px, 94vw); }
+.looks-dlg .dlg { max-height: 90vh; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; }
+.look-grid { overflow: auto; display: grid; grid-auto-rows: max-content; align-content: start; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; padding: 4px 4px 16px; }
+.look-fam { grid-column: 1 / -1; color: var(--on-surface-variant); margin: 8px 4px 0; }
+.look { border: 0; padding: 0; text-align: left; border-radius: 16px; background: var(--surface-container-lowest); overflow: hidden; transition: border-radius .25s var(--ease), box-shadow .2s; }
+.look .pv { aspect-ratio: 3/2; background: var(--surface-container-highest); position: relative; }
+.look .pv img { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; display: block; }
+.look .pv .sw { position: absolute; inset: 0; }
+.look b { display: block; padding: 10px 12px 2px; font: 500 14px/20px var(--font); }
+.look .insp { display: block; padding: 0 12px 4px; font: 500 12px/16px var(--font); font-style: normal; color: var(--primary); }
+.look span { display: block; padding: 0 12px 12px; color: var(--on-surface-variant); font-size: 12px; line-height: 16px; }
+.look[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--primary); border-radius: 20px; }
+.look-note { color: var(--on-surface-variant); margin: -8px 0 12px; }
+
+/* Viewer extras */
+.vbody { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; }
+.vside { display: flex; flex-direction: column; gap: 14px; min-height: 0; max-height: 66vh; overflow: auto; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
+.facts dt { color: var(--on-surface-variant); }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+.vside textarea { width: 100%; min-height: 64px; border-radius: 8px; border: 1px solid var(--outline); background: transparent; padding: 8px 10px; font: 14px/20px var(--font); color: inherit; resize: vertical; outline: none; }
+.vside textarea:focus, .vside input:focus { border-color: var(--primary); }
+.vside input { width: 100%; height: 36px; border-radius: 8px; border: 1px solid var(--outline); background: transparent; padding: 0 10px; outline: none; }
+.vtags { display: flex; flex-wrap: wrap; gap: 6px; }
+.vtags button { height: 28px; border-radius: 8px; border: 0; padding: 0 6px 0 10px; display: inline-flex; align-items: center; gap: 4px; background: var(--secondary-container); color: var(--on-secondary-container); font: 500 12px var(--font); }
+.vtags svg { width: 14px; height: 14px; }
+.vlooks { display: flex; gap: 6px; flex-wrap: wrap; }
+.vlooks button { height: 28px; border-radius: 8px; border: 1px solid var(--outline-variant); background: none; padding: 0 10px; font: 500 12px var(--font); color: var(--on-surface-variant); display: inline-flex; align-items: center; gap: 6px; }
+.vlooks button i { width: 10px; height: 10px; border-radius: 5px; }
+.vlooks button[aria-pressed="true"] { background: var(--secondary-container); color: var(--on-secondary-container); border-color: transparent; }
+.vstar[aria-pressed="true"] { color: #E0A800; }
+.vwarn { padding: 10px 12px; border-radius: 12px; background: var(--error-container); color: var(--on-error-container); font-size: 13px; }
+
+/* Guide + shortcuts */
+dialog.guide { width: min(560px, 92vw); }
+.guide .art { height: 140px; border-radius: 20px; margin-bottom: 20px; display: grid; place-items: center; background: var(--primary-container); color: var(--on-primary-container); }
+.guide .art svg { width: 64px; height: 64px; }
+.guide .dots { display: flex; gap: 6px; margin-right: auto; }
+.guide .dots i { width: 8px; height: 8px; border-radius: 4px; background: var(--outline-variant); transition: width .25s var(--ease); }
+.guide .dots i.on { width: 24px; background: var(--primary); }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; align-items: center; margin-bottom: 20px; }
+kbd { display: inline-block; min-width: 28px; height: 28px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--outline-variant); border-bottom-width: 3px; font: 500 13px/24px var(--font); text-align: center; background: var(--surface-container-lowest); }
+
+body.has-tray .toasts { bottom: 96px; }
+@media (max-width: 860px) {
+  .vbody { grid-template-columns: 1fr; }
+  .settings { padding: 8px 12px 48px; }
+  .srow { flex-wrap: wrap; }
+}
 </style>
 <style id="dyn"></style>
 </head>
@@ -341,22 +485,22 @@ dialog.palette { width: min(400px, 92vw); }
     <div class="brand" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3.5"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 6l1.5-2.5h5L16 6"/></svg>
     </div>
-    <button class="nav" id="tabLive" aria-pressed="true" disabled>
+    <button class="nav" id="tabLive" aria-pressed="false" disabled>
       <span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="6" width="13.5" height="12" rx="3"/><path d="M16 10.5 21.5 7.5v9L16 13.5"/></svg></span>
-      <span class="lbl">Live</span>
+      <span class="lbl" data-t>Live</span>
     </button>
     <button class="nav" id="tabLib" aria-pressed="false" disabled>
       <span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span>
-      <span class="lbl">Library</span>
+      <span class="lbl" data-t>Library</span>
     </button>
     <button class="nav" id="openJobs" aria-pressed="false">
       <span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span class="badge num" id="jobBadge" hidden>0</span></span>
-      <span class="lbl">Transfers</span>
+      <span class="lbl" data-t>Transfers</span>
     </button>
     <div class="rail-spacer"></div>
-    <button class="nav" id="paletteBtn" aria-pressed="false" title="Colors">
-      <span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.9 1.8-1.8 0-1.3-1-1.7-1-2.8 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15" cy="7.5" r="1.2" fill="currentColor"/></svg></span>
-      <span class="lbl">Colors</span>
+    <button class="nav" id="tabSettings" aria-pressed="false">
+      <span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg></span>
+      <span class="lbl" data-t>Settings</span>
     </button>
   </nav>
 
@@ -369,26 +513,40 @@ dialog.palette { width: min(400px, 92vw); }
         <span class="assist opt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 7v3M12 7v3M15 8v2"/></svg><span id="lcdCard"></span></span>
         <span class="assist opt" id="tempChip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14V5a2 2 0 1 1 4 0v9a4 4 0 1 1-4 0z"/></svg><span id="lcdTemp"></span></span>
       </div>
-      <button class="btn text sl" id="disconnectBtn" hidden>Disconnect</button>
+      <button class="update-chip sl" id="updateChip" hidden></button>
+      <button class="btn text sl" id="disconnectBtn" hidden><span data-t>Disconnect</span></button>
+      <button class="icon-btn sl help" id="helpBtn" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.3a2.6 2.6 0 0 1 5 .9c0 1.8-2.5 2.2-2.5 3.8M12 17v.1"/></svg></button>
     </header>
 
     <main>
+      <div class="banner" id="banner" role="status">
+        <span class="spinner"></span>
+        <span id="bannerText"></span>
+        <button class="btn text small sl" id="bannerStop"><span data-t>Stop trying</span></button>
+      </div>
+
       <!-- Connect -->
       <section class="view connect" id="viewConnect">
         <div class="connect-card">
           <div class="hero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9.5a14 14 0 0 1 19 0M5.5 12.8a9.5 9.5 0 0 1 13 0M8.6 16a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></svg></div>
-          <h1>Connect your Ace Pro 2</h1>
-          <p class="lead">The camera makes its own Wi-Fi network. Join it from this laptop and you can see the live view, record, and copy your clips.</p>
+          <h1 data-t>Connect your Ace Pro 2</h1>
+          <p class="lead" data-t>The camera makes its own Wi-Fi network. Join it from this computer to see the live view, record, and copy your clips.</p>
           <div class="list">
-            <div class="li"><span class="avatar">1</span><div><b>Turn on the camera's Wi-Fi</b><span>Swipe down on the camera's screen and switch on Wi-Fi.</span></div></div>
-            <div class="li"><span class="avatar">2</span><div><b>Join its network from Zorin</b><span>Open the Wi-Fi menu at the top right and pick the network named after your camera. The password is in the camera's Wi-Fi settings.</span></div></div>
-            <div class="li"><span class="avatar">3</span><div><b>Connect</b><span>Ace Studio looks for the camera at <code id="hostText">192.168.42.1</code>.</span></div></div>
+            <div class="li"><span class="avatar">1</span><div><b data-t>Turn on the camera's Wi-Fi</b><span data-t>Swipe down on the camera's screen and switch on Wi-Fi.</span></div></div>
+            <div class="li"><span class="avatar">2</span><div><b data-t>Join its network from this computer</b><span data-t>Open your Wi-Fi menu and pick the network named after your camera. The password is in the camera's Wi-Fi settings.</span></div></div>
+            <div class="li"><span class="avatar">3</span><div><b data-t>Connect</b><span><span data-t>Ace Studio looks for the camera at</span> <code id="hostText">192.168.42.1</code>.</span></div></div>
           </div>
           <div class="connect-actions">
-            <button class="btn filled sl" id="connectBtn">Connect</button>
+            <button class="btn filled sl" id="connectBtn"><span data-t>Connect</span></button>
+            <span class="auto-hint" id="autoHint" hidden><span class="spinner"></span><span data-t>Connects by itself when the camera's Wi-Fi is joined</span></span>
             <span class="hint" id="connectHint"></span>
           </div>
           <div class="alert" id="connectErr" hidden></div>
+          <div class="usb-card" id="usbCard" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M12 3l-2.5 3M12 3l2.5 3M7 10v2.5l5 3M17 9v3.5l-5 3"/><circle cx="12" cy="18.5" r="2.5"/><rect x="5.5" y="8" width="3" height="2" rx=".5"/><circle cx="17" cy="8" r="1.5"/></svg>
+            <div><b data-t>Camera plugged in by USB</b><span id="usbText"></span></div>
+            <button class="btn filled sl" id="usbOpen"><span data-t>Open Library</span></button>
+          </div>
         </div>
       </section>
 
@@ -403,10 +561,10 @@ dialog.palette { width: min(400px, 92vw); }
           </div>
           <div class="idle" id="idle">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="6" width="13.5" height="12" rx="3"/><path d="M16 10.5 21.5 7.5v9L16 13.5"/></svg>
-            <p>Live view is off to save the camera's battery.</p>
-            <button class="btn filled sl" id="previewOn">Turn on live view</button>
+            <p data-t>Live view is off to save the camera's battery.</p>
+            <button class="btn filled sl" id="previewOn"><span data-t>Turn on live view</span></button>
           </div>
-          <div class="waiting" id="waiting" hidden><span class="spinner" style="color:#D0BCFF"></span>Waiting for the first picture from the camera</div>
+          <div class="waiting" id="waiting" hidden><span class="spinner" style="color:#D0BCFF"></span><span data-t>Waiting for the first picture from the camera</span></div>
         </div>
 
         <aside class="panel" aria-label="Camera controls">
@@ -417,8 +575,8 @@ dialog.palette { width: min(400px, 92vw); }
           </div>
 
           <div class="seg" role="group" aria-label="Capture mode">
-            <button id="modeVideo" class="sl" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Video</button>
-            <button id="modePhoto" class="sl" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Photo</button>
+            <button id="modeVideo" class="sl" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-t>Video</span></button>
+            <button id="modePhoto" class="sl" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-t>Photo</span></button>
           </div>
 
           <div class="shutter-wrap">
@@ -429,33 +587,33 @@ dialog.palette { width: min(400px, 92vw); }
           <div class="group" id="timerField">
             <div class="field">
               <select id="stopAfter">
-                <option value="0">No limit</option>
-                <option value="30">30 seconds</option>
-                <option value="60">1 minute</option>
-                <option value="300">5 minutes</option>
-                <option value="600">10 minutes</option>
-                <option value="1200">20 minutes</option>
-                <option value="1800">30 minutes</option>
-                <option value="3600">1 hour</option>
+                <option value="0" data-t>No limit</option>
+                <option value="30" data-t>30 seconds</option>
+                <option value="60" data-t>1 minute</option>
+                <option value="300" data-t>5 minutes</option>
+                <option value="600" data-t>10 minutes</option>
+                <option value="1200" data-t>20 minutes</option>
+                <option value="1800" data-t>30 minutes</option>
+                <option value="3600" data-t>1 hour</option>
               </select>
-              <label for="stopAfter">Stop recording after</label>
+              <label for="stopAfter" data-t>Stop recording after</label>
             </div>
           </div>
 
           <div class="group" id="intervalField" hidden>
-            <span class="label-l group-title">Interval photos</span>
+            <span class="label-l group-title" data-t>Interval photos</span>
             <div class="row2">
-              <div class="field"><input id="ivEvery" class="num" type="number" min="2" value="5"><label for="ivEvery">Every (seconds)</label></div>
-              <div class="field"><input id="ivCount" class="num" type="number" min="0" value="0"><label for="ivCount">How many</label></div>
+              <div class="field"><input id="ivEvery" class="num" type="number" min="2" value="5"><label for="ivEvery" data-t>Every (seconds)</label></div>
+              <div class="field"><input id="ivCount" class="num" type="number" min="0" value="0"><label for="ivCount" data-t>How many</label></div>
             </div>
-            <span class="body-s supporting" style="margin-top:-12px">0 keeps going until you stop it</span>
+            <span class="body-s supporting" style="margin-top:-12px" data-t>0 keeps going until you stop it</span>
             <button class="btn tonal sl" id="ivBtn">Start interval</button>
           </div>
 
           <div class="chips">
-            <button class="chip sl" id="gridBtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.2 4.5v15M14.8 4.5v15M3.5 9.5h17M3.5 14.5h17"/></svg>Grid</button>
-            <button class="chip sl" id="previewToggle" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Live view</button>
-            <button class="chip sl" id="latBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M10 3h4"/></svg>Delay test</button>
+            <button class="chip sl" id="gridBtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.2 4.5v15M14.8 4.5v15M3.5 9.5h17M3.5 14.5h17"/></svg><span data-t>Grid</span></button>
+            <button class="chip sl" id="previewToggle" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span data-t>Live view</span></button>
+            <button class="chip sl" id="latBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M10 3h4"/></svg><span data-t>Delay test</span></button>
           </div>
         </aside>
       </section>
@@ -463,19 +621,108 @@ dialog.palette { width: min(400px, 92vw); }
       <!-- Library -->
       <section class="view library" id="viewLib" hidden>
         <div class="lib-head">
-          <span class="title-m">On the camera<small class="num" id="libCount"></small></span>
-          <button class="filter sl" data-filter="all" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>All</button>
-          <button class="filter sl" data-filter="video" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Videos</button>
-          <button class="filter sl" data-filter="photo" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Photos</button>
-          <button class="filter sl" data-filter="new" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Not copied</button>
+          <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="search" type="search" placeholder="Search names, notes, tags, trips" data-tp></label>
+          <span class="src-chip" id="srcChip"></span>
+          <span style="flex:1"></span>
+          <button class="btn tonal sl small" id="copyNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span data-t>Copy all new</span></button>
           <button class="icon-btn sl" id="refreshLib" aria-label="Refresh" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
+          <div class="lib-row2">
+            <button class="filter sl" data-filter="all" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-t>All</span></button>
+            <button class="filter sl" data-filter="video" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-t>Videos</span></button>
+            <button class="filter sl" data-filter="photo" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-t>Pictures</span></button>
+            <button class="filter sl" data-filter="new" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-t>Not copied</span></button>
+            <button class="filter sl" data-filter="fav" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-t>Favourites</span></button>
+            <select class="mini-select" id="groupSel" aria-label="Trip or tag"></select>
+            <span class="grow"></span>
+            <button class="btn text small sl" id="newTrip"><span data-t>New trip</span></button>
+            <select class="mini-select" id="sortSel" aria-label="Sort">
+              <option value="new" data-t>Newest first</option>
+              <option value="old" data-t>Oldest first</option>
+              <option value="big" data-t>Largest first</option>
+              <option value="long" data-t>Longest first</option>
+              <option value="name" data-t>By name</option>
+            </select>
+          </div>
         </div>
-        <div class="scroller" id="scroller"><div id="sheet"></div></div>
+        <div class="scroller" id="scroller"><div id="overview"></div><div id="sheet"></div></div>
         <div class="tray" id="tray">
           <button class="icon-btn sl" id="trayClear" aria-label="Clear selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
           <span class="count num" id="trayText"></span>
+          <button class="icon-btn sl" id="trayFav" aria-label="Favourite" title="Favourite (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/></svg></button>
+          <button class="icon-btn sl" id="trayTag" aria-label="Add tags" title="Add tags"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3.5 12.6V4.5a1 1 0 0 1 1-1h8.1l8 8a1.4 1.4 0 0 1 0 2l-7.1 7.1a1.4 1.4 0 0 1-2 0z"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/></svg></button>
+          <button class="icon-btn sl" id="trayDelete" aria-label="Delete from camera" title="Delete from camera (Delete)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/></svg></button>
+          <button class="btn text sl" id="trayLook"><span data-t>Film look</span></button>
           <button class="btn text sl" id="trayShare" hidden>Make share copies</button>
-          <button class="btn filled sl" id="trayDownload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>Copy to computer</button>
+          <button class="btn filled sl" id="trayDownload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span data-t>Copy to computer</span></button>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section class="view settings" id="viewSettings" hidden>
+        <div class="settings-inner">
+          <h2 data-t>Copying</h2>
+          <div class="card">
+            <div class="srow"><div class="txt"><b data-t>Save copies in</b><span id="sSaveDir"></span></div>
+              <div class="ctl"><button class="btn outlined sl small" data-pick="save_dir"><span data-t>Change</span></button><button class="btn text sl small" data-open="copies"><span data-t>Open</span></button></div></div>
+            <div class="srow"><div class="txt"><b data-t>Separate pictures and videos</b><span data-t>Pictures go in a Pictures folder and videos in a Videos folder.</span></div>
+              <div class="ctl"><label class="switch"><input type="checkbox" data-cfg="split_kinds"><span class="tr"></span><span class="th"></span></label></div></div>
+            <div class="srow"><div class="txt"><b data-t>Folders by date</b><span data-t>Put each day's clips in its own folder, like 2026-10-28.</span></div>
+              <div class="ctl"><label class="switch"><input type="checkbox" data-cfg="folders_by_date"><span class="tr"></span><span class="th"></span></label></div></div>
+            <div class="srow"><div class="txt"><b data-t>File names</b><span id="sNameEx"></span></div>
+              <div class="ctl"><select data-cfg="file_names"><option value="original" data-t>Camera's names</option><option value="date" data-t>Date and time</option></select></div></div>
+            <div class="srow"><div class="txt"><b data-t>Backup to a second drive</b><span id="sBackup"></span></div>
+              <div class="ctl"><button class="btn text sl small" id="backupOff" hidden><span data-t>Turn off</span></button><button class="btn outlined sl small" data-pick="backup_dir"><span data-t>Choose</span></button></div></div>
+          </div>
+
+          <h2 data-t>Film looks</h2>
+          <div class="card">
+            <div class="srow"><div class="txt"><b data-t>Look for every new copy</b><span data-t>Also makes a copy with this look in the Looks folder. Your original copy is never changed.</span></div>
+              <div class="ctl"><select data-cfg="default_look" id="sDefaultLook"></select></div></div>
+            <div class="srow"><div class="txt"><b data-t>Video size for looks</b><span data-t>1080p is quicker and smaller. Full size keeps the camera's resolution.</span></div>
+              <div class="ctl"><select data-cfg="look_video_size"><option value="1080p">1080p</option><option value="full" data-t>Full size</option></select></div></div>
+            <div class="srow"><div class="txt"><b data-t>Browse the looks</b><span data-t>Twenty-two film-inspired colour styles you can add to copied photos and videos.</span></div>
+              <div class="ctl"><button class="btn outlined sl small" id="browseLooks"><span data-t>Show looks</span></button><button class="btn text sl small" data-open="looks"><span data-t>Open</span></button></div></div>
+          </div>
+
+          <h2 data-t>Camera</h2>
+          <div class="card">
+            <div class="srow"><div class="txt"><b data-t>Connect automatically</b><span data-t>Connect as soon as this computer joins the camera's Wi-Fi.</span></div>
+              <div class="ctl"><label class="switch"><input type="checkbox" data-cfg="auto_connect"><span class="tr"></span><span class="th"></span></label></div></div>
+            <div class="srow"><div class="txt"><b data-t>Reconnect after drops</b><span data-t>If the Wi-Fi drops, keep trying and pick up where you left off.</span></div>
+              <div class="ctl"><label class="switch"><input type="checkbox" data-cfg="auto_reconnect"><span class="tr"></span><span class="th"></span></label></div></div>
+            <div class="srow"><div class="txt"><b data-t>Camera clock</b><span data-t>Set the camera's date and time from this computer when connecting, or leave it alone.</span></div>
+              <div class="ctl"><select data-cfg="clock"><option value="computer" data-t>Use this computer's time</option><option value="leave" data-t>Leave the camera's clock</option></select></div></div>
+            <div class="srow"><div class="txt"><b data-t>Camera address</b><span data-t>Only change this if your camera uses a different address.</span></div>
+              <div class="ctl"><input type="text" data-cfg="camera_host" size="14" class="num"></div></div>
+          </div>
+
+          <h2 data-t>Appearance</h2>
+          <div class="card">
+            <div class="srow"><div class="txt"><b data-t>Theme</b></div>
+              <div class="ctl"><div class="seg3" id="themeSeg"><button data-theme="system" data-t>System</button><button data-theme="light" data-t>Light</button><button data-theme="dark" data-t>Dark</button></div></div></div>
+            <div class="srow stack"><div class="txt"><b data-t>Colours</b><span data-t>Pick a colour and the whole app is themed from it. The camera button uses the colours of your latest shot.</span></div>
+              <div class="swatches" id="swatches"></div></div>
+            <div class="srow"><div class="txt"><b data-t>Language</b></div>
+              <div class="ctl"><select data-cfg="lang"><option value="en">English</option><option value="ms">Bahasa Melayu</option></select></div></div>
+          </div>
+
+          <h2 data-t>Duplicate check</h2>
+          <div class="card">
+            <div class="srow stack"><div class="txt"><b data-t>Folders to check</b><span data-t>Ace Studio looks here for files with the same name and size as the ones on the camera, so you can skip copying them twice. One folder per line.</span></div>
+              <textarea id="dupDirs" spellcheck="false"></textarea></div>
+            <div class="srow"><div class="txt"><b data-t>Check now</b><span id="dupStatus"></span></div>
+              <div class="ctl"><button class="btn outlined sl small" id="dupScan"><span data-t>Check</span></button></div></div>
+          </div>
+
+          <h2 data-t>About</h2>
+          <div class="card">
+            <div class="srow"><div class="txt"><b>Ace Studio <span id="sVersion" class="num"></span></b><span data-t>Unofficial and open source. Not made by or connected with Insta360.</span></div>
+              <div class="ctl"><button class="btn text sl small" id="openRepo">GitHub</button></div></div>
+            <div class="srow"><div class="txt"><b data-t>Check for updates</b><span id="sUpdate"></span></div>
+              <div class="ctl"><button class="btn text sl small" id="checkNow"><span data-t>Check now</span></button><label class="switch"><input type="checkbox" data-cfg="check_updates"><span class="tr"></span><span class="th"></span></label></div></div>
+            <div class="srow"><div class="txt"><b data-t>Help</b><span data-t>See the welcome guide or the keyboard shortcuts again.</span></div>
+              <div class="ctl"><button class="btn outlined sl small" id="showGuide"><span data-t>Welcome guide</span></button><button class="btn outlined sl small" id="showKeys"><span data-t>Shortcuts</span></button></div></div>
+          </div>
         </div>
       </section>
 
@@ -483,15 +730,16 @@ dialog.palette { width: min(400px, 92vw); }
       <div class="scrim" id="scrim"></div>
       <aside class="drawer" id="drawer" aria-label="Transfers">
         <header>
-          <h2>Transfers</h2>
+          <h2 data-t>Transfers</h2>
           <button class="icon-btn sl" id="closeDrawer" aria-label="Close transfers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
         </header>
         <div class="jobs" id="jobs"></div>
         <footer>
-          <button class="btn text sl" id="clearJobs">Clear finished</button>
-          <span style="display:flex;gap:8px">
-            <button class="btn outlined sl small" id="openShare">Share folder</button>
-            <button class="btn tonal sl small" id="openFolder">Copies folder</button>
+          <button class="btn text sl" id="clearJobs"><span data-t>Clear finished</span></button>
+          <span style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn outlined sl small" data-open="looks"><span data-t>Looks</span></button>
+            <button class="btn outlined sl small" data-open="share"><span data-t>Share</span></button>
+            <button class="btn tonal sl small" data-open="copies"><span data-t>Copies</span></button>
           </span>
         </footer>
       </aside>
@@ -504,34 +752,127 @@ dialog.palette { width: min(400px, 92vw); }
 <dialog class="viewer" id="viewer">
   <div class="dlg">
     <h2 id="viewerWhen"></h2>
-    <img id="viewerImg" alt="">
+    <div class="vbody">
+      <img id="viewerImg" alt="">
+      <div class="vside">
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn outlined sl small vstar" id="viewerFav" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/></svg><span data-t>Favourite</span></button>
+          <span class="trip-chip" id="viewerTrip" hidden></span>
+        </div>
+        <div class="vwarn" id="viewerWarn" hidden></div>
+        <dl class="facts num" id="viewerFacts"></dl>
+        <div><span class="label-m" style="color:var(--on-surface-variant)" data-t>Film look preview</span>
+          <div class="vlooks" id="viewerLooks" style="margin-top:6px"></div></div>
+        <div><span class="label-m" style="color:var(--on-surface-variant)" data-t>Note</span>
+          <textarea id="viewerNote" placeholder="Add a note" data-tp></textarea></div>
+        <div><span class="label-m" style="color:var(--on-surface-variant)" data-t>Tags</span>
+          <div class="vtags" id="viewerTags" style="margin:6px 0"></div>
+          <input id="viewerTagIn" placeholder="Add a tag and press Enter" list="tagList" data-tp></div>
+      </div>
+    </div>
     <div class="vfoot">
       <span class="info num" id="viewerMeta"></span>
       <div class="acts">
-        <button class="btn text sl" id="viewerClose">Close</button>
+        <button class="btn text sl" id="viewerDelete" style="color:var(--error)"><span data-t>Delete from camera</span></button>
+        <button class="btn text sl" id="viewerClose"><span data-t>Close</span></button>
+        <button class="btn tonal sl" id="viewerApply" hidden></button>
         <button class="btn tonal sl" id="viewerShare" hidden>Make share copy</button>
         <button class="btn filled sl" id="viewerCopy">Copy to computer</button>
       </div>
     </div>
   </div>
 </dialog>
+<datalist id="tagList"></datalist>
 
-<dialog class="palette" id="palette">
+<dialog class="looks-dlg" id="looksDlg">
   <div class="dlg">
-    <h2>Colors</h2>
-    <p>Pick a color and the whole app is themed from it. "From your camera" uses the colors of your latest shot.</p>
-    <div class="swatches" id="swatches"></div>
-    <div class="dlg-actions"><button class="btn text sl" id="paletteClose">Done</button></div>
+    <h2 data-t>Film looks</h2>
+    <p class="look-note" id="looksNote"></p>
+    <div class="look-grid" id="lookGrid"></div>
+    <p class="body-s" style="color:var(--on-surface-variant);margin:0 0 12px" data-t>These are Ace Studio's own colour styles, hand-tuned to resemble each film or camera mode. Ace Studio isn't affiliated with Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid or Lomography.</p>
+    <div class="dlg-actions">
+      <button class="btn text sl" id="looksCancel"><span data-t>Cancel</span></button>
+      <button class="btn filled sl" id="looksApply" disabled></button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="small" id="askDlg">
+  <div class="dlg">
+    <h2 id="askTitle"></h2>
+    <p id="askText"></p>
+    <label class="check-row" id="askCheckRow" hidden><input type="checkbox" id="askCheck"><span id="askCheckText"></span></label>
+    <div class="dlg-actions">
+      <button class="btn text sl" id="askCancel"></button>
+      <button class="btn text sl" id="askAlt" hidden></button>
+      <button class="btn filled sl" id="askOk"></button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="small" id="tripDlg">
+  <div class="dlg">
+    <h2 data-t>New trip</h2>
+    <p data-t>Group the days of a trip together. Clips taken on these days show the trip's name.</p>
+    <div class="group">
+      <div class="field"><input id="tripName" type="text" placeholder=" "><label for="tripName" data-t>Trip name</label></div>
+      <div class="row2">
+        <div class="field"><input id="tripStart" type="date"><label for="tripStart" data-t>First day</label></div>
+        <div class="field"><input id="tripEnd" type="date"><label for="tripEnd" data-t>Last day</label></div>
+      </div>
+    </div>
+    <div class="dlg-actions">
+      <button class="btn text sl" id="tripDelete" hidden><span data-t>Delete trip</span></button>
+      <span style="flex:1"></span>
+      <button class="btn text sl" id="tripCancel"><span data-t>Cancel</span></button>
+      <button class="btn filled sl" id="tripSave"><span data-t>Save</span></button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="small" id="tagDlg">
+  <div class="dlg">
+    <h2 data-t>Add tags</h2>
+    <p id="tagDlgText"></p>
+    <div class="group">
+      <div class="field"><input id="tagInput" type="text" placeholder=" " list="tagList"><label for="tagInput" data-t>Tags, separated by commas</label></div>
+      <div class="tagpick" id="tagPick"></div>
+    </div>
+    <div class="dlg-actions">
+      <button class="btn text sl" id="tagCancel"><span data-t>Cancel</span></button>
+      <button class="btn filled sl" id="tagSave"><span data-t>Add</span></button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guideDlg">
+  <div class="dlg">
+    <div class="art" id="guideArt"></div>
+    <h2 id="guideTitle"></h2>
+    <p id="guideText"></p>
+    <div class="dlg-actions" style="align-items:center">
+      <span class="dots" id="guideDots"></span>
+      <button class="btn text sl" id="guideBack"><span data-t>Back</span></button>
+      <button class="btn filled sl" id="guideNext"></button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="mid" id="keysDlg">
+  <div class="dlg">
+    <h2 data-t>Keyboard shortcuts</h2>
+    <div class="keys" id="keysList"></div>
+    <div class="dlg-actions"><button class="btn text sl" id="keysClose"><span data-t>Close</span></button></div>
   </div>
 </dialog>
 
 <div class="lat" id="lat" hidden>
   <div class="lat-card">
-    <h2>Measure live view delay</h2>
+    <h2 data-t>Measure live view delay</h2>
     <p id="latText"></p>
     <div class="result num" id="latResult" hidden></div>
     <div style="display:flex;gap:8px;justify-content:center">
-      <button class="btn text" id="latClose">Close</button>
+      <button class="btn text" id="latClose"><span data-t>Close</span></button>
       <button class="btn filled" id="latStart" style="background:#D0BCFF;color:#381E72">Start</button>
     </div>
   </div>
@@ -622,17 +963,6 @@ const Color = (() => {
   }
   return { apply, scheme, hexToOklch };
 })();
-
-const SEEDS = ["#6750A4", "#00639B", "#006A6A", "#386A20", "#8E4E00", "#B3261E", "#984061"];
-const store = {
-  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
-};
-const theme = { choice: store.get("ace.seed") || "camera", cameraSeed: null };
-function applyTheme() {
-  const seed = theme.choice === "camera" ? (theme.cameraSeed || SEEDS[0]) : theme.choice;
-  Color.apply(seed);
-}
 // Most vivid color in an image, for "From your camera"
 function seedFromImage(src) {
   return new Promise((resolve) => {
@@ -661,12 +991,168 @@ function seedFromImage(src) {
     img.src = src;
   });
 }
-applyTheme();
 
 /* ====================================================================== */
+const SEEDS = ["#6750A4", "#00639B", "#006A6A", "#386A20", "#8E4E00", "#B3261E", "#984061"];
 const $ = (id) => document.getElementById(id);
-const state = { status: {}, files: [], selected: new Set(), filter: "all", view: "connect", jobs: [], anchor: null, latency: null };
+const state = { status: {}, files: [], selected: new Set(), filter: "all", group: "", sort: "new", q: "",
+                view: "connect", jobs: [], anchor: null, latency: null };
+let CFG = { seed: "camera", theme: "system", lang: "en" }, LOOKS = [], LOOK = {}, TRIPS = [], TAGS = [];
 
+/* ---------- Language (English / Bahasa Melayu) ---------- */
+const MS = {
+  "Live": "Langsung", "Library": "Pustaka", "Transfers": "Pemindahan", "Settings": "Tetapan",
+  "Disconnect": "Putuskan", "Stop trying": "Berhenti cuba",
+  "Connect your Ace Pro 2": "Sambungkan Ace Pro 2 anda",
+  "The camera makes its own Wi-Fi network. Join it from this computer to see the live view, record, and copy your clips.": "Kamera membuat rangkaian Wi-Fi sendiri. Sertai rangkaian itu dari komputer ini untuk melihat paparan langsung, merakam dan menyalin klip anda.",
+  "Turn on the camera's Wi-Fi": "Hidupkan Wi-Fi kamera",
+  "Swipe down on the camera's screen and switch on Wi-Fi.": "Leret ke bawah pada skrin kamera dan hidupkan Wi-Fi.",
+  "Join its network from this computer": "Sertai rangkaiannya dari komputer ini",
+  "Open your Wi-Fi menu and pick the network named after your camera. The password is in the camera's Wi-Fi settings.": "Buka menu Wi-Fi dan pilih rangkaian yang bernama kamera anda. Kata laluannya ada dalam tetapan Wi-Fi kamera.",
+  "Connect": "Sambung", "Ace Studio looks for the camera at": "Ace Studio mencari kamera di",
+  "Connects by itself when the camera's Wi-Fi is joined": "Bersambung sendiri apabila Wi-Fi kamera disertai",
+  "Camera plugged in by USB": "Kamera disambung melalui USB", "Open Library": "Buka Pustaka",
+  "Live view is off to save the camera's battery.": "Paparan langsung dimatikan untuk menjimatkan bateri kamera.",
+  "Turn on live view": "Hidupkan paparan langsung",
+  "Waiting for the first picture from the camera": "Menunggu gambar pertama dari kamera",
+  "Video": "Video", "Photo": "Foto", "No limit": "Tiada had", "30 seconds": "30 saat", "1 minute": "1 minit",
+  "5 minutes": "5 minit", "10 minutes": "10 minit", "20 minutes": "20 minit", "30 minutes": "30 minit", "1 hour": "1 jam",
+  "Stop recording after": "Berhenti merakam selepas", "Interval photos": "Foto selang masa",
+  "Every (seconds)": "Setiap (saat)", "How many": "Berapa banyak", "0 keeps going until you stop it": "0 berterusan sehingga anda hentikan",
+  "Grid": "Grid", "Live view": "Paparan langsung", "Delay test": "Uji kelewatan",
+  "Search names, notes, tags, trips": "Cari nama, nota, tag, percutian", "Copy all new": "Salin semua yang baharu",
+  "All": "Semua", "Videos": "Video", "Photos": "Foto", "Not copied": "Belum disalin", "Favourites": "Kegemaran",
+  "New trip": "Percutian baharu", "Newest first": "Terbaru dahulu", "Oldest first": "Terlama dahulu",
+  "Largest first": "Terbesar dahulu", "Longest first": "Terpanjang dahulu", "By name": "Ikut nama",
+  "Film look": "Rupa filem", "Copy to computer": "Salin ke komputer",
+  "Copying": "Menyalin", "Save copies in": "Simpan salinan dalam", "Change": "Tukar", "Open": "Buka",
+  "Folders by date": "Folder ikut tarikh", "Put each day's clips in its own folder, like 2026-10-28.": "Letak klip setiap hari dalam folder sendiri, contohnya 2026-10-28.",
+  "File names": "Nama fail", "Camera's names": "Nama dari kamera", "Date and time": "Tarikh dan masa",
+  "Backup to a second drive": "Sandaran ke pemacu kedua", "Turn off": "Matikan", "Choose": "Pilih",
+  "Film looks": "Rupa filem", "Look for every new copy": "Rupa untuk setiap salinan baharu",
+  "Also makes a copy with this look in the Looks folder. Your original copy is never changed.": "Turut membuat salinan dengan rupa ini dalam folder Looks. Salinan asal anda tidak pernah diubah.",
+  "Video size for looks": "Saiz video untuk rupa", "1080p is quicker and smaller. Full size keeps the camera's resolution.": "1080p lebih cepat dan kecil. Saiz penuh mengekalkan resolusi kamera.",
+  "Full size": "Saiz penuh", "Browse the looks": "Lihat rupa-rupa", "Twenty-two film-inspired colour styles you can add to copied photos and videos.": "Dua puluh dua gaya warna ala filem untuk foto dan video yang sudah disalin.",
+  "Show looks": "Tunjuk rupa", "Camera": "Kamera", "Connect automatically": "Sambung secara automatik",
+  "Connect as soon as this computer joins the camera's Wi-Fi.": "Sambung sebaik sahaja komputer ini menyertai Wi-Fi kamera.",
+  "Reconnect after drops": "Sambung semula selepas terputus", "If the Wi-Fi drops, keep trying and pick up where you left off.": "Jika Wi-Fi terputus, terus mencuba dan sambung dari tempat anda berhenti.",
+  "Camera clock": "Jam kamera", "Set the camera's date and time from this computer when connecting, or leave it alone.": "Tetapkan tarikh dan masa kamera dari komputer ini semasa bersambung, atau biarkan sahaja.",
+  "Use this computer's time": "Guna masa komputer ini", "Leave the camera's clock": "Biarkan jam kamera",
+  "Camera address": "Alamat kamera", "Only change this if your camera uses a different address.": "Tukar ini hanya jika kamera anda menggunakan alamat lain.",
+  "Appearance": "Rupa paparan", "Theme": "Tema", "System": "Sistem", "Light": "Cerah", "Dark": "Gelap", "Colours": "Warna",
+  "Pick a colour and the whole app is themed from it. The camera button uses the colours of your latest shot.": "Pilih satu warna dan seluruh aplikasi bertema daripadanya. Butang kamera menggunakan warna gambar terbaru anda.",
+  "Language": "Bahasa", "Duplicate check": "Semakan pendua", "Folders to check": "Folder untuk disemak",
+  "Ace Studio looks here for files with the same name and size as the ones on the camera, so you can skip copying them twice. One folder per line.": "Ace Studio mencari di sini fail dengan nama dan saiz yang sama seperti di kamera, supaya anda tidak menyalinnya dua kali. Satu folder setiap baris.",
+  "Check now": "Semak sekarang", "Check": "Semak", "About": "Perihal",
+  "Unofficial and open source. Not made by or connected with Insta360.": "Tidak rasmi dan sumber terbuka. Bukan dibuat oleh atau berkaitan dengan Insta360.",
+  "Check for updates": "Semak kemas kini", "Help": "Bantuan", "See the welcome guide or the keyboard shortcuts again.": "Lihat semula panduan permulaan atau pintasan papan kekunci.",
+  "Welcome guide": "Panduan permulaan", "Shortcuts": "Pintasan", "Clear finished": "Kosongkan yang selesai",
+  "Looks": "Rupa", "Share": "Kongsi", "Copies": "Salinan", "Favourite": "Kegemaran", "Film look preview": "Pratonton rupa filem",
+  "Note": "Nota", "Add a note": "Tambah nota", "Tags": "Tag", "Add a tag and press Enter": "Tambah tag dan tekan Enter",
+  "Close": "Tutup", "Cancel": "Batal", "Group the days of a trip together. Clips taken on these days show the trip's name.": "Kumpulkan hari-hari percutian. Klip yang diambil pada hari ini menunjukkan nama percutian.",
+  "Trip name": "Nama percutian", "First day": "Hari pertama", "Last day": "Hari terakhir", "Delete trip": "Padam percutian",
+  "Save": "Simpan", "Add tags": "Tambah tag", "Tags, separated by commas": "Tag, dipisahkan dengan koma", "Add": "Tambah",
+  "Back": "Kembali", "Keyboard shortcuts": "Pintasan papan kekunci", "Measure live view delay": "Ukur kelewatan paparan langsung",
+  "Ready": "Sedia", "Offline": "Luar talian", "Record": "Rakam", "Stop": "Henti", "Take photo": "Ambil foto",
+  "Recording": "Merakam", "Running": "Berjalan", "No time limit": "Tiada had masa", "Start interval": "Mula selang",
+  "Stop interval": "Henti selang", "Photo taken": "Foto diambil", "Video saved on the camera": "Video disimpan dalam kamera",
+  "Connection dropped. Reconnecting…": "Sambungan terputus. Menyambung semula…",
+  "Connection dropped. Reconnecting… Copies carry on when it's back.": "Sambungan terputus. Menyambung semula… Salinan diteruskan apabila kembali.",
+  "Reconnected": "Bersambung semula", "Connected to {m}": "Bersambung ke {m}", "the camera": "kamera",
+  "Connecting": "Menyambung", "This can take up to 30 seconds.": "Ini boleh mengambil masa sehingga 30 saat.",
+  "Make sure this computer is joined to the camera's Wi-Fi, not your home network.": "Pastikan komputer ini menyertai Wi-Fi kamera, bukan rangkaian rumah anda.",
+  "Reading the memory card…": "Membaca kad memori…", "Nothing matches.": "Tiada yang sepadan.",
+  "The memory card is empty. Record something from Live.": "Kad memori kosong. Rakam sesuatu dari Langsung.",
+  "Today": "Hari ini", "Yesterday": "Semalam", "Unknown date": "Tarikh tidak diketahui", "Select all": "Pilih semua",
+  "Copied": "Disalin", "Incomplete": "Tidak lengkap", "Share copy": "Salinan kongsi", "On computer": "Dalam komputer",
+  "{n} selected · {size}": "{n} dipilih · {size}", "Make share copies": "Buat salinan kongsi",
+  "Files": "Fail", "Total": "Jumlah", "Free on card": "Ruang kosong di kad",
+  "{v} videos, {p} pictures": "{v} video, {p} gambar", "{n} already on this computer elsewhere": "{n} sudah ada di tempat lain dalam komputer ini",
+  "All trips and tags": "Semua percutian dan tag", "Trips": "Percutian",
+  "Wi-Fi": "Wi-Fi", "USB": "USB", "Version {v} is out": "Versi {v} sudah keluar",
+  "Copying is still running": "Penyalinan masih berjalan",
+  "Disconnecting stops the copies that are left. You can copy them again later.": "Memutuskan sambungan akan menghentikan salinan yang tinggal. Anda boleh salin semula kemudian.",
+  "Keep copying": "Teruskan menyalin", "{n} not copied yet": "{n} belum disalin",
+  "These are still only on the camera ({size}). Copy them before you disconnect?": "Fail ini masih hanya ada dalam kamera ({size}). Salin dahulu sebelum memutuskan sambungan?",
+  "Disconnect anyway": "Putuskan juga", "Everything on the card is already copied.": "Semua di kad sudah disalin.",
+  "Copy {n} new files?": "Salin {n} fail baharu?", "Copy": "Salin",
+  "{size} that isn't on this computer yet.": "{size} yang belum ada dalam komputer ini.",
+  "Skip {n} already found elsewhere on this computer": "Langkau {n} yang sudah ada di tempat lain dalam komputer ini",
+  "Copying {n} files to this computer": "Menyalin {n} fail ke komputer ini",
+  "Waiting": "Menunggu", "Copied and checked": "Disalin dan disemak", "Cancelled": "Dibatalkan", "Failed": "Gagal",
+  "Share copy ready": "Salinan kongsi sedia", "{look} copy ready": "Salinan {look} sedia",
+  "Select clips in the Library, then choose Copy to computer.": "Pilih klip dalam Pustaka, kemudian pilih Salin ke komputer.",
+  "Original": "Asal", "Apply {look}": "Guna {look}", "Copy again": "Salin semula", "Make share copy": "Buat salinan kongsi",
+  "Apply to {n}": "Guna pada {n}", "None": "Tiada",
+  "Pick a look. Ace Studio makes new copies with it; your originals stay as they are.": "Pilih satu rupa. Ace Studio membuat salinan baharu dengannya; fail asal anda kekal.",
+  "{n} not copied yet will be copied first.": "{n} yang belum disalin akan disalin dahulu.",
+  "Previews use one of your shots. Select files in the Library to apply a look.": "Pratonton menggunakan salah satu gambar anda. Pilih fail dalam Pustaka untuk menggunakan rupa.",
+  "Adding {look} to {n} files": "Menambah {look} pada {n} fail", "Added to favourites": "Ditambah ke kegemaran",
+  "Removed from favourites": "Dibuang dari kegemaran", "Tags added": "Tag ditambah", "Trip saved": "Percutian disimpan",
+  "Trip deleted": "Percutian dipadam", "Pick at least the first day.": "Pilih sekurang-kurangnya hari pertama.",
+  "Off. Pick a folder on another drive to keep a second copy of everything you copy.": "Mati. Pilih folder pada pemacu lain untuk menyimpan salinan kedua.",
+  "Every new copy is also saved to {dir}": "Setiap salinan baharu juga disimpan ke {dir}",
+  "Example: {ex}": "Contoh: {ex}", "Checking…": "Menyemak…", "Last checked {when}": "Kali terakhir disemak {when}",
+  "Not checked yet. Open the Library first so Ace Studio knows what's on the camera.": "Belum disemak. Buka Pustaka dahulu supaya Ace Studio tahu apa yang ada di kamera.",
+  "Version {v} is available.": "Versi {v} tersedia.", "Checks GitHub now and then when you're online.": "Menyemak GitHub sekali-sekala apabila anda dalam talian.",
+  "You have the latest version.": "Anda menggunakan versi terkini.",
+  "Next": "Seterusnya", "Get started": "Mula",
+  "Welcome to Ace Studio": "Selamat datang ke Ace Studio",
+  "Join the camera's Wi-Fi and Ace Studio connects by itself, no phone needed. You can also plug the camera in by USB to copy straight from its card.": "Sertai Wi-Fi kamera dan Ace Studio bersambung sendiri, tanpa telefon. Anda juga boleh sambung kamera melalui USB untuk menyalin terus dari kadnya.",
+  "Copy and keep track": "Salin dan jejak",
+  "Copy all new copies everything you haven't copied yet and checks each file. Favourites, notes, tags and trips help you find clips later.": "Salin semua yang baharu menyalin semua yang belum disalin dan menyemak setiap fail. Kegemaran, nota, tag dan percutian membantu anda mencari klip kemudian.",
+  "Give copies a film look": "Beri salinan rupa filem",
+  "Twenty-two colour looks inspired by classic film and cameras. Ace Studio adds them to new copies, so your originals never change.": "Dua puluh dua rupa warna yang diilhamkan oleh filem dan kamera klasik. Ace Studio menambahnya pada salinan baharu, jadi fail asal tidak pernah berubah.",
+  "Make it yours": "Jadikan milik anda",
+  "Settings has the save folder, folders by date, a backup drive, the theme and the language. Press ? any time for keyboard shortcuts.": "Tetapan ada folder simpanan, folder ikut tarikh, pemacu sandaran, tema dan bahasa. Tekan ? bila-bila masa untuk pintasan papan kekunci.",
+  "Record or take a photo": "Rakam atau ambil foto", "Live view on or off": "Hidup atau matikan paparan langsung",
+  "Show the grid": "Tunjuk grid", "Go to Live, Library or Settings": "Pergi ke Langsung, Pustaka atau Tetapan",
+  "Show transfers": "Tunjuk pemindahan", "Search the Library": "Cari dalam Pustaka", "Select everything shown": "Pilih semua yang dipapar",
+  "Favourite the selection": "Jadikan pilihan kegemaran", "Copy the selection": "Salin pilihan",
+  "Clear the selection or close": "Kosongkan pilihan atau tutup", "This list": "Senarai ini",
+  "Copy the files to this computer first.": "Salin fail ke komputer ini dahulu.",
+  "Size": "Saiz", "Taken": "Diambil", "Camera model": "Model kamera", "Exposure": "Dedahan", "Aperture": "Apertur",
+  "ISO": "ISO", "Focal length": "Panjang fokus", "Exposure comp.": "Pampasan dedahan", "White balance": "Imbangan putih",
+  "Duration": "Tempoh", "Codec": "Kodek", "Frame rate": "Kadar bingkai", "Bitrate": "Kadar bit", "Audio": "Audio",
+  "Resolution": "Resolusi", "Reading details…": "Membaca butiran…",
+  "This copy may be damaged. Copy it again from the camera.": "Salinan ini mungkin rosak. Salin semula dari kamera.",
+  "Pictures": "Gambar", "Picture": "Gambar", "Delete from camera": "Padam dari kamera", "Delete": "Padam",
+  "Delete this file from the camera?": "Padam fail ini dari kamera?", "Delete {n} files from the camera?": "Padam {n} fail dari kamera?",
+  "This removes them from the camera's memory card ({size}) and can't be undone.": "Ini membuangnya dari kad memori kamera ({size}) dan tidak boleh dibatalkan.",
+  "None of these are copied to this computer yet.": "Tiada satu pun yang sudah disalin ke komputer ini.",
+  "Your copies on this computer are kept.": "Salinan anda dalam komputer ini dikekalkan.",
+  "Only delete the {n} that are copied to this computer": "Padam hanya {n} yang sudah disalin ke komputer ini",
+  "Deleted {n} from the camera": "{n} dipadam dari kamera", "{n} couldn't be deleted": "{n} tidak dapat dipadam",
+  "Delete the selection from the camera": "Padam pilihan dari kamera",
+  "Separate pictures and videos": "Asingkan gambar dan video",
+  "Pictures go in a Pictures folder and videos in a Videos folder.": "Gambar disimpan dalam folder Pictures dan video dalam folder Videos.",
+  "Inspired by {x}": "Diilhamkan oleh {x}",
+  "These are Ace Studio's own colour styles, hand-tuned to resemble each film or camera mode. Ace Studio isn't affiliated with Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid or Lomography.": "Ini gaya warna Ace Studio sendiri, dilaras tangan supaya menyerupai setiap filem atau mod kamera. Ace Studio tidak berkaitan dengan Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid atau Lomography.",
+  "Delay": "Kelewatan", "Saved": "Disimpan", "Copy is incomplete": "Salinan tidak lengkap",
+};
+const t = (s, vars) => {
+  let r = (CFG.lang === "ms" && MS[s]) || s;
+  if (vars) for (const k in vars) r = r.split("{" + k + "}").join(vars[k]);
+  return r;
+};
+function applyLang() {
+  document.documentElement.lang = CFG.lang === "ms" ? "ms" : "en";
+  document.querySelectorAll("[data-t]").forEach(el => { if (el.dataset.en === undefined) el.dataset.en = el.textContent.trim(); el.textContent = t(el.dataset.en); });
+  document.querySelectorAll("[data-tp]").forEach(el => { if (el.dataset.en === undefined) el.dataset.en = el.placeholder; el.placeholder = t(el.dataset.en); });
+}
+
+/* ---------- Theme ---------- */
+const theme = { cameraSeed: null };
+function applyTheme() {
+  const choice = CFG.seed || "camera";
+  Color.apply(choice === "camera" ? (theme.cameraSeed || SEEDS[0]) : choice);
+  const th = CFG.theme || "system";
+  if (th === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = th;
+  document.querySelectorAll("#themeSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.theme === th));
+}
+applyTheme();
+
+/* ---------- Helpers ---------- */
 async function api(path, body) {
   const opts = body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
   const r = await fetch(path, opts);
@@ -679,7 +1165,7 @@ function toast(msg, kind = "") {
   const el = document.createElement("div");
   el.className = "toast " + kind; el.textContent = msg;
   $("toasts").append(el);
-  setTimeout(() => el.remove(), kind === "error" ? 6000 : 3500);
+  setTimeout(() => el.remove(), kind === "error" ? 6500 : 3500);
 }
 const fmtBytes = (b) => {
   if (b == null) return "";
@@ -694,7 +1180,13 @@ const fmtDur = (s) => {
 };
 const tc = (s) => [Math.floor(s / 3600), Math.floor(s % 3600 / 60), Math.floor(s % 60)].map(n => String(n).padStart(2, "0")).join(":");
 const thumbUrl = (p) => `/api/thumb?path=${encodeURIComponent(p)}`;
+const lookUrl = (p, id) => `/api/look/preview?path=${encodeURIComponent(p)}&look=${id}`;
 const localDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const sum = (list) => list.reduce((a, f) => a + (f.size || 0), 0);
+const base = (p) => String(p || "").split("/").pop();
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const loc = () => (CFG.lang === "ms" ? "ms-MY" : undefined);
+const dialogOpen = () => !!document.querySelector("dialog[open]");
 const ICON = {
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
@@ -703,59 +1195,128 @@ const ICON = {
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4M8.2 13.2l7.6 4"/></svg>',
   warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.1"/></svg>',
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  pic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="m4 17 5-4.5 3.5 3 3-2.5L20 17"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/></svg>',
+  wifi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2.5 9.5a14 14 0 0 1 19 0M5.5 12.8a9.5 9.5 0 0 1 13 0M8.6 16a5 5 0 0 1 6.8 0"/></svg>',
+  usb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 10v2.5l5 3M17 9v3.5l-5 3"/><circle cx="12" cy="18.5" r="2.5"/></svg>',
+  trip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>',
+  film: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 4v16M17 4v16M3 8h4M3 12h4M3 16h4M17 8h4M17 12h4M17 16h4"/></svg>',
+  sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg>',
 };
+const swatchCss = (l) => `linear-gradient(135deg, ${l.swatch[0]}, ${l.swatch[1]})`;
+
+/* ---------- Config ---------- */
+async function loadConfig() {
+  const d = await api("/api/config");
+  CFG = d.config; LOOKS = d.looks; LOOK = Object.fromEntries(LOOKS.map(l => [l.id, l]));
+  TRIPS = d.trips; TAGS = d.tags; state.version = d.version;
+}
+async function setCfg(changes) {
+  try {
+    const d = await api("/api/config", changes);
+    CFG = d.config;
+    if ("lang" in changes) { applyLang(); rerender(); }
+    if ("theme" in changes || "seed" in changes) applyTheme();
+    if (["folders_by_date", "file_names", "save_dir", "split_kinds"].some(k => k in changes)) { state.files = []; if (state.view === "library") loadFiles(true); }
+  } catch (e) { toast(e.message, "error"); }
+  renderSettings();
+}
+function rerender() {
+  show(state.view, false); renderStatus(); renderJobs(); renderGroupSel();
+  if (state.files.length) renderFiles();
+}
+
+/* ---------- Dialog helper ---------- */
+function ask({ title, text, ok, cancel, alt, check, danger }) {
+  return new Promise(res => {
+    $("askOk").className = danger ? "btn danger sl" : "btn filled sl";
+    $("askTitle").textContent = title; $("askText").textContent = text || "";
+    $("askOk").textContent = ok; $("askCancel").textContent = cancel || t("Cancel");
+    $("askAlt").hidden = !alt; if (alt) $("askAlt").textContent = alt;
+    $("askCheckRow").hidden = !check;
+    if (check) { $("askCheckText").textContent = check.text; $("askCheck").checked = !!check.value; }
+    const d = $("askDlg");
+    const done = (choice) => { d.close(); res({ choice, checked: $("askCheck").checked }); };
+    $("askOk").onclick = () => done("ok"); $("askAlt").onclick = () => done("alt"); $("askCancel").onclick = () => done("cancel");
+    d.oncancel = (e) => { e.preventDefault(); done("cancel"); };
+    d.showModal();
+  });
+}
+for (const id of ["viewer", "looksDlg", "tripDlg", "tagDlg", "keysDlg"]) $(id).addEventListener("click", (e) => { if (e.target === $(id)) $(id).close(); });
 
 /* ---------- Views ---------- */
-const TITLES = { connect: "Ace Studio", live: "Live", library: "Library" };
-function show(view) {
+const TITLES = { connect: "Ace Studio", live: "Live", library: "Library", settings: "Settings" };
+function show(view, remember = true) {
   state.view = view;
-  $("viewConnect").hidden = view !== "connect";
-  $("viewLive").hidden = view !== "live";
-  $("viewLib").hidden = view !== "library";
+  [["connect", "viewConnect"], ["live", "viewLive"], ["library", "viewLib"], ["settings", "viewSettings"]].forEach(([v, id]) => $(id).hidden = v !== view);
   $("tabLive").setAttribute("aria-pressed", view === "live");
   $("tabLib").setAttribute("aria-pressed", view === "library");
-  $("topTitle").textContent = TITLES[view];
-  if (view === "library" && !state.files.length) loadFiles();
+  $("tabSettings").setAttribute("aria-pressed", view === "settings");
+  document.body.classList.toggle("has-tray", view === "library" && state.selected.size > 0);
+  $("topTitle").textContent = t(TITLES[view]);
+  if (view === "library") { if (state.files.length) renderFiles(); else if (!state.loadingFiles) loadFiles(); }
+  if (view === "settings") renderSettings();
+  if (remember && (view === "live" || view === "library") && CFG.last_view !== view) { CFG.last_view = view; api("/api/config", { last_view: view }).catch(() => {}); }
 }
 $("tabLive").onclick = () => show("live");
 $("tabLib").onclick = () => show("library");
+$("tabSettings").onclick = () => show(state.view === "settings" ? (state.status.connected ? (CFG.last_view || "live") : state.status.usb ? "library" : "connect") : "settings", false);
 
 /* ---------- Status ---------- */
 function renderStatus() {
-  const s = state.status, on = !!s.connected;
+  const s = state.status, on = !!s.connected, rc = s.link === "reconnecting";
   $("statusLcd").hidden = !on;
-  $("tabLive").disabled = $("tabLib").disabled = !on;
+  $("tabLive").disabled = !on && !rc;
+  $("tabLib").disabled = !on && !rc && !s.usb;
   $("disconnectBtn").hidden = !on;
   $("hostText").textContent = s.host && s.host !== "demo" ? s.host : "192.168.42.1";
+  $("banner").classList.toggle("show", rc);
+  if (rc) $("bannerText").textContent = s.copying ? t("Connection dropped. Reconnecting… Copies carry on when it's back.") : t("Connection dropped. Reconnecting…");
+  $("autoHint").hidden = !CFG.auto_connect || on;
+  $("usbCard").hidden = !s.usb || on;
+  if (s.usb) $("usbText").textContent = s.usb.label + " · " + s.usb.path;
+  $("updateChip").hidden = !s.update;
+  if (s.update) $("updateChip").textContent = t("Version {v} is out", { v: s.update.version });
+
   if (on) {
     $("lcdModel").textContent = (s.model || "Camera").replace(/^Insta360\s*/i, "");
     const b = s.battery;
     $("battFill").setAttribute("width", Math.max(0.5, 12 * (b ?? 0) / 100));
     $("batt").style.color = b != null && b <= 15 ? "var(--error)" : "";
-    $("lcdBatt").textContent = b == null ? "—" : b + "%" + (s.charging ? " · charging" : "");
-    $("lcdCard").textContent = s.total ? `${fmtBytes(s.free)} free` : (s.card && s.card !== "STOR_CS_PASS" ? "Check card" : "—");
+    $("lcdBatt").textContent = b == null ? "—" : b + "%" + (s.charging ? " ⚡" : "");
+    $("lcdCard").textContent = s.card_message || (s.total ? `${fmtBytes(s.free)}` : "—");
     $("lcdTemp").textContent = s.temp != null ? `${s.temp} °C` : "";
     $("tempChip").hidden = s.temp == null;
-    if (state.view === "connect") show("live");
-    if (theme.choice === "camera" && !theme.cameraSeed && !state.loadingFiles && !state.triedSeed) { state.triedSeed = true; loadFiles(true); }
-  } else if (state.view !== "connect") show("connect");
+    if (state.view === "connect") show(CFG.last_view === "library" ? "library" : "live", false);
+  } else if (!rc && (state.view === "live" || (state.view === "library" && !s.usb))) show("connect", false);
+
+  // Connection events
+  if (on && state.wasOn === false) toast(state.wasRc ? t("Reconnected") : t("Connected to {m}", { m: s.model || t("the camera") }));
+  // Source changed (Wi-Fi <-> USB): reload the Library
+  const src = on ? "wifi" : s.usb ? "usb" : null;
+  if (!rc && src !== state.src) {
+    if (state.src !== undefined) { state.files = []; state.selected.clear(); }
+    state.src = src;
+    if (src) loadFiles(state.view !== "library");
+  }
+  state.wasOn = on; state.wasRc = rc;
 
   const rec = !!s.recording, photo = s.mode === "photo";
   const iv = s.interval && s.interval.running ? s.interval : null;
   $("modeVideo").setAttribute("aria-pressed", !photo);
   $("modePhoto").setAttribute("aria-pressed", photo);
-  $("modeVideo").disabled = $("modePhoto").disabled = rec || !!iv;
+  $("modeVideo").disabled = $("modePhoto").disabled = rec || !!iv || !on;
   const sh = $("shutter");
   sh.classList.toggle("photo", photo); sh.classList.toggle("rec", rec);
-  sh.disabled = !!iv;
-  sh.setAttribute("aria-label", photo ? "Take photo" : rec ? "Stop recording" : "Start recording");
-  $("shutterLabel").textContent = photo ? "Take photo" : rec ? "Stop" : "Record";
+  sh.disabled = !!iv || !on;
+  sh.setAttribute("aria-label", photo ? t("Take photo") : rec ? t("Stop") : t("Record"));
+  $("shutterLabel").textContent = photo ? t("Take photo") : rec ? t("Stop") : t("Record");
   $("finder").classList.toggle("rec", rec);
   $("railLcd").classList.toggle("rec", rec);
   $("timerField").hidden = photo;
   $("intervalField").hidden = !photo;
   $("stopAfter").disabled = rec;
-  $("ivBtn").textContent = iv ? "Stop interval" : "Start interval";
+  $("ivBtn").textContent = iv ? t("Stop interval") : t("Start interval");
   $("ivBtn").className = iv ? "btn danger sl" : "btn tonal sl";
   $("ivEvery").disabled = $("ivCount").disabled = !!iv;
   if (s.interval && s.interval.error && !s.interval.running && state.lastIvErr !== s.interval.error) {
@@ -764,36 +1325,38 @@ function renderStatus() {
 
   const pv = !!s.preview, st = s.preview_stats || {};
   $("idle").hidden = pv;
+  $("previewOn").disabled = !on;
   $("waiting").hidden = !pv || !st.waiting;
   $("osd").hidden = !pv || st.waiting;
   $("previewToggle").setAttribute("aria-pressed", pv);
   const codec = { h264: "H.264", hevc: "H.265", demo: "Demo", auto: "Auto" }[st.codec] || "";
   $("osdStats").textContent = [st.fps != null ? `${st.fps} fps` : "", codec, st.kbps ? `${(st.kbps / 1000).toFixed(1)} Mbps` : ""].filter(Boolean).join(" · ");
   $("osdLatency").hidden = state.latency == null;
-  if (state.latency != null) $("osdLatency").textContent = `Delay ≈ ${state.latency} ms`;
+  if (state.latency != null) $("osdLatency").textContent = `${t("Delay")} ≈ ${state.latency} ms`;
   const img = $("stream");
   if (pv && img.hidden) { img.src = "/stream.mjpg?t=" + Date.now(); img.hidden = false; }
   if (!pv && !img.hidden) { img.removeAttribute("src"); img.hidden = true; }
   renderLcd();
+  if (state.view === "library") renderOverview();
 }
 
 function renderLcd() {
   const s = state.status, now = Date.now() / 1000;
   const photo = s.mode === "photo", iv = s.interval && s.interval.running ? s.interval : null;
-  $("lcdMode").textContent = photo ? (iv ? "Interval photos" : "Photo") : "Video";
+  $("lcdMode").textContent = photo ? (iv ? t("Interval photos") : t("Photo")) : t("Video");
   if (s.recording && s.recording_since) {
     $("timecode").textContent = tc(now - s.recording_since);
-    $("lcdRight").innerHTML = '<span class="dot"></span>Recording';
-    $("lcdSub").textContent = s.stop_at ? `Stops in ${fmtDur(s.stop_at - now)}` : "No time limit";
+    $("lcdRight").innerHTML = '<span class="dot"></span>' + esc(t("Recording"));
+    $("lcdSub").textContent = s.stop_at ? `⏱ ${fmtDur(s.stop_at - now)}` : t("No time limit");
   } else if (iv) {
-    $("timecode").textContent = `${iv.taken}${iv.count ? " of " + iv.count : ""}`;
-    $("lcdRight").textContent = "Running";
-    $("lcdSub").textContent = `Next photo in ${Math.max(0, Math.ceil(iv.next_at - now))} s`;
+    $("timecode").textContent = `${iv.taken}${iv.count ? " / " + iv.count : ""}`;
+    $("lcdRight").textContent = t("Running");
+    $("lcdSub").textContent = `⏱ ${Math.max(0, Math.ceil(iv.next_at - now))} s`;
   } else {
-    $("timecode").textContent = photo ? "Ready" : "00:00:00";
-    $("lcdRight").textContent = s.connected ? "Ready" : "Offline";
+    $("timecode").textContent = photo ? t("Ready") : "00:00:00";
+    $("lcdRight").textContent = s.connected ? t("Ready") : t("Offline");
     const sa = Number($("stopAfter").value);
-    $("lcdSub").textContent = photo ? " " : sa ? `Will stop after ${fmtDur(sa)}` : " ";
+    $("lcdSub").textContent = photo ? " " : sa ? `⏱ ${fmtDur(sa)}` : " ";
   }
 }
 async function poll() { try { state.status = await api("/api/status"); renderStatus(); } catch {} }
@@ -801,35 +1364,53 @@ async function poll() { try { state.status = await api("/api/status"); renderSta
 /* ---------- Connect ---------- */
 $("connectBtn").onclick = async () => {
   const btn = $("connectBtn");
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Connecting';
+  btn.disabled = true; btn.innerHTML = `<span class="spinner"></span>${esc(t("Connecting"))}`;
   $("connectErr").hidden = true;
-  $("connectHint").textContent = "This can take up to 30 seconds.";
+  $("connectHint").textContent = t("This can take up to 30 seconds.");
   try {
     state.status = await api("/api/connect", {});
-    renderStatus(); show("live");
-    toast("Connected to " + (state.status.model || "the camera"));
+    renderStatus();
   } catch (e) {
     $("connectErr").hidden = false;
-    $("connectErr").textContent = e.message + " Make sure Zorin is joined to the camera's Wi-Fi, not your home network.";
+    $("connectErr").textContent = e.message + " " + t("Make sure this computer is joined to the camera's Wi-Fi, not your home network.");
   } finally {
-    btn.disabled = false; btn.textContent = "Connect"; $("connectHint").textContent = "";
+    btn.disabled = false; btn.innerHTML = `<span>${esc(t("Connect"))}</span>`; $("connectHint").textContent = "";
   }
 };
-$("disconnectBtn").onclick = async () => { await api("/api/disconnect", {}); state.files = []; poll(); };
+$("usbOpen").onclick = () => show("library");
+$("bannerStop").onclick = async () => { await api("/api/disconnect", {}); poll(); };
+$("updateChip").onclick = () => state.status.update && api("/api/open-url", { url: state.status.update.url }).catch(e => toast(e.message, "error"));
+
+// Reminder before disconnecting
+$("disconnectBtn").onclick = async () => {
+  const fresh = state.files.filter(f => !f.downloaded);
+  if (state.status.copying) {
+    const r = await ask({ title: t("Copying is still running"), text: t("Disconnecting stops the copies that are left. You can copy them again later."), ok: t("Disconnect"), cancel: t("Keep copying") });
+    if (r.choice !== "ok") return;
+  } else if (fresh.length) {
+    const r = await ask({ title: t("{n} not copied yet", { n: fresh.length }), text: t("These are still only on the camera ({size}). Copy them before you disconnect?", { size: fmtBytes(sum(fresh)) }),
+                          ok: t("Copy all new"), alt: t("Disconnect anyway") });
+    if (r.choice === "ok") { copyAllNew(); return; }
+    if (r.choice !== "alt") return;
+  }
+  await api("/api/disconnect", {});
+  state.files = []; poll();
+};
 
 /* ---------- Live ---------- */
 async function setPreview(on) {
   try { await api("/api/preview", { on }); }
-  catch (e) { toast(e.message + " Recording and copying still work.", "error"); }
+  catch (e) { toast(e.message, "error"); }
   poll();
 }
 $("previewOn").onclick = () => setPreview(true);
 $("previewToggle").onclick = () => setPreview(!state.status.preview);
-$("gridBtn").onclick = () => {
+function toggleGrid() {
   const on = $("gridBtn").getAttribute("aria-pressed") !== "true";
   $("gridBtn").setAttribute("aria-pressed", on);
   $("finder").classList.toggle("show-grid", on);
-};
+}
+$("gridBtn").onclick = toggleGrid;
 async function setMode(mode) {
   if (state.status.mode === mode) return;
   try { await api("/api/mode", { mode }); } catch (e) { toast(e.message, "error"); }
@@ -841,16 +1422,16 @@ $("stopAfter").onchange = renderLcd;
 
 $("shutter").onclick = async () => {
   const s = state.status, sh = $("shutter");
+  if (!s.connected) return;
   sh.disabled = true;
   try {
-    if (s.mode === "photo") { await api("/api/photo", {}); toast("Photo taken"); }
+    if (s.mode === "photo") { await api("/api/photo", {}); toast(t("Photo taken")); }
     else {
       const start = !s.recording;
       const r = await api("/api/record", { action: start ? "start" : "stop", stop_after: Number($("stopAfter").value) });
       state.status = { ...s, ...r };
       renderStatus();
-      if (!start) toast("Video saved on the camera");
-      else if (r.stop_at) toast(`Recording. It stops by itself after ${fmtDur(Number($("stopAfter").value))}.`);
+      if (!start) toast(t("Video saved on the camera"));
     }
     state.files = [];
   } catch (e) { toast(e.message, "error"); }
@@ -860,11 +1441,8 @@ $("shutter").onclick = async () => {
 $("ivBtn").onclick = async () => {
   const running = state.status.interval && state.status.interval.running;
   try {
-    if (running) { await api("/api/interval", { action: "stop" }); toast(`Interval stopped after ${state.status.interval.taken} photos`); }
-    else {
-      await api("/api/interval", { action: "start", every: Number($("ivEvery").value) || 5, count: Number($("ivCount").value) || 0 });
-      toast("Interval photos started");
-    }
+    if (running) await api("/api/interval", { action: "stop" });
+    else await api("/api/interval", { action: "start", every: Number($("ivEvery").value) || 5, count: Number($("ivCount").value) || 0 });
     state.files = [];
   } catch (e) { toast(e.message, "error"); }
   poll();
@@ -878,7 +1456,7 @@ const lat = { running: false };
 $("latBtn").onclick = () => {
   if (!state.status.preview) { toast("Turn on live view first."); return; }
   $("lat").hidden = false; $("latResult").hidden = true;
-  $("latText").textContent = LAT_INTRO;
+  $("latText").textContent = t(LAT_INTRO);
   $("latStart").hidden = false; $("latStart").textContent = "Start";
   $("latPeek").src = "/stream.mjpg?t=" + Date.now();
 };
@@ -940,27 +1518,30 @@ $("latStart").onclick = async () => {
 
 /* ---------- Library ---------- */
 async function loadFiles(quiet) {
-  if (!quiet) $("sheet").innerHTML = '<p class="empty">Reading the memory card…</p>';
+  if (!quiet) { $("sheet").innerHTML = `<p class="empty">${esc(t("Reading the memory card…"))}</p>`; $("overview").innerHTML = ""; }
   state.loadingFiles = true;
   try {
     const d = await api("/api/files");
-    state.files = d.files;
+    state.files = d.files; state.source = d.source;
+    TRIPS = d.trips; TAGS = d.tags; state.dupScanned = d.elsewhere_scanned;
+    const have = new Set(d.files.map(f => f.path));
+    [...state.selected].forEach(p => have.has(p) || state.selected.delete(p));
+    renderGroupSel(); renderTagList();
     if (!quiet || state.view === "library") renderFiles();
     updateCameraSeed();
   } catch (e) {
     if (quiet) return;
-    $("sheet").innerHTML = ""; const p = document.createElement("p"); p.className = "empty"; p.textContent = e.message; $("sheet").append(p);
+    $("overview").innerHTML = "";
+    $("sheet").innerHTML = `<p class="empty">${esc(e.message)}</p>`;
   } finally { state.loadingFiles = false; }
 }
 async function updateCameraSeed() {
-  const latest = state.files[0];
-  if (!latest || theme.loadingSeed) return;
-  if (theme.seedFrom === latest.path) return;
+  const latest = state.files.find(f => f.kind === "photo") || state.files[0];
+  if (!latest || theme.loadingSeed || theme.seedFrom === latest.path) return;
   theme.loadingSeed = true;
   const seed = await seedFromImage(thumbUrl(latest.path));
-  theme.loadingSeed = false;
-  theme.seedFrom = latest.path;
-  if (seed) { theme.cameraSeed = seed; if (theme.choice === "camera") applyTheme(); renderSwatches(); }
+  theme.loadingSeed = false; theme.seedFrom = latest.path;
+  if (seed) { theme.cameraSeed = seed; if ((CFG.seed || "camera") === "camera") applyTheme(); if (state.view === "settings") renderSwatches(); }
 }
 $("refreshLib").onclick = () => loadFiles();
 document.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => {
@@ -968,8 +1549,47 @@ document.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => {
   document.querySelectorAll("[data-filter]").forEach(x => x.setAttribute("aria-pressed", x === b));
   renderFiles();
 });
+let searchTimer;
+$("search").oninput = () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { state.q = $("search").value.trim().toLowerCase(); renderFiles(); }, 150); };
+$("sortSel").onchange = () => { state.sort = $("sortSel").value; renderFiles(); };
+$("groupSel").onchange = () => { state.group = $("groupSel").value; $("groupSel").classList.toggle("on", !!state.group); renderFiles(); };
+$("copyNew").onclick = () => copyAllNew();
+
+const tripName = (id) => (TRIPS.find(x => x.id === id) || {}).name || "";
+function renderGroupSel() {
+  const sel = $("groupSel"), v = state.group;
+  sel.innerHTML = `<option value="">${esc(t("All trips and tags"))}</option>` +
+    (TRIPS.length ? `<optgroup label="${esc(t("Trips"))}">${TRIPS.map(x => `<option value="trip:${esc(x.id)}">${esc(x.name)}</option>`).join("")}</optgroup>` : "") +
+    (TAGS.length ? `<optgroup label="${esc(t("Tags"))}">${TAGS.map(x => `<option value="tag:${esc(x)}"># ${esc(x)}</option>`).join("")}</optgroup>` : "");
+  sel.value = [...sel.options].some(o => o.value === v) ? v : "";
+  state.group = sel.value; sel.classList.toggle("on", !!state.group);
+  sel.hidden = !TRIPS.length && !TAGS.length;
+}
+function renderTagList() { $("tagList").innerHTML = TAGS.map(x => `<option value="${esc(x)}">`).join(""); }
+
+function matches(f, q) {
+  const hay = [f.name, f.note, ...(f.tags || []), tripName(f.trip), f.taken, f.kind === "video" ? "video" : "photo foto"].join(" ").toLowerCase();
+  return q.split(/\s+/).every(w => hay.includes(w));
+}
 function visibleFiles() {
-  return state.files.filter(f => state.filter === "all" || (state.filter === "new" ? !f.downloaded : f.kind === state.filter));
+  const fl = state.filter, g = state.group;
+  const list = state.files.filter(f => {
+    if ((fl === "video" || fl === "photo") && f.kind !== fl) return false;
+    if (fl === "new" && f.downloaded) return false;
+    if (fl === "fav" && !f.fav) return false;
+    if (g.startsWith("trip:") && f.trip !== g.slice(5)) return false;
+    if (g.startsWith("tag:") && !(f.tags || []).includes(g.slice(4))) return false;
+    if (state.q && !matches(f, state.q)) return false;
+    return true;
+  });
+  const by = {
+    new: (a, b) => (b.taken || "").localeCompare(a.taken || "") || b.name.localeCompare(a.name),
+    old: (a, b) => (a.taken || "").localeCompare(b.taken || "") || a.name.localeCompare(b.name),
+    big: (a, b) => (b.size || 0) - (a.size || 0),
+    long: (a, b) => (b.duration || 0) - (a.duration || 0),
+    name: (a, b) => a.name.localeCompare(b.name),
+  }[state.sort];
+  return list.sort(by);
 }
 const io = new IntersectionObserver((entries) => {
   for (const en of entries) {
@@ -981,32 +1601,64 @@ const io = new IntersectionObserver((entries) => {
   }
 }, { root: $("scroller"), rootMargin: "300px" });
 
+function renderOverview() {
+  const F = state.files, s = state.status, box = $("overview");
+  const src = state.source === "usb" ? `${ICON.usb}${esc(t("USB"))}` : `${ICON.wifi}${esc(t("Wi-Fi"))}`;
+  $("srcChip").innerHTML = state.source ? src : "";
+  $("srcChip").hidden = !state.source;
+  if (!F.length) { box.innerHTML = ""; return; }
+  const v = F.filter(f => f.kind === "video").length, copied = F.filter(f => f.downloaded), fresh = F.filter(f => !f.downloaded);
+  const elsewhere = fresh.filter(f => (f.elsewhere || []).length);
+  const total = sum(F), cap = s.total && state.source === "wifi" ? s.total : total;
+  const pc = (x) => Math.max(0, Math.min(100, x / cap * 100)).toFixed(2) + "%";
+  const sig = [F.length, total, copied.length, s.free, state.source, CFG.lang, elsewhere.length].join("|");
+  if (box.dataset.sig === sig) return;
+  box.dataset.sig = sig;
+  box.innerHTML = `<div class="overview num">
+    <div class="stat"><b>${F.length}</b><span>${esc(t("{v} videos, {p} pictures", { v, p: F.length - v }))}</span></div>
+    <div class="stat"><b>${fmtBytes(total)}</b><span>${esc(t("Total"))}</span></div>
+    <div class="stat"><b>${copied.length}</b><span>${esc(t("Copied"))} · ${fmtBytes(sum(copied))}</span></div>
+    <div class="stat"><b>${fresh.length}</b><span>${esc(t("Not copied"))} · ${fmtBytes(sum(fresh))}</span></div>
+    ${s.total && state.source === "wifi" ? `<div class="stat"><b>${fmtBytes(s.free)}</b><span>${esc(t("Free on card"))}</span></div>` : ""}
+    <div class="bar" title="${esc(t("Copied"))} / ${esc(t("Not copied"))}"><i style="width:${pc(sum(copied))};background:var(--ok)"></i><i style="width:${pc(sum(fresh))};background:var(--primary)"></i></div>
+    ${elsewhere.length ? `<span class="body-s" style="flex-basis:100%;color:var(--on-surface-variant)">${esc(t("{n} already on this computer elsewhere", { n: elsewhere.length }))}</span>` : ""}
+  </div>`;
+}
+
+function dayLabel(day) {
+  const now = new Date(), today = localDay(now), yest = localDay(new Date(now - 864e5));
+  if (day === today) return t("Today");
+  if (day === yest) return t("Yesterday");
+  if (day === "unknown") return t("Unknown date");
+  const d = new Date(day + "T12:00");
+  return d.toLocaleDateString(loc(), d.getFullYear() === now.getFullYear() ? { weekday: "short", day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" });
+}
 function renderFiles() {
   const files = visibleFiles(), sheet = $("sheet");
+  renderOverview();
   sheet.innerHTML = "";
-  const v = state.files.filter(f => f.kind === "video").length, p = state.files.length - v;
-  $("libCount").textContent = `${v} video${v === 1 ? "" : "s"}, ${p} photo${p === 1 ? "" : "s"}`;
+  $("copyNew").disabled = !state.files.some(f => !f.downloaded);
   if (!files.length) {
-    const e = document.createElement("p"); e.className = "empty";
-    e.textContent = state.files.length ? "Nothing matches this filter." : "The memory card is empty. Record something from Live.";
-    sheet.append(e); renderTray(); return;
+    sheet.innerHTML = `<p class="empty">${esc(state.files.length ? t("Nothing matches.") : t("The memory card is empty. Record something from Live."))}</p>`;
+    renderTray(); return;
   }
+  const byDay = state.sort === "new" || state.sort === "old";
   const groups = new Map();
   for (const f of files) {
-    const k = f.taken ? f.taken.slice(0, 10) : "unknown";
+    const k = byDay ? (f.taken ? f.taken.slice(0, 10) : "unknown") : "all";
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k).push(f);
   }
-  const now = new Date(), today = localDay(now), yest = localDay(new Date(now - 864e5));
   for (const [day, list] of groups) {
     const head = document.createElement("div"); head.className = "day";
     const h = document.createElement("h3");
-    const d = new Date(day + "T12:00");
-    h.textContent = day === today ? "Today" : day === yest ? "Yesterday" : day === "unknown" ? "Unknown date" :
-      d.toLocaleDateString(undefined, d.getFullYear() === now.getFullYear() ? { weekday: "short", day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" });
-    const all = document.createElement("button"); all.className = "btn text small sl"; all.textContent = "Select all";
+    h.textContent = day === "all" ? $("sortSel").selectedOptions[0].textContent : dayLabel(day);
+    head.append(h);
+    const trip = day !== "all" && list.find(f => f.trip)?.trip;
+    if (trip) head.insertAdjacentHTML("beforeend", `<span class="trip-chip">${ICON.trip}${esc(tripName(trip))}</span>`);
+    const all = document.createElement("button"); all.className = "btn text small sl"; all.textContent = t("Select all");
     all.onclick = () => { list.forEach(f => state.selected.add(f.path)); syncSelection(); };
-    head.append(h, all);
+    head.append(all);
     const grid = document.createElement("div"); grid.className = "sheet";
     for (const f of list) grid.append(tile(f));
     sheet.append(head, grid);
@@ -1015,26 +1667,31 @@ function renderFiles() {
 }
 
 function tile(f) {
-  const t = document.createElement("button");
-  t.className = "tile"; t.dataset.path = f.path;
-  const time = f.taken ? new Date(f.taken).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : f.name;
-  t.setAttribute("aria-label", `${f.kind} ${time} ${fmtBytes(f.size)}`);
+  const el = document.createElement("button");
+  el.className = "tile"; el.dataset.path = f.path;
+  const time = f.taken ? new Date(f.taken).toLocaleTimeString(loc(), { hour: "numeric", minute: "2-digit" }) : f.name;
+  el.setAttribute("aria-label", `${f.kind} ${time} ${fmtBytes(f.size)}`);
+  const lookDots = (f.looks || []).map(id => LOOK[id] ? `<i style="background:${swatchCss(LOOK[id])}" title="${esc(LOOK[id].name)}"></i>` : "").join("");
   const badges = [
-    f.downloaded ? `<span class="tag ok">${ICON.laptop}Copied</span>` : "",
-    f.incomplete ? `<span class="tag warn">${ICON.warn}Incomplete</span>` : "",
-    f.shared ? `<span class="tag share">${ICON.share}Share copy</span>` : "",
+    f.downloaded ? `<span class="tag ok">${ICON.laptop}${esc(t("Copied"))}</span>` : "",
+    f.incomplete ? `<span class="tag warn">${ICON.warn}${esc(t("Incomplete"))}</span>` : "",
+    !f.downloaded && (f.elsewhere || []).length ? `<span class="tag else" title="${esc(f.elsewhere.join("\n"))}">${ICON.laptop}${esc(t("On computer"))}</span>` : "",
+    f.shared ? `<span class="tag share">${ICON.share}</span>` : "",
+    lookDots ? `<span class="tag look">${lookDots}</span>` : "",
   ].join("");
-  t.innerHTML = `
+  el.innerHTML = `
     <div class="thumb">
       <img alt="" data-src="${thumbUrl(f.path)}">
-      <span class="ph">${f.ext}</span>
+      <span class="ph">${esc(f.ext)}</span>
       <span class="badges">${badges}</span>
-      ${f.kind === "video" ? `<span class="dur num">${ICON.play}${f.duration ? fmtDur(f.duration) : "Video"}</span>` : ""}
+      ${f.fav ? `<span class="star">${ICON.star}</span>` : ""}
+      ${f.kind === "video" ? `<span class="dur num">${ICON.play}${f.duration ? fmtDur(f.duration) : esc(t("Video"))}</span>` : `<span class="dur">${ICON.pic}${esc(t("Picture"))}</span>`}
     </div>
     <span class="check">${ICON.check}</span>
-    <div class="cap"><b class="num">${time}</b><span class="num">${fmtBytes(f.size)}</span></div>`;
-  io.observe(t.querySelector("img"));
-  t.onclick = (ev) => {
+    <div class="cap"><b class="num">${esc(time)}</b>${f.note ? `<span class="note">${esc(f.note)}</span>` : `<span class="num">${fmtBytes(f.size)}</span>`}</div>
+    ${(f.tags || []).length ? `<div class="tile-tags">${f.tags.map(x => `<span>#${esc(x)}</span>`).join("")}</div>` : ""}`;
+  io.observe(el.querySelector("img"));
+  el.onclick = (ev) => {
     if (ev.target.closest(".check") || state.selected.size || ev.ctrlKey || ev.shiftKey) {
       if (ev.shiftKey && state.anchor) {
         const ps = visibleFiles().map(x => x.path);
@@ -1044,94 +1701,395 @@ function tile(f) {
       state.anchor = f.path; syncSelection();
     } else openViewer(f);
   };
-  return t;
+  return el;
 }
 function syncSelection() {
-  document.querySelectorAll(".tile").forEach(t => t.setAttribute("aria-pressed", state.selected.has(t.dataset.path)));
+  document.querySelectorAll(".tile").forEach(x => x.setAttribute("aria-pressed", state.selected.has(x.dataset.path)));
   $("sheet").classList.toggle("has-selection", state.selected.size > 0);
   renderTray();
 }
+const selectedFiles = () => state.files.filter(f => state.selected.has(f.path));
 function renderTray() {
-  const sel = state.files.filter(f => state.selected.has(f.path));
-  const bytes = sel.reduce((a, f) => a + (f.size || 0), 0);
-  $("trayText").textContent = `${sel.length} selected · ${fmtBytes(bytes)}`;
+  const sel = selectedFiles();
+  $("trayText").textContent = t("{n} selected · {size}", { n: sel.length, size: fmtBytes(sum(sel)) });
   $("tray").classList.toggle("show", sel.length > 0);
+  document.body.classList.toggle("has-tray", sel.length > 0 && state.view === "library");
   const copied = sel.filter(f => f.downloaded);
   $("trayShare").hidden = !copied.length;
-  $("trayShare").textContent = copied.length === sel.length ? "Make share copies" : `Share copies (${copied.length})`;
+  $("trayShare").textContent = t("Make share copies") + (copied.length === sel.length ? "" : ` (${copied.length})`);
 }
 $("trayClear").onclick = () => { state.selected.clear(); syncSelection(); };
 $("trayDownload").onclick = () => startDownload([...state.selected]);
-$("trayShare").onclick = () => startShare(state.files.filter(f => state.selected.has(f.path) && f.downloaded).map(f => f.name));
+$("trayShare").onclick = () => startShare(selectedFiles().filter(f => f.downloaded).map(f => f.path));
+$("trayFav").onclick = () => favSelection();
+$("trayTag").onclick = () => openTagDlg();
+$("trayLook").onclick = () => openLooks(selectedFiles());
+$("trayDelete").onclick = () => deleteFiles(selectedFiles());
+
+async function deleteFiles(files) {
+  if (!files.length) return false;
+  const notCopied = files.filter(f => !f.downloaded);
+  const r = await ask({
+    title: files.length === 1 ? t("Delete this file from the camera?") : t("Delete {n} files from the camera?", { n: files.length }),
+    text: t("This removes them from the camera's memory card ({size}) and can't be undone.", { size: fmtBytes(sum(files)) }) +
+      (notCopied.length && notCopied.length < files.length ? "" : notCopied.length ? " " + t("None of these are copied to this computer yet.") : " " + t("Your copies on this computer are kept.")),
+    ok: t("Delete"), danger: true,
+    check: notCopied.length && notCopied.length < files.length ? { text: t("Only delete the {n} that are copied to this computer", { n: files.length - notCopied.length }), value: true } : null,
+  });
+  if (r.choice !== "ok") return false;
+  const list = notCopied.length && notCopied.length < files.length && r.checked ? files.filter(f => f.downloaded) : files;
+  try {
+    const d = await api("/api/delete", { paths: list.map(f => f.path) });
+    const gone = new Set(list.map(f => f.path).filter(p => !d.failed.includes(p)));
+    state.files = state.files.filter(f => !gone.has(f.path));
+    gone.forEach(p => state.selected.delete(p));
+    renderFiles();
+    toast(t("Deleted {n} from the camera", { n: d.deleted }) + (d.failed.length || d.skipped ? " · " + t("{n} couldn't be deleted", { n: d.failed.length + d.skipped }) : ""));
+    setTimeout(poll, 800);
+    return true;
+  } catch (e) { toast(e.message, "error"); return false; }
+}
+
+async function saveMeta(files, change) {
+  try {
+    const d = await api("/api/meta", { names: files.map(f => f.name), ...change });
+    TAGS = d.tags; renderTagList(); renderGroupSel();
+    for (const f of files) {
+      if ("fav" in change) f.fav = !!change.fav;
+      if ("note" in change) f.note = change.note;
+      if (change.add_tags) f.tags = [...new Set([...(f.tags || []), ...change.add_tags])].sort();
+      if (change.remove_tags) f.tags = (f.tags || []).filter(x => !change.remove_tags.includes(x));
+    }
+  } catch (e) { toast(e.message, "error"); }
+}
+async function favSelection() {
+  const sel = selectedFiles(); if (!sel.length) return;
+  const fav = !sel.every(f => f.fav);
+  await saveMeta(sel, { fav });
+  toast(fav ? t("Added to favourites") : t("Removed from favourites"));
+  renderFiles();
+}
 
 function openDrawer(open) {
   $("drawer").classList.toggle("open", open);
   $("scrim").classList.toggle("show", open);
   $("openJobs").setAttribute("aria-pressed", open);
 }
-async function startDownload(paths) {
+async function startDownload(paths, look) {
   if (!paths.length) return;
   try {
-    await api("/api/download", { paths });
+    await api("/api/download", { paths, look });
     state.selected.clear(); syncSelection(); pollJobs(); openDrawer(true);
-    toast(`Copying ${paths.length} file${paths.length > 1 ? "s" : ""} to this computer`);
+    toast(t("Copying {n} files to this computer", { n: paths.length }));
   } catch (e) { toast(e.message, "error"); }
 }
-async function startShare(names) {
-  if (!names.length) return;
+async function startShare(paths) {
+  if (!paths.length) return;
   try {
-    await api("/api/share", { names });
+    await api("/api/share", { paths });
     state.selected.clear(); syncSelection(); pollJobs(); openDrawer(true);
-    toast(`Making ${names.length} share cop${names.length > 1 ? "ies" : "y"} (1080p, small file size)`);
   } catch (e) { toast(e.message, "error"); }
+}
+async function copyAllNew() {
+  if (!state.files.length) await loadFiles(true);
+  const fresh = state.files.filter(f => !f.downloaded);
+  if (!fresh.length) { toast(t("Everything on the card is already copied.")); return; }
+  const dupes = fresh.filter(f => (f.elsewhere || []).length);
+  let list = fresh;
+  const r = await ask({
+    title: t("Copy {n} new files?", { n: fresh.length }), text: t("{size} that isn't on this computer yet.", { size: fmtBytes(sum(fresh)) }),
+    ok: t("Copy"), check: dupes.length ? { text: t("Skip {n} already found elsewhere on this computer", { n: dupes.length }), value: true } : null,
+  });
+  if (r.choice !== "ok") return;
+  if (dupes.length && r.checked) list = fresh.filter(f => !(f.elsewhere || []).length);
+  if (!list.length) { toast(t("Everything on the card is already copied.")); return; }
+  startDownload(list.map(f => f.path));
 }
 
-/* Viewer */
-let viewerFile = null;
+/* ---------- Trips ---------- */
+let editTrip = null;
+function openTripDlg(trip) {
+  editTrip = trip || null;
+  const sel = selectedFiles().filter(f => f.taken).map(f => f.taken.slice(0, 10)).sort();
+  const shown = visibleFiles().filter(f => f.taken).map(f => f.taken.slice(0, 10)).sort();
+  const days = sel.length ? sel : shown;
+  $("tripName").value = trip ? trip.name : "";
+  $("tripStart").value = trip ? trip.start : (days[0] || localDay(new Date()));
+  $("tripEnd").value = trip ? trip.end : (days[days.length - 1] || localDay(new Date()));
+  $("tripDelete").hidden = !trip;
+  $("tripDlg").showModal();
+  $("tripName").focus();
+}
+$("newTrip").onclick = () => openTripDlg(state.group.startsWith("trip:") ? TRIPS.find(x => x.id === state.group.slice(5)) : null);
+$("tripCancel").onclick = () => $("tripDlg").close();
+$("tripSave").onclick = async () => {
+  if (!$("tripStart").value) { toast(t("Pick at least the first day."), "error"); return; }
+  try {
+    if (editTrip) await api("/api/trips/delete", { id: editTrip.id });
+    const d = await api("/api/trips", { name: $("tripName").value, start: $("tripStart").value, end: $("tripEnd").value || $("tripStart").value });
+    TRIPS = d.trips; $("tripDlg").close(); toast(t("Trip saved"));
+    state.group = "trip:" + d.trip.id;
+    await loadFiles(true); renderFiles();
+  } catch (e) { toast(e.message, "error"); }
+};
+$("tripDelete").onclick = async () => {
+  if (!editTrip) return;
+  await api("/api/trips/delete", { id: editTrip.id });
+  $("tripDlg").close(); toast(t("Trip deleted")); state.group = "";
+  await loadFiles(true); renderFiles();
+};
+
+/* ---------- Tags ---------- */
+function openTagDlg() {
+  const sel = selectedFiles(); if (!sel.length) return;
+  $("tagDlgText").textContent = t("{n} selected · {size}", { n: sel.length, size: fmtBytes(sum(sel)) });
+  $("tagInput").value = "";
+  $("tagPick").innerHTML = "";
+  for (const x of TAGS) {
+    const b = document.createElement("button"); b.className = "chip sl"; b.textContent = "#" + x;
+    b.onclick = () => { const cur = $("tagInput").value.split(",").map(s => s.trim()).filter(Boolean); if (!cur.includes(x)) cur.push(x); $("tagInput").value = cur.join(", "); };
+    $("tagPick").append(b);
+  }
+  $("tagDlg").showModal(); $("tagInput").focus();
+}
+$("tagCancel").onclick = () => $("tagDlg").close();
+$("tagSave").onclick = async () => {
+  const tags = $("tagInput").value.split(",").map(s => s.trim()).filter(Boolean);
+  $("tagDlg").close();
+  if (!tags.length) return;
+  await saveMeta(selectedFiles(), { add_tags: tags });
+  toast(t("Tags added")); renderFiles();
+};
+$("tagInput").onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); $("tagSave").click(); } };
+
+/* ---------- Film looks ---------- */
+const lookPick = { targets: [], chosen: null };
+function openLooks(targets) {
+  lookPick.targets = targets; lookPick.chosen = null;
+  const sample = targets.find(f => f.kind === "photo") || targets[0] || state.files.find(f => f.kind === "photo") || state.files[0];
+  const grid = $("lookGrid"); grid.innerHTML = "";
+  let fam = "";
+  for (const l of LOOKS) {
+    if (l.family !== fam) { fam = l.family; grid.insertAdjacentHTML("beforeend", `<span class="look-fam label-l">${esc(fam)}</span>`); }
+    const b = document.createElement("button");
+    b.className = "look sl"; b.setAttribute("aria-pressed", "false");
+    b.innerHTML = `<div class="pv"><div class="sw" style="background:${swatchCss(l)}"></div>${sample ? `<img alt="" loading="lazy" src="${lookUrl(sample.path, l.id)}">` : ""}</div><b>${esc(l.name)}</b><em class="insp">${esc(t("Inspired by {x}", { x: l.inspired }))}</em><span>${esc(l.style)}</span>`;
+    const img = b.querySelector("img"); if (img) img.onerror = () => img.remove();
+    b.onclick = () => {
+      if (!targets.length) return;
+      lookPick.chosen = l.id;
+      grid.querySelectorAll(".look").forEach(x => x.setAttribute("aria-pressed", x === b));
+      $("looksApply").disabled = false;
+      $("looksApply").textContent = t("Apply {look}", { look: l.name }) + ` (${targets.length})`;
+    };
+    grid.append(b);
+  }
+  const uncopied = targets.filter(f => !f.downloaded).length;
+  $("looksNote").textContent = targets.length
+    ? t("Pick a look. Ace Studio makes new copies with it; your originals stay as they are.") + (uncopied ? " " + t("{n} not copied yet will be copied first.", { n: uncopied }) : "")
+    : t("Previews use one of your shots. Select files in the Library to apply a look.");
+  $("looksApply").hidden = !targets.length;
+  $("looksApply").disabled = true;
+  $("looksApply").textContent = t("Apply to {n}", { n: targets.length });
+  $("looksDlg").showModal();
+}
+$("looksCancel").onclick = () => $("looksDlg").close();
+$("looksApply").onclick = () => { $("looksDlg").close(); applyLook(lookPick.chosen, lookPick.targets); };
+async function applyLook(id, targets) {
+  if (!id || !targets.length) return;
+  const copied = targets.filter(f => f.downloaded), fresh = targets.filter(f => !f.downloaded);
+  try {
+    if (copied.length) await api("/api/look", { look: id, paths: copied.map(f => f.path) });
+    if (fresh.length) await api("/api/download", { paths: fresh.map(f => f.path), look: id });
+    toast(t("Adding {look} to {n} files", { look: LOOK[id].name, n: targets.length }));
+    state.selected.clear(); syncSelection(); pollJobs(); openDrawer(true);
+  } catch (e) { toast(e.message, "error"); }
+}
+$("browseLooks").onclick = () => openLooks([]);
+
+/* ---------- Viewer ---------- */
+let viewerFile = null, viewerLook = null;
+const FACTS = [["taken", "Taken"], ["model", "Camera model"], ["width", "Resolution"], ["duration", "Duration"], ["codec", "Codec"], ["fps", "Frame rate"],
+  ["bitrate", "Bitrate"], ["audio", "Audio"], ["exposure", "Exposure"], ["aperture", "Aperture"], ["iso", "ISO"], ["focal_length", "Focal length"],
+  ["ev", "Exposure comp."], ["white_balance", "White balance"]];
+function viewerSrc(f) { return f.downloaded && f.kind === "photo" ? `/api/local?path=${encodeURIComponent(f.path)}` : thumbUrl(f.path); }
 function openViewer(f) {
-  viewerFile = f;
-  $("viewerImg").src = thumbUrl(f.path);
-  $("viewerWhen").textContent = f.taken ? new Date(f.taken).toLocaleString(undefined, { weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" }) : f.name;
-  $("viewerMeta").textContent = [f.name, fmtBytes(f.size), f.duration ? fmtDur(f.duration) : "", f.downloaded ? "Copied" : f.incomplete ? "Copy is incomplete" : ""].filter(Boolean).join(" · ");
-  $("viewerCopy").textContent = f.downloaded ? "Copy again" : "Copy to computer";
+  viewerFile = f; viewerLook = null;
+  $("viewerImg").src = viewerSrc(f);
+  $("viewerImg").onerror = () => { if (!$("viewerImg").src.includes("/api/thumb")) $("viewerImg").src = thumbUrl(f.path); };
+  $("viewerWhen").textContent = f.taken ? new Date(f.taken).toLocaleString(loc(), { weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" }) : f.name;
+  $("viewerMeta").textContent = [f.name, fmtBytes(f.size), f.downloaded ? t("Copied") : f.incomplete ? t("Copy is incomplete") : ""].filter(Boolean).join(" · ");
+  $("viewerCopy").textContent = f.downloaded ? t("Copy again") : t("Copy to computer");
   $("viewerShare").hidden = !f.downloaded;
-  $("viewerShare").textContent = f.shared ? "Make share copy again" : "Make share copy";
+  $("viewerShare").textContent = t("Make share copy");
+  $("viewerApply").hidden = true;
+  $("viewerFav").setAttribute("aria-pressed", !!f.fav);
+  $("viewerTrip").hidden = !f.trip;
+  if (f.trip) $("viewerTrip").innerHTML = ICON.trip + esc(tripName(f.trip));
+  $("viewerNote").value = f.note || "";
+  renderViewerTags();
+  renderViewerLooks();
+  $("viewerWarn").hidden = true;
+  $("viewerFacts").innerHTML = `<dt>${esc(t("Reading details…"))}</dt><dd></dd>`;
+  const want = f.path;
+  api(`/api/details?path=${encodeURIComponent(f.path)}`).then(d => {
+    if (viewerFile?.path !== want) return;
+    const x = d.details || {}, rows = [];
+    for (const [k, label] of FACTS) {
+      let v = x[k];
+      if (v == null || v === "") continue;
+      if (k === "width") v = `${x.width} × ${x.height}`;
+      if (k === "duration") v = fmtDur(v);
+      if (k === "fps") v = `${v} fps`;
+      if (k === "bitrate") v = `${(v / 1e6).toFixed(0)} Mbps`;
+      if (k === "taken") v = String(v).replace("T", " ");
+      rows.push(`<dt>${esc(t(label))}</dt><dd>${esc(v)}</dd>`);
+    }
+    rows.push(`<dt>${esc(t("Size"))}</dt><dd>${fmtBytes(f.size)}</dd>`);
+    $("viewerFacts").innerHTML = rows.join("");
+    if (f.kind === "video" && f.downloaded && !x.codec) { $("viewerWarn").hidden = false; $("viewerWarn").textContent = t("This copy may be damaged. Copy it again from the camera."); }
+  }).catch(e => {
+    if (viewerFile?.path !== want) return;
+    $("viewerFacts").innerHTML = `<dt>${esc(t("Size"))}</dt><dd>${fmtBytes(f.size)}</dd>`;
+    if (f.kind === "video" && f.downloaded) { $("viewerWarn").hidden = false; $("viewerWarn").textContent = t("This copy may be damaged. Copy it again from the camera."); }
+  });
   $("viewer").showModal();
 }
+function renderViewerLooks() {
+  const box = $("viewerLooks"), f = viewerFile; box.innerHTML = "";
+  const orig = document.createElement("button"); orig.textContent = t("Original"); orig.setAttribute("aria-pressed", !viewerLook);
+  orig.onclick = () => { viewerLook = null; $("viewerImg").src = viewerSrc(f); $("viewerApply").hidden = true; renderViewerLooks(); };
+  box.append(orig);
+  for (const l of LOOKS) {
+    const b = document.createElement("button"); b.setAttribute("aria-pressed", viewerLook === l.id);
+    b.innerHTML = `<i style="background:${swatchCss(l)}"></i>${esc(l.name)}${(f.looks || []).includes(l.id) ? " ✓" : ""}`;
+    b.title = t("Inspired by {x}", { x: l.inspired }) + " — " + l.style;
+    b.onclick = () => {
+      viewerLook = l.id; $("viewerImg").src = lookUrl(f.path, l.id);
+      $("viewerApply").hidden = false; $("viewerApply").textContent = t("Apply {look}", { look: l.name });
+      renderViewerLooks();
+    };
+    box.append(b);
+  }
+}
+function renderViewerTags() {
+  const box = $("viewerTags"); box.innerHTML = "";
+  for (const x of viewerFile.tags || []) {
+    const b = document.createElement("button"); b.innerHTML = `#${esc(x)}${ICON.x}`; b.title = "Remove";
+    b.onclick = async () => { await saveMeta([viewerFile], { remove_tags: [x] }); renderViewerTags(); renderFiles(); };
+    box.append(b);
+  }
+}
+$("viewerTagIn").onkeydown = async (e) => {
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+  const tags = $("viewerTagIn").value.split(",").map(s => s.trim()).filter(Boolean);
+  $("viewerTagIn").value = "";
+  if (!tags.length) return;
+  await saveMeta([viewerFile], { add_tags: tags }); renderViewerTags(); renderFiles();
+};
+$("viewerNote").onchange = async () => { await saveMeta([viewerFile], { note: $("viewerNote").value.trim() }); renderFiles(); };
+$("viewerFav").onclick = async () => {
+  const fav = !viewerFile.fav;
+  await saveMeta([viewerFile], { fav }); $("viewerFav").setAttribute("aria-pressed", fav); renderFiles();
+};
 $("viewerClose").onclick = () => $("viewer").close();
-$("viewer").onclick = (e) => { if (e.target === $("viewer")) $("viewer").close(); };
+$("viewerDelete").onclick = async () => { const f = viewerFile; $("viewer").close(); await deleteFiles([f]); };
+$("viewer").addEventListener("close", () => { if (document.activeElement === $("viewerNote")) $("viewerNote").blur(); });
 $("viewerCopy").onclick = () => { $("viewer").close(); startDownload([viewerFile.path]); };
-$("viewerShare").onclick = () => { $("viewer").close(); startShare([viewerFile.name]); };
+$("viewerShare").onclick = () => { $("viewer").close(); startShare([viewerFile.path]); };
+$("viewerApply").onclick = () => { $("viewer").close(); applyLook(viewerLook, [viewerFile]); };
 
-/* Colors */
+/* ---------- Settings ---------- */
 function renderSwatches() {
   const box = $("swatches"); box.innerHTML = "";
+  const choice = CFG.seed || "camera";
   const cam = document.createElement("button");
-  cam.className = "swatch cam"; cam.title = "From your camera"; cam.setAttribute("aria-label", "From your camera");
-  cam.setAttribute("aria-pressed", theme.choice === "camera");
-  if (state.files[0]) { const i = new Image(); i.alt = ""; i.src = thumbUrl(state.files[0].path); i.onerror = () => i.remove(); cam.append(i); }
+  cam.className = "swatch cam"; cam.title = cam.ariaLabel = "From your camera";
+  cam.setAttribute("aria-pressed", choice === "camera");
+  const sample = state.files.find(f => f.kind === "photo") || state.files[0];
+  if (sample) { const i = new Image(); i.alt = ""; i.src = thumbUrl(sample.path); i.onerror = () => i.remove(); cam.append(i); }
   cam.insertAdjacentHTML("beforeend", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3.5"/><circle cx="12" cy="12.5" r="3.5"/></svg>');
-  cam.onclick = () => { theme.choice = "camera"; store.set("ace.seed", "camera"); applyTheme(); renderSwatches(); };
+  cam.onclick = () => setCfg({ seed: "camera" });
   box.append(cam);
   for (const seed of SEEDS) {
     const { light } = Color.scheme(seed);
     const b = document.createElement("button");
-    b.className = "swatch"; b.setAttribute("aria-label", "Theme color " + seed); b.setAttribute("aria-pressed", theme.choice === seed);
+    b.className = "swatch"; b.setAttribute("aria-label", "Theme colour " + seed); b.setAttribute("aria-pressed", choice === seed);
     b.innerHTML = `<span><i style="background:${light.primary}"></i><i style="background:${light["primary-container"]}"></i><i style="background:${light["tertiary-container"]}"></i><i style="background:${light["secondary-container"]}"></i></span>`;
-    b.onclick = () => { theme.choice = seed; store.set("ace.seed", seed); applyTheme(); renderSwatches(); };
+    b.onclick = () => setCfg({ seed });
     box.append(b);
   }
 }
-$("paletteBtn").onclick = () => { renderSwatches(); $("palette").showModal(); };
-$("paletteClose").onclick = () => $("palette").close();
-$("palette").onclick = (e) => { if (e.target === $("palette")) $("palette").close(); };
+function renderSettings() {
+  const dl = $("sDefaultLook"), cur = CFG.default_look || "";
+  dl.innerHTML = `<option value="">${esc(t("None"))}</option>` + LOOKS.map(l => `<option value="${l.id}">${esc(l.name)} (${esc(l.inspired)})</option>`).join("");
+  document.querySelectorAll("[data-cfg]").forEach(el => {
+    const k = el.dataset.cfg;
+    if (el.type === "checkbox") el.checked = !!CFG[k];
+    else if (document.activeElement !== el) el.value = CFG[k] ?? "";
+  });
+  dl.value = cur;
+  $("sSaveDir").textContent = state.status.save_dir || CFG.save_dir || "";
+  $("sNameEx").textContent = t("Example: {ex}", { ex: CFG.file_names === "date" ? "2026-10-28 09.30.15 Video 071.mp4" : "VID_20261028_093015_00_071.mp4" });
+  $("sBackup").textContent = CFG.backup_dir ? t("Every new copy is also saved to {dir}", { dir: CFG.backup_dir }) : t("Off. Pick a folder on another drive to keep a second copy of everything you copy.");
+  $("backupOff").hidden = !CFG.backup_dir;
+  if (document.activeElement !== $("dupDirs")) $("dupDirs").value = (CFG.dup_dirs || []).join("\n");
+  $("dupStatus").textContent = state.dupRunning ? t("Checking…") : state.dupScanned
+    ? t("Last checked {when}", { when: new Date(state.dupScanned * 1000).toLocaleString(loc(), { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) })
+    : t("Not checked yet. Open the Library first so Ace Studio knows what's on the camera.");
+  $("dupScan").disabled = !!state.dupRunning;
+  $("sVersion").textContent = state.version || state.status.version || "";
+  $("sUpdate").textContent = state.status.update ? t("Version {v} is available.", { v: state.status.update.version }) : t("Checks GitHub now and then when you're online.");
+  document.querySelectorAll("#themeSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.theme === (CFG.theme || "system")));
+  renderSwatches();
+}
+document.querySelectorAll("[data-cfg]").forEach(el => el.addEventListener("change", () => {
+  const k = el.dataset.cfg;
+  setCfg({ [k]: el.type === "checkbox" ? el.checked : el.value });
+}));
+document.querySelectorAll("#themeSeg button").forEach(b => b.onclick = () => setCfg({ theme: b.dataset.theme }));
+document.querySelectorAll("[data-pick]").forEach(b => b.onclick = async () => {
+  try {
+    const d = await api("/api/pick-folder", { title: b.closest(".srow").querySelector("b").textContent });
+    if (d.path) await setCfg({ [b.dataset.pick]: d.path });
+  } catch (e) { toast(e.message, "error"); }
+});
+document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => api("/api/open-folder", { which: b.dataset.open }).catch(e => toast(e.message, "error")));
+$("backupOff").onclick = () => setCfg({ backup_dir: "" });
+$("dupDirs").onchange = () => setCfg({ dup_dirs: $("dupDirs").value.split("\n").map(s => s.trim()).filter(Boolean) });
+$("dupScan").onclick = async () => {
+  try {
+    await setCfg({ dup_dirs: $("dupDirs").value.split("\n").map(s => s.trim()).filter(Boolean) });
+    if (!state.files.length) await loadFiles(true);
+    await api("/api/duplicates/scan", {});
+    state.dupRunning = true; renderSettings();
+    const timer = setInterval(async () => {
+      const d = await api("/api/duplicates/status").catch(() => ({}));
+      if (!d.running) {
+        clearInterval(timer); state.dupRunning = false; state.dupScanned = d.scanned;
+        await loadFiles(true); renderSettings();
+        const n = state.files.filter(f => !f.downloaded && (f.elsewhere || []).length).length;
+        toast(t("{n} already on this computer elsewhere", { n }));
+      }
+    }, 1000);
+  } catch (e) { toast(e.message, "error"); state.dupRunning = false; renderSettings(); }
+};
+$("checkNow").onclick = async () => {
+  try {
+    const d = await api("/api/update/check", {});
+    state.status.update = d.update; renderStatus(); renderSettings();
+    toast(d.update ? t("Version {v} is available.", { v: d.update.version }) : t("You have the latest version."));
+  } catch (e) { toast(e.message, "error"); }
+};
+$("openRepo").onclick = () => api("/api/open-url", { url: "https://github.com/dhaneshshanmugam36-alt/ace-studio" }).catch(e => toast(e.message, "error"));
+$("showGuide").onclick = () => openGuide();
+$("showKeys").onclick = () => openKeys();
 
 /* ---------- Transfers ---------- */
 $("openJobs").onclick = () => openDrawer(!$("drawer").classList.contains("open"));
 $("closeDrawer").onclick = () => openDrawer(false);
 $("scrim").onclick = () => openDrawer(false);
-$("openFolder").onclick = () => api("/api/open-folder", {});
-$("openShare").onclick = () => api("/api/open-folder", { share: true });
 $("clearJobs").onclick = async () => { await api("/api/jobs/clear", {}); pollJobs(); };
 
 function renderJobs() {
@@ -1139,53 +2097,116 @@ function renderJobs() {
   const active = jobs.filter(j => j.state === "queued" || j.state === "running").length;
   $("jobBadge").hidden = !active; $("jobBadge").textContent = active;
   const box = $("jobs");
-  if (!jobs.length) { box.innerHTML = '<p class="empty">Select clips in the Library, then choose Copy to computer.</p>'; return; }
+  if (!jobs.length) { box.innerHTML = `<p class="empty">${esc(t("Select clips in the Library, then choose Copy to computer."))}</p>`; return; }
   box.innerHTML = "";
   for (const j of jobs) {
-    const share = j.kind === "share";
-    const pct = share ? j.done : (j.total ? Math.min(100, j.done / j.total * 100) : 0);
+    const copy = j.kind === "copy";
+    const pct = copy ? (j.total ? Math.min(100, j.done / j.total * 100) : 0) : j.done;
     const el = document.createElement("div");
-    el.className = `job ${j.state}${share ? " share" : ""}`;
-    const label = share
-      ? { queued: "Share copy · waiting", running: `Share copy · ${Math.round(pct)}%`, done: `Share copy ready · ${fmtBytes(j.size)}`, cancelled: "Cancelled", failed: j.error || "Failed" }[j.state]
-      : { queued: "Waiting", running: `${Math.round(pct)}% · ${fmtBytes(j.speed)}/s`, done: "Copied and checked", cancelled: "Cancelled", failed: j.error || "Failed" }[j.state];
-    const right = share ? "" : `${fmtBytes(j.done)}${j.total ? " of " + fmtBytes(j.total) : ""}`;
+    el.className = `job ${j.state}${copy ? "" : " share"}`;
+    const what = j.kind === "look" ? j.look_name : j.kind === "share" ? t("Share copy") : "";
+    let label = {
+      queued: [what, t("Waiting")].filter(Boolean).join(" · "),
+      running: copy ? `${Math.round(pct)}% · ${fmtBytes(j.speed)}/s` : `${what} · ${Math.round(pct)}%`,
+      done: copy ? t("Copied and checked") : j.kind === "look" ? t("{look} copy ready", { look: j.look_name }) : t("Share copy ready"),
+      cancelled: t("Cancelled"), failed: j.error || t("Failed"),
+    }[j.state];
+    if (j.note && j.state !== "failed") label += " · " + j.note;
+    const right = copy ? `${fmtBytes(j.done)}${j.total ? " / " + fmtBytes(j.total) : ""}` : (j.state === "done" && j.size ? fmtBytes(j.size) : "");
     const showBar = j.state === "running" || j.state === "queued";
     el.innerHTML = `<span class="job-name"></span>
       ${showBar ? `<button class="icon-btn sl" aria-label="Cancel">${ICON.x}</button>` : j.state === "done" ? `<span style="color:var(--ok);width:24px;height:24px">${ICON.done}</span>` : "<span></span>"}
       <div class="job-sub num"><span></span><span>${right}</span></div>
       ${showBar ? `<div class="progress"><span class="track"></span><span class="bar" style="width:${pct}%"></span><span class="stop"></span></div>` : ""}`;
-    el.querySelector(".job-name").textContent = share ? j.out : j.name;
+    el.querySelector(".job-name").textContent = copy ? base(j.dest || j.name) : base(j.out);
+    el.querySelector(".job-name").title = copy ? (j.dest || j.name) : j.out;
     el.querySelector(".job-sub span").textContent = label;
     const c = el.querySelector(".icon-btn"); if (c) c.onclick = () => api("/api/jobs/cancel", { id: j.id }).then(pollJobs);
     box.append(el);
   }
 }
-let prevDone = "";
+let prevDone = null;
 async function pollJobs() {
   try {
     const d = await api("/api/jobs");
     state.jobs = d.jobs;
     const doneKey = d.jobs.filter(j => j.state === "done").map(j => j.id).join(",");
-    if (doneKey !== prevDone && prevDone !== "" && state.view === "library") {
-      try { const f = await api("/api/files"); state.files = f.files; renderFiles(); } catch {}
+    if (prevDone !== null && doneKey !== prevDone && state.files.length) {
+      await loadFiles(true);
     }
-    prevDone = doneKey || prevDone;
+    prevDone = doneKey;
     renderJobs();
   } catch {}
 }
 
+/* ---------- Welcome guide ---------- */
+const GUIDE = [
+  [ICON.wifi, "Welcome to Ace Studio", "Join the camera's Wi-Fi and Ace Studio connects by itself, no phone needed. You can also plug the camera in by USB to copy straight from its card."],
+  [ICON.laptop, "Copy and keep track", "Copy all new copies everything you haven't copied yet and checks each file. Favourites, notes, tags and trips help you find clips later."],
+  [ICON.film, "Give copies a film look", "Twenty-two colour looks inspired by classic film and cameras. Ace Studio adds them to new copies, so your originals never change."],
+  [ICON.sliders, "Make it yours", "Settings has the save folder, folders by date, a backup drive, the theme and the language. Press ? any time for keyboard shortcuts."],
+];
+let guideStep = 0;
+function renderGuide() {
+  const [icon, title, text] = GUIDE[guideStep];
+  $("guideArt").innerHTML = icon; $("guideTitle").textContent = t(title); $("guideText").textContent = t(text);
+  $("guideDots").innerHTML = GUIDE.map((_, i) => `<i class="${i === guideStep ? "on" : ""}"></i>`).join("");
+  $("guideBack").hidden = guideStep === 0;
+  $("guideNext").textContent = guideStep === GUIDE.length - 1 ? t("Get started") : t("Next");
+}
+function openGuide() { guideStep = 0; renderGuide(); if (!$("guideDlg").open) $("guideDlg").showModal(); }
+function closeGuide() { $("guideDlg").close(); if (!CFG.first_run_done) { CFG.first_run_done = true; api("/api/config", { first_run_done: true }).catch(() => {}); } }
+$("guideBack").onclick = () => { guideStep = Math.max(0, guideStep - 1); renderGuide(); };
+$("guideNext").onclick = () => { if (guideStep === GUIDE.length - 1) closeGuide(); else { guideStep++; renderGuide(); } };
+$("guideDlg").oncancel = (e) => { e.preventDefault(); closeGuide(); };
+
+/* ---------- Shortcuts ---------- */
+const KEYS = [["Space", "Record or take a photo"], ["L", "Live view on or off"], ["G", "Show the grid"], ["1 2 3", "Go to Live, Library or Settings"],
+  ["T", "Show transfers"], ["/", "Search the Library"], ["Ctrl A", "Select everything shown"], ["F", "Favourite the selection"],
+  ["C", "Copy the selection"], ["Delete", "Delete the selection from the camera"], ["N", "Copy all new"], ["Esc", "Clear the selection or close"], ["?", "This list"]];
+function openKeys() {
+  $("keysList").innerHTML = KEYS.map(([k, d]) => `<span>${k.split(" ").map(x => `<kbd>${esc(x)}</kbd>`).join(" ")}</span><span>${esc(t(d))}</span>`).join("");
+  $("keysDlg").showModal();
+}
+$("keysClose").onclick = () => $("keysDlg").close();
+$("helpBtn").onclick = openKeys;
+
 document.addEventListener("keydown", (e) => {
-  if (e.target.closest("input, select, textarea") || $("viewer").open || $("palette").open || !$("lat").hidden) return;
-  if (state.view === "live" && e.code === "Space" && !e.repeat) { e.preventDefault(); $("shutter").click(); }
-  if (e.key === "Escape") { openDrawer(false); if (state.selected.size) { state.selected.clear(); syncSelection(); } }
-  if (state.view === "library" && (e.ctrlKey || e.metaKey) && e.key === "a") { e.preventDefault(); visibleFiles().forEach(f => state.selected.add(f.path)); syncSelection(); }
+  if (e.target.closest("input, select, textarea") || !$("lat").hidden) return;
+  if (dialogOpen()) return;
+  const k = e.key, lib = state.view === "library";
+  if (e.ctrlKey || e.metaKey || e.altKey) {
+    if (lib && (e.ctrlKey || e.metaKey) && k.toLowerCase() === "a") { e.preventDefault(); visibleFiles().forEach(f => state.selected.add(f.path)); syncSelection(); }
+    return;
+  }
+  if (k === "?") { e.preventDefault(); openKeys(); }
+  else if (state.view === "live" && e.code === "Space" && !e.repeat) { e.preventDefault(); $("shutter").click(); }
+  else if (k === "Escape") { openDrawer(false); if (state.selected.size) { state.selected.clear(); syncSelection(); } }
+  else if (k === "1" && !$("tabLive").disabled) show("live");
+  else if (k === "2" && !$("tabLib").disabled) show("library");
+  else if (k === "3") show("settings", false);
+  else if (k === "t" || k === "T") openDrawer(!$("drawer").classList.contains("open"));
+  else if ((k === "l" || k === "L") && state.status.connected) setPreview(!state.status.preview);
+  else if ((k === "g" || k === "G") && state.view === "live") toggleGrid();
+  else if (k === "/" && lib) { e.preventDefault(); $("search").focus(); }
+  else if ((k === "f" || k === "F") && lib) favSelection();
+  else if (k === "Delete" && lib && state.selected.size) deleteFiles(selectedFiles());
+  else if ((k === "c" || k === "C") && lib && state.selected.size) startDownload([...state.selected]);
+  else if ((k === "n" || k === "N") && (lib || state.status.connected)) copyAllNew();
 });
 
-poll(); pollJobs();
-setInterval(poll, 1500);
-setInterval(pollJobs, 1000);
-setInterval(renderLcd, 250);
+/* ---------- Start ---------- */
+(async () => {
+  try { await loadConfig(); } catch {}
+  applyTheme(); applyLang();
+  await poll();
+  if (state.view === "connect" && !state.status.connected && !state.status.usb && CFG.last_view === "settings") show("settings", false);
+  renderSettings(); pollJobs();
+  if (!CFG.first_run_done) openGuide();
+  setInterval(poll, 1500);
+  setInterval(pollJobs, 1000);
+  setInterval(renderLcd, 250);
+})();
 </script>
 </body>
 </html>

@@ -1,1040 +1,270 @@
 #!/usr/bin/env python3
 """
-Ace Studio — a desktop companion for the Insta360 Ace Pro 2 on Linux.
+Ace Studio — an unofficial Linux desktop app for the Insta360 Ace Pro 2.
 
 Talks to the camera over its own Wi-Fi hotspot:
   * control + status  -> TCP 6666 (Insta360's protobuf protocol, via the
                          community `insta360` Python package)
   * files + downloads -> HTTP 80 on the camera (/DCIM/...)
-  * live preview      -> H.264/H.265 packets from the camera, re-encoded to
-                         MJPEG by ffmpeg so any web view can show them
+  * live preview      -> H.264/H.265 from the camera, shown as MJPEG
+It can also read the camera's memory card over a USB cable.
 
 The UI is a local web page served on 127.0.0.1 and shown in a native window
 (pywebview) when available, otherwise in the browser.
 
 Run `python3 app.py --demo` to try the interface without a camera.
+
+Unofficial. Not affiliated with or endorsed by Insta360.
+
+Copyright (C) 2026 Ace Studio contributors. Licensed under the GNU General
+Public License v3 or later; see the LICENSE file. No warranty.
 """
 
 from __future__ import annotations
 
+__version__ = "2.0.2"
+REPO = "dhaneshshanmugam36-alt/ace-studio"
+
 import argparse
 import hashlib
-import json
 import logging
 import os
-import random
-import re
 import shutil
 import subprocess
 import sys
 import threading
 import time
-import uuid
-from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, Response, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_file, send_from_directory
+
+import looks
+from camera import (THUMB_DIR, DemoCamera, MjpegPipe, RealCamera, UsbSource, friendly,
+                    photo_thumbnail)
+from jobs import Downloads, Exporter, Shooting
+from store import Config, Library, scan_for_duplicates
 
 APP_DIR = Path(__file__).resolve().parent
-CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "ace-studio"
-THUMB_DIR = CACHE_DIR / "thumbs"
 log = logging.getLogger("ace-studio")
 
-NAME_RE = re.compile(
-    r"^(?P<kind>VID|IMG|LRV|PRO_VID|PRO_LRV|PRO_IMG)_(?P<date>\d{8})_(?P<time>\d{6})(?:_(?P<lens>\d{2}))?_(?P<idx>\d{3})",
-    re.I,
-)
-VIDEO_EXT = {".mp4", ".mov", ".insv"}
-PHOTO_EXT = {".jpg", ".jpeg", ".insp", ".dng"}
-HIDDEN_EXT = {".lrv", ".thm", ".list", ".log", ".txt", ".bin"}
-
 
 # --------------------------------------------------------------------------
-# Helpers
+# Background helpers
 # --------------------------------------------------------------------------
 
-def parse_size(text: str) -> int | None:
-    """'1.2G' / '845M' / '12 KB' / '123456' -> bytes."""
-    if not text:
-        return None
-    m = re.match(r"^\s*([\d.]+)\s*([KMGT]?)i?B?\s*$", text.strip(), re.I)
-    if not m:
-        return None
-    mult = {"": 1, "K": 1024, "M": 1024**2, "G": 1024**3, "T": 1024**4}[m.group(2).upper()]
-    return int(float(m.group(1)) * mult)
+class Supervisor(threading.Thread):
+    """Connects automatically when the camera's Wi-Fi appears and reconnects after drops."""
+
+    def __init__(self, camera, cfg):
+        super().__init__(daemon=True)
+        self.camera, self.cfg = camera, cfg
+        self.last_try = 0.0
+
+    def run(self):
+        while True:
+            time.sleep(2)
+            cam = self.camera
+            cam.clock_mode = self.cfg.get("clock")
+            if cam.connected or cam.user_disconnected:
+                continue
+            want = (cam.link == "reconnecting" and self.cfg.get("auto_reconnect")) or \
+                   (cam.link == "off" and self.cfg.get("auto_connect"))
+            if not want or time.time() - self.last_try < 3:
+                continue
+            if not cam.reachable():
+                continue
+            self.last_try = time.time()
+            was = cam.link
+            try:
+                log.info("Camera found; %s", "reconnecting" if was == "reconnecting" else "connecting automatically")
+                cam.connect()
+                if cam.preview_wanted:
+                    try:
+                        cam.start_preview()
+                    except Exception as exc:
+                        log.warning("Live view didn't restart: %s", exc)
+            except Exception as exc:
+                cam.link = was
+                log.info("Automatic connect failed: %s", exc)
 
 
-def to_bytes_guess(value) -> int | None:
-    """Camera reports storage in an undocumented unit; pick the plausible one."""
-    try:
-        v = int(value)
-    except (TypeError, ValueError):
-        return None
-    if v <= 0:
-        return 0
-    if v < 10_000_000:      # MB
-        return v * 1024**2
-    if v < 4_000_000_000:   # KB (cards up to ~4 TB)
-        return v * 1024
-    return v                # bytes
+class UpdateChecker(threading.Thread):
+    def __init__(self, cfg):
+        super().__init__(daemon=True)
+        self.cfg = cfg
+        self.latest: dict | None = None
 
-
-def describe_file(path: str, size: int | None = None) -> dict | None:
-    name = path.rsplit("/", 1)[-1]
-    ext = os.path.splitext(name)[1].lower()
-    if ext in HIDDEN_EXT or name.startswith("."):
-        return None
-    if ext in VIDEO_EXT:
-        kind = "video"
-    elif ext in PHOTO_EXT:
-        kind = "photo"
-    else:
-        return None
-    m = NAME_RE.match(name)
-    taken = None
-    if m:
+    @staticmethod
+    def _ver(v: str) -> tuple:
         try:
-            taken = datetime.strptime(m["date"] + m["time"], "%Y%m%d%H%M%S").isoformat()
+            return tuple(int(x) for x in v.lstrip("vV").split(".")[:3])
         except ValueError:
-            pass
-    return {
-        "path": path,
-        "name": name,
-        "kind": kind,
-        "ext": ext.lstrip("."),
-        "size": size,
-        "taken": taken,
-        "key": f"{m['date']}_{m['time']}_{m['idx']}" if m else name,
-    }
+            return (0,)
 
-
-def detect_codec(buf: bytes) -> str | None:
-    """Spot H.264 vs H.265 from Annex-B start codes, so ffmpeg can skip probing."""
-    i = 0
-    while True:
-        i = buf.find(b"\x00\x00\x01", i)
-        if i < 0 or i + 4 >= len(buf):
-            return None
-        b0, b1 = buf[i + 3], buf[i + 4]
-        if (b0 >> 1) & 0x3F in (32, 33) and b1 == 0x01:   # HEVC VPS / SPS
-            return "hevc"
-        if b0 & 0x1F == 7 and not b0 & 0x80:               # H.264 SPS
-            return "h264"
-        i += 3
-
-
-class MjpegPipe:
-    """Feeds encoded video into ffmpeg and keeps only the newest JPEG frame.
-
-    For the camera stream ffmpeg is started lazily: the first bytes are
-    inspected to learn the codec, which lets ffmpeg start decoding at once
-    with no probing delay. Decoding runs single-threaded because frame
-    threading holds back one frame per thread.
-    """
-
-    # Note: "-fflags nobuffer" is left out on purpose: with raw H.264 on a pipe it
-    # makes ffmpeg drop every frame.
-    LOW_DELAY = ["-flags", "low_delay", "-threads", "1"]
-
-    def __init__(self, input_args: list[str] | None = None):
-        self.cond = threading.Condition()
-        self.frame: bytes | None = None
-        self.frame_no = 0
-        self.codec: str | None = None
-        self.proc: subprocess.Popen | None = None
-        self._pending = b""
-        self._times: list[float] = []      # frame output times, for fps
-        self._bytes_in: list[tuple[float, int]] = []
-        self.started = time.time()
-        self.closed = False
-        if input_args is not None:          # demo / fixed source
-            self._start(input_args)
-
-    def _start(self, input_args: list[str]) -> None:
-        cmd = [
-            "ffmpeg", "-hide_banner", "-loglevel", "error",
-            *self.LOW_DELAY, *input_args,
-            "-an", "-vsync", "passthrough",
-            "-vf", "scale=960:-2:flags=fast_bilinear",
-            "-q:v", "6", "-f", "image2pipe", "-vcodec", "mjpeg", "pipe:1",
-        ]
-        self.proc = subprocess.Popen(
-            cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-        )
-        threading.Thread(target=self._read, daemon=True).start()
-
-    def write(self, data: bytes) -> None:
-        now = time.time()
-        self._bytes_in.append((now, len(data)))
-        if len(self._bytes_in) > 400:
-            del self._bytes_in[:200]
-        if self.proc is None:
-            if self.closed:
-                return
-            self._pending += data
-            codec = detect_codec(self._pending)
-            if codec:
-                self.codec = codec
-                log.info("Live view codec: %s", codec)
-                self._start(["-probesize", "32", "-analyzeduration", "0", "-f", codec, "-i", "pipe:0"])
-            elif len(self._pending) > 1_500_000:
-                self.codec = "auto"
-                log.info("Live view codec not recognised from start codes; letting ffmpeg probe")
-                self._start(["-probesize", "512k", "-i", "pipe:0"])
+    def check(self) -> None:
+        import requests
+        r = requests.get(f"https://api.github.com/repos/{REPO}/releases/latest", timeout=6,
+                         headers={"Accept": "application/vnd.github+json"})
+        if r.ok:
+            d = r.json()
+            tag = d.get("tag_name", "")
+            if self._ver(tag) > self._ver(__version__):
+                self.latest = {"version": tag.lstrip("vV"), "url": d.get("html_url"), "notes": (d.get("body") or "")[:400]}
             else:
-                return
-            data, self._pending = self._pending, b""
-        try:
-            self.proc.stdin.write(data)
-            self.proc.stdin.flush()
-        except (BrokenPipeError, ValueError, OSError):
-            pass
+                self.latest = None
 
-    def stats(self) -> dict:
-        now = time.time()
-        recent = [t for t in self._times if now - t < 2]
-        kb = sum(n for t, n in self._bytes_in if now - t < 2)
-        return {
-            "fps": round(len(recent) / 2, 1),
-            "kbps": round(kb * 8 / 2 / 1000),
-            "codec": self.codec,
-            "waiting": self.frame is None,
-            "since": round(now - self.started, 1),
-        }
-
-    def _read(self) -> None:
-        buf = b""
-        out = self.proc.stdout
+    def run(self):
         while True:
-            chunk = out.read1(65536) if hasattr(out, "read1") else out.read(65536)
-            if not chunk:
-                break
-            buf += chunk
-            while True:
-                start = buf.find(b"\xff\xd8")
-                end = buf.find(b"\xff\xd9", start + 2)
-                if start < 0 or end < 0:
-                    if start > 0:
-                        buf = buf[start:]
-                    break
-                frame = buf[start:end + 2]
-                buf = buf[end + 2:]
-                now = time.time()
-                self._times.append(now)
-                if len(self._times) > 240:
-                    del self._times[:120]
-                with self.cond:
-                    self.frame = frame
-                    self.frame_no += 1
-                    self.cond.notify_all()
-
-    def frames(self):
-        last = -1
-        while not self.closed and (self.proc is None or self.proc.poll() is None):
-            with self.cond:
-                self.cond.wait_for(lambda: self.frame_no != last, timeout=2)
-                if self.frame_no == last or self.frame is None:
+            if self.cfg.get("check_updates"):
+                try:
+                    self.check()
+                    time.sleep(6 * 3600)
                     continue
-                last, frame = self.frame_no, self.frame
-            yield frame
-
-    def close(self) -> None:
-        self.closed = True
-        with self.cond:
-            self.cond.notify_all()
-        if self.proc is None:
-            return
-        try:
-            self.proc.stdin.close()
-        except Exception:
-            pass
-        try:
-            self.proc.terminate()
-            self.proc.wait(timeout=3)
-        except Exception:
-            self.proc.kill()
-
-
-# --------------------------------------------------------------------------
-# Camera backends
-# --------------------------------------------------------------------------
-
-class BaseCamera:
-    def __init__(self):
-        self.lock = threading.RLock()
-        self.connected = False
-        self.info: dict = {}
-        self.recording_since: float | None = None
-        self.mode = "video"
-        self.preview: MjpegPipe | None = None
-        self.last_error: str | None = None
-
-    def status(self) -> dict:
-        return {
-            "connected": self.connected,
-            "recording": self.recording_since is not None,
-            "recording_since": self.recording_since,
-            "mode": self.mode,
-            "preview": self.preview is not None,
-            "preview_stats": self.preview.stats() if self.preview is not None else None,
-            "error": self.last_error,
-            **self.info,
-        }
-
-
-class RealCamera(BaseCamera):
-    def __init__(self, host: str):
-        super().__init__()
-        self.host = host
-        self.client = None
-        self._poller: threading.Thread | None = None
-
-    # -- connection -------------------------------------------------------
-    def connect(self) -> None:
-        from insta360.rtmp import Client  # imported lazily: heavy deps
-
-        with self.lock:
-            if self.connected:
-                return
-            self.last_error = None
-            client = Client(host=self.host, callback=self._on_notification, enable_hwaccel=False)
-
-            @client.on_event("video_stream", uid="ace-studio-preview", wait=True)
-            async def _video(data=None, **_):
-                pipe = self.preview
-                if pipe is not None and data:
-                    pipe.write(data)
-
-            @client.on_event("disconnect", uid="ace-studio-disconnect")
-            async def _gone(**_):
-                self.connected = False
-
-            # The library checks reachability via /osc/info, an endpoint only the
-            # 360 cameras serve. The Ace Pro 2 returns 404 there, so check the
-            # control port directly instead.
-            def _port_check():
-                import socket
-                try:
-                    socket.create_connection((self.host, 6666), timeout=5).close()
-                except OSError as exc:
-                    from insta360.rtmp.exception import CameraNotConnectedException
-                    raise CameraNotConnectedException(str(exc)) from exc
-
-            client.ensure_camera_connected = _port_check
-
-            try:
-                ok = client.open()
-            except Exception as exc:
-                log.warning("open() failed: %r", exc)
-                try:
-                    client.close()
                 except Exception:
-                    pass
-                if "not connected" in type(exc).__name__.lower() or isinstance(exc, OSError):
-                    raise RuntimeError(
-                        "Can't reach the camera. Join its Wi-Fi network first, then try again."
-                    ) from exc
-                raise RuntimeError(f"The camera answered but didn't finish the handshake ({exc}).") from exc
-            if ok is False and not client.is_connected:
-                raise RuntimeError("The camera refused the connection. Restart its Wi-Fi and retry.")
-            self.client = client
-            self.connected = True
-            try:
-                self.refresh()
-            except Exception as exc:
-                log.warning("Couldn't read camera status: %r", exc)
-            self._poller = threading.Thread(target=self._poll, daemon=True)
-            self._poller.start()
-
-    def disconnect(self) -> None:
-        with self.lock:
-            self.stop_preview()
-            if self.client is not None:
-                try:
-                    self.client.close()
-                except Exception:
-                    pass
-            self.client = None
-            self.connected = False
-
-    def _poll(self) -> None:
-        while self.connected:
-            time.sleep(6)
-            if not self.connected:
-                break
-            try:
-                self.refresh()
-            except Exception as exc:
-                log.debug("status poll failed: %s", exc)
-
-    def _on_notification(self, msg: dict) -> None:
-        state = str(msg.get("state", ""))
-        if "IDLE" in state or "NOT_CAPTURE" in state:
-            self.recording_since = None
-        elif "RECORD" in state or "CAPTURE" in state:
-            if self.recording_since is None:
-                t = int(msg.get("captureTime", 0) or 0)
-                self.recording_since = time.time() - t
-
-    def _require(self):
-        if not self.connected or self.client is None:
-            raise RuntimeError("Not connected to the camera.")
-        return self.client
-
-    # -- status -----------------------------------------------------------
-    def refresh(self) -> None:
-        client = self._require()
-        resp = client.get_camera_info(wait_for_seconds=5)
-        value = (resp or {}).get("value", {}) if isinstance(resp, dict) else {}
-        batt = value.get("batteryStatus", {})
-        level, scale = batt.get("batteryLevel"), batt.get("batteryScale") or 100
-        stor = value.get("storageState", {})
-        info = {
-            "model": value.get("cameraType") or "Insta360 camera",
-            "firmware": value.get("firmwareRevision"),
-            "battery": round(100 * int(level) / int(scale)) if level is not None else None,
-            "charging": "USB" in str(batt.get("powerType", "")).upper(),
-            "card": stor.get("cardState"),
-            "free": to_bytes_guess(stor.get("freeSpace")),
-            "total": to_bytes_guess(stor.get("totalSpace")),
-            "temp": value.get("tempValue"),
-        }
-        if value.get("photoSubMode") == "PHOTO_NONE":
-            self.mode = "video"
-        elif value.get("videoSubMode") == "VIDEO_NONE":
-            self.mode = "photo"
-        self.info = {k: v for k, v in info.items() if v is not None}
-
-    # -- capture ----------------------------------------------------------
-    def start_recording(self) -> None:
-        client = self._require()
-        seq = client.start_capture()
-        client._check_if_command_successful(seq, wait_for_seconds=6)
-        self.recording_since = time.time()
-
-    def stop_recording(self) -> None:
-        client = self._require()
-        seq = client.stop_capture()
-        client._check_if_command_successful(seq, wait_for_seconds=10)
-        self.recording_since = None
-
-    def take_photo(self) -> None:
-        self._require().take_picture(wait_for_seconds=10)
-
-    def set_mode(self, mode: str) -> None:
-        client = self._require()
-        client.set_camera_mode("VIDEO_NORMAL" if mode == "video" else "PHOTO_SINGLE", wait_for_seconds=6)
-        self.mode = mode
-
-    # -- preview ----------------------------------------------------------
-    PREVIEW_RESOLUTIONS = ["RES_1920_1080P30", "RES_1280_720P30", "RES_1440_720P30"]
-
-    def start_preview(self) -> None:
-        client = self._require()
-        with self.lock:
-            if self.preview:
-                return
-            self.preview = MjpegPipe()  # starts ffmpeg once the codec is known
-            last_exc = None
-            for res in self.PREVIEW_RESOLUTIONS:
-                msg = {
-                    "enableVideo": True,
-                    "audioSampleRate": 48000,
-                    "enableGyro": False,
-                    "resolution": res,
-                    "resolution1": "RES_424_240P15",
-                }
-                try:
-                    seq = client._send_message(msg, client.PHONE_COMMAND_START_LIVE_STREAM)
-                    client._check_if_command_successful(seq, wait_for_seconds=5)
-                    client.preview_stream_started = True
-                    return
-                except Exception as exc:
-                    last_exc = exc
-            self.preview.close()
-            self.preview = None
-            raise RuntimeError("The camera didn't start its live view.") from last_exc
-
-    def stop_preview(self) -> None:
-        with self.lock:
-            pipe, self.preview = self.preview, None
-        if pipe is None:
-            return
-        try:
-            if self.client is not None and self.connected:
-                self.client.stop_preview_stream()
-        except Exception:
-            pass
-        pipe.close()
-
-    # -- files ------------------------------------------------------------
-    def base_url(self) -> str:
-        return f"http://{self.host}"
-
-    def _list_via_protocol(self) -> list[tuple[str, int | None]]:
-        """Ask the camera for its file list over the control connection."""
-        from urllib.parse import urlparse
-
-        client = self._require()
-        uris, offset = [], 0
-        for _ in range(50):  # hard stop: 50 pages
-            resp = client.get_camera_files_list(limit=100, offset=offset, wait_for_seconds=10)
-            batch = list(resp.uri or [])
-            uris.extend(batch)
-            if not batch or len(uris) >= (resp.totalCount or 0):
-                break
-            offset += len(batch)
-        paths = []
-        for u in uris:
-            p = urlparse(u).path if "://" in u else u
-            if not p.startswith("/"):
-                p = "/" + p
-            paths.append(p)
-        log.info("Camera reported %d files; first: %s", len(paths), paths[:3])
-        return [(p, None) for p in paths]
-
-    def _fill_sizes(self, found: list[tuple[str, int | None]]) -> list[tuple[str, int | None]]:
-        import requests
-        from concurrent.futures import ThreadPoolExecutor
-
-        def head(item):
-            path, size = item
-            if size is not None or path.lower().endswith(".lrv"):
-                return item
-            try:
-                r = requests.head(self.base_url() + path, timeout=5)
-                return path, int(r.headers.get("Content-Length")) if r.ok else None
-            except Exception:
-                return item
-
-        with ThreadPoolExecutor(6) as pool:
-            return list(pool.map(head, found))
-
-    def list_files(self) -> list[dict]:
-        self._require()
-        try:
-            found = self._fill_sizes(self._list_via_protocol())
-        except Exception as exc:
-            log.warning("Protocol file list failed (%r); trying the web listing", exc)
-            found = self._list_via_web()
-        return self._describe_all(found)
-
-    def _list_via_web(self) -> list[tuple[str, int | None]]:
-        import requests
-        from bs4 import BeautifulSoup
-
-        found, queue = [], ["/DCIM/"]
-        while queue:
-            cur = queue.pop(0)
-            r = requests.get(self.base_url() + cur, timeout=15)
-            if r.status_code != 200 and cur == "/DCIM/":
-                raise RuntimeError("the camera didn't share its file list")
-            soup = BeautifulSoup(r.text, "html.parser")
-            for row in soup.select("table tr"):
-                a = row.select_one("td:nth-child(1) a")
-                cells = row.select("td")
-                if not a or len(cells) < 3:
-                    continue
-                name = a.text.strip()
-                size_txt = cells[2].text.strip()
-                if name in ("..", "../", "Parent Directory") or name.startswith("."):
-                    continue
-                if "directory" in size_txt.lower() or name.endswith("/"):
-                    queue.append(cur + name.rstrip("/") + "/")
-                    continue
-                found.append((cur + name, parse_size(size_txt)))
-        return found
-
-    def _describe_all(self, found: list[tuple[str, int | None]]) -> list[dict]:
-        all_paths = {p for p, _ in found}
-        files = []
-        for path, size in found:
-            d = describe_file(path, size)
-            if d:
-                d["lrv"] = self._find_lrv(path, all_paths)
-                files.append(d)
-        return files
-
-    @staticmethod
-    def _find_lrv(path: str, all_paths: set[str]) -> str | None:
-        folder, name = path.rsplit("/", 1)
-        m = NAME_RE.match(name)
-        if not m or not m["kind"].upper().endswith("VID"):
-            return None
-        prefix = "PRO_LRV" if m["kind"].upper().startswith("PRO") else "LRV"
-        for p in all_paths:
-            n = p.rsplit("/", 1)[-1]
-            if n.upper().startswith(prefix + f"_{m['date']}_{m['time']}_") and n.endswith(f"_{m['idx']}.lrv") and p.startswith(folder):
-                return p
-        return None
-
-    def thumbnail(self, path: str, lrv: str | None) -> bytes | None:
-        src = self.base_url() + (lrv or path)
-        is_video = os.path.splitext(path)[1].lower() in VIDEO_EXT
-        if os.path.splitext(path)[1].lower() in {".dng", ".insp"}:
-            return None
-        cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error"]
-        if is_video:
-            cmd += ["-ss", "1"]
-        cmd += ["-i", src, "-frames:v", "1", "-vf", "scale=480:-2", "-q:v", "5",
-                "-f", "image2", "-vcodec", "mjpeg", "pipe:1"]
-        try:
-            out = subprocess.run(cmd, capture_output=True, timeout=40).stdout
-        except subprocess.TimeoutExpired:
-            return None
-        return out or None
-
-    def download(self, path: str, dest: Path, progress, cancel: threading.Event) -> bool:
-        client = self._require()
-        return client.download_file(
-            path, str(dest), resume=True,
-            progress_callback=lambda done, total: progress(done, total),
-            cancel_event=cancel,
-        )
-
-
-class DemoCamera(BaseCamera):
-    """A pretend camera so the UI can be tried without hardware."""
-
-    def __init__(self):
-        super().__init__()
-        rnd = random.Random(7)
-        self.files = []
-        base = datetime(2026, 10, 25, 7, 12, 0)
-        for i in range(17):
-            t = base.timestamp() + i * 2700 + rnd.randint(0, 900) - (86400 if i < 6 else 0)
-            dt = datetime.fromtimestamp(t)
-            is_photo = i % 4 == 3
-            stamp = dt.strftime("%Y%m%d_%H%M%S")
-            name = f"IMG_{stamp}_00_{i:03d}.jpg" if is_photo else f"VID_{stamp}_00_{i:03d}.mp4"
-            size = rnd.randint(6, 14) * 1024**2 if is_photo else rnd.randint(180, 3800) * 1024**2
-            d = describe_file(f"/DCIM/Camera01/{name}", size)
-            d["lrv"] = None
-            d["duration"] = None if is_photo else rnd.randint(8, 420)
-            self.files.append(d)
-
-    def connect(self):
-        time.sleep(0.8)
-        self.connected = True
-        self.info = {"model": "Insta360 Ace Pro 2", "firmware": "v1.4.12 (demo)", "battery": 78,
-                     "charging": False, "card": "STOR_CS_PASS",
-                     "free": 41 * 1024**3, "total": 119 * 1024**3, "temp": 41}
-
-    def disconnect(self):
-        self.stop_preview()
-        self.connected = False
-
-    def refresh(self):
-        pass
-
-    def start_recording(self):
-        self.recording_since = time.time()
-
-    def stop_recording(self):
-        dur = time.time() - (self.recording_since or time.time())
-        self.recording_since = None
-        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        d = describe_file(f"/DCIM/Camera01/VID_{stamp}_00_{len(self.files):03d}.mp4",
-                          int(max(dur, 1) * 12 * 1024**2))
-        d["lrv"], d["duration"] = None, int(dur)
-        self.files.append(d)
-
-    def take_photo(self):
-        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        d = describe_file(f"/DCIM/Camera01/IMG_{stamp}_00_{len(self.files):03d}.jpg", 9 * 1024**2)
-        d["lrv"] = None
-        self.files.append(d)
-
-    def set_mode(self, mode):
-        self.mode = mode
-
-    def start_preview(self):
-        with self.lock:
-            if not self.preview:
-                self.preview = MjpegPipe(["-re", "-f", "lavfi", "-i", "testsrc2=size=1280x720:rate=30"])
-                self.preview.codec = "demo"
-
-    def stop_preview(self):
-        with self.lock:
-            pipe, self.preview = self.preview, None
-        if pipe:
-            pipe.close()
-
-    def list_files(self):
-        time.sleep(0.4)
-        return list(self.files)
-
-    def thumbnail(self, path, lrv):
-        h = int(hashlib.md5(path.encode()).hexdigest()[:6], 16)
-        hue = h % 360
-        src = (f"gradients=size=480x270:c0=0x{h:06x}:c1=0x{(h * 7919) & 0xFFFFFF:06x}:"
-               f"x0=0:y0=0:x1=480:y1=270:duration=1,hue=h={hue}")
-        cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", src,
-               "-frames:v", "1", "-q:v", "5", "-f", "image2", "-vcodec", "mjpeg", "pipe:1"]
-        return subprocess.run(cmd, capture_output=True, timeout=20).stdout or None
-
-    def download(self, path, dest, progress, cancel):
-        total = next((f["size"] for f in self.files if f["path"] == path), 50 * 1024**2)
-        done = 0
-        while done < total:
-            if cancel.is_set():
-                return False
-            time.sleep(0.05)
-            done = min(total, done + 30 * 1024**2 // 20)
-            progress(done, total)
-        # Write a small real file so share copies can be tried in demo mode.
-        f = next((x for x in self.files if x["path"] == path), None)
-        if path.lower().endswith(".jpg"):
-            src = ["-f", "lavfi", "-i", "testsrc2=size=4000x3000", "-frames:v", "1"]
-        else:
-            src = ["-f", "lavfi", "-i", "testsrc2=size=3840x2160:rate=30", "-f", "lavfi",
-                   "-i", "sine=frequency=440", "-t", "3", "-c:v", "libx264", "-preset", "ultrafast",
-                   "-pix_fmt", "yuv420p", "-c:a", "aac", "-f", "mp4"]
-        subprocess.run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", *src, str(dest)], timeout=120)
-        if f and dest.exists():
-            f["size"] = dest.stat().st_size
-            progress(f["size"], f["size"])
-        return True
-
-
-# --------------------------------------------------------------------------
-# Downloads
-# --------------------------------------------------------------------------
-
-class Downloads:
-    def __init__(self, camera: BaseCamera, folder: Path):
-        self.camera = camera
-        self.folder = folder
-        self.jobs: dict[str, dict] = {}
-        self.order: list[str] = []
-        self.cancel_events: dict[str, threading.Event] = {}
-        self.lock = threading.Lock()
-        self.wake = threading.Event()
-        threading.Thread(target=self._worker, daemon=True).start()
-
-    def add(self, items: list[dict]) -> None:
-        with self.lock:
-            for it in items:
-                if any(j["path"] == it["path"] and j["state"] in ("queued", "running")
-                       for j in self.jobs.values()):
-                    continue
-                jid = uuid.uuid4().hex[:10]
-                self.jobs[jid] = {"id": jid, "kind": "copy", "path": it["path"],
-                                  "name": it["path"].rsplit("/", 1)[-1],
-                                  "done": 0, "total": it.get("size"), "state": "queued",
-                                  "speed": 0, "error": None, "created": time.time()}
-                self.cancel_events[jid] = threading.Event()
-                self.order.append(jid)
-        self.wake.set()
-
-    def cancel(self, jid: str | None) -> None:
-        with self.lock:
-            ids = [jid] if jid else list(self.jobs)
-            for i in ids:
-                j = self.jobs.get(i)
-                if j and j["state"] in ("queued", "running"):
-                    self.cancel_events[i].set()
-                    if j["state"] == "queued":
-                        j["state"] = "cancelled"
-
-    def clear_finished(self) -> None:
-        with self.lock:
-            for i in list(self.order):
-                if self.jobs[i]["state"] in ("done", "cancelled", "failed"):
-                    self.order.remove(i)
-                    self.jobs.pop(i)
-                    self.cancel_events.pop(i, None)
-
-    def snapshot(self) -> list[dict]:
-        with self.lock:
-            return [dict(self.jobs[i]) for i in self.order]
-
-    def downloaded(self) -> dict[str, int]:
-        """Files already in the save folder, with their sizes."""
-        if not self.folder.exists():
-            return {}
-        return {p.name: p.stat().st_size for p in self.folder.iterdir() if p.is_file()}
-
-    def _worker(self) -> None:
-        while True:
-            self.wake.wait()
-            self.wake.clear()
-            while True:
-                with self.lock:
-                    jid = next((i for i in self.order if self.jobs[i]["state"] == "queued"), None)
-                    if jid is None:
-                        break
-                    job = self.jobs[jid]
-                    job["state"] = "running"
-                cancel = self.cancel_events[jid]
-                self.folder.mkdir(parents=True, exist_ok=True)
-                dest = self.folder / job["name"]
-                started = time.time()
-
-                def progress(done, total, job=job, started=started):
-                    job["done"] = done
-                    if total:
-                        job["total"] = total
-                    job["speed"] = done / max(time.time() - started, 0.1)
-
-                try:
-                    ok = self.camera.download(job["path"], dest, progress, cancel)
-                    if cancel.is_set():
-                        job["state"] = "cancelled"
-                    elif ok:
-                        have = dest.stat().st_size if dest.exists() else -1
-                        if job["total"] and have != job["total"]:
-                            job["state"] = "failed"
-                            job["error"] = "The copy is incomplete. Copy it again."
-                        else:
-                            job["state"] = "done"
-                            job["done"] = job["total"] = have
-                    else:
-                        job["state"], job["error"] = "failed", "The transfer stopped. Check the Wi-Fi link and retry."
-                except Exception as exc:
-                    job["state"], job["error"] = "failed", str(exc)
-
-
-# --------------------------------------------------------------------------
-# Share copies (small files for WhatsApp / Telegram)
-# --------------------------------------------------------------------------
-
-class Exporter:
-    """Makes 1080p H.264 copies of videos and 2048px copies of photos."""
-
-    def __init__(self, folder: Path):
-        self.folder = folder
-        self.out = folder / "Share"
-        self.jobs: dict[str, dict] = {}
-        self.order: list[str] = []
-        self.procs: dict[str, subprocess.Popen] = {}
-        self.lock = threading.Lock()
-        self.wake = threading.Event()
-        threading.Thread(target=self._worker, daemon=True).start()
-
-    @staticmethod
-    def share_name(name: str) -> str:
-        stem, ext = os.path.splitext(name)
-        return f"{stem}_share{'.jpg' if ext.lower() in ('.jpg', '.jpeg') else '.mp4'}"
-
-    def shared(self) -> set[str]:
-        if not self.out.exists():
-            return set()
-        return {p.name for p in self.out.iterdir() if p.is_file()}
-
-    def add(self, names: list[str]) -> None:
-        with self.lock:
-            for name in names:
-                name = os.path.basename(name)
-                src = self.folder / name
-                if not src.is_file() or any(j["name"] == name and j["state"] in ("queued", "running")
-                                            for j in self.jobs.values()):
-                    continue
-                jid = uuid.uuid4().hex[:10]
-                self.jobs[jid] = {"id": jid, "kind": "share", "name": name, "path": None,
-                                  "out": self.share_name(name), "done": 0, "total": 100,
-                                  "state": "queued", "speed": 0, "error": None, "created": time.time()}
-                self.order.append(jid)
-        self.wake.set()
-
-    def cancel(self, jid: str | None) -> None:
-        with self.lock:
-            for i in ([jid] if jid else list(self.jobs)):
-                j = self.jobs.get(i)
-                if not j or j["state"] not in ("queued", "running"):
-                    continue
-                j["state"] = "cancelled"
-                proc = self.procs.get(i)
-                if proc:
-                    proc.terminate()
-
-    def clear_finished(self) -> None:
-        with self.lock:
-            for i in list(self.order):
-                if self.jobs[i]["state"] in ("done", "cancelled", "failed"):
-                    self.order.remove(i)
-                    self.jobs.pop(i)
-
-    def snapshot(self) -> list[dict]:
-        with self.lock:
-            return [dict(self.jobs[i]) for i in self.order]
-
-    @staticmethod
-    def _duration(path: Path) -> float:
-        try:
-            out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
-                                  "-of", "csv=p=0", str(path)], capture_output=True, text=True, timeout=30)
-            return float(out.stdout.strip())
-        except Exception:
-            return 0.0
-
-    def _worker(self) -> None:
-        while True:
-            self.wake.wait()
-            self.wake.clear()
-            while True:
-                with self.lock:
-                    jid = next((i for i in self.order if self.jobs[i]["state"] == "queued"), None)
-                    if jid is None:
-                        break
-                    job = self.jobs[jid]
-                    job["state"] = "running"
-                src = self.folder / job["name"]
-                self.out.mkdir(parents=True, exist_ok=True)
-                dest = self.out / job["out"]
-                tmp = dest.with_name(".part-" + dest.name)
-                is_photo = dest.suffix == ".jpg"
-                if is_photo:
-                    args = ["-i", str(src), "-vf", "scale='min(2048,iw)':-2", "-q:v", "3", "-f", "image2"]
-                    total = 0.0
-                else:
-                    total = self._duration(src)
-                    args = ["-i", str(src), "-map", "0:v:0", "-map", "0:a:0?",
-                            "-vf", "scale=-2:'min(1080,ih)'", "-c:v", "libx264", "-preset", "veryfast",
-                            "-crf", "26", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k",
-                            "-movflags", "+faststart", "-f", "mp4"]
-                cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-nostats",
-                       "-progress", "pipe:1", *args, str(tmp)]
-                try:
-                    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-                    self.procs[jid] = proc
-                    for line in proc.stdout:
-                        if line.startswith("out_time_us=") and total > 0:
-                            try:
-                                job["done"] = min(99, int(int(line.split("=")[1]) / 1e6 / total * 100))
-                            except ValueError:
-                                pass
-                    err = proc.stderr.read()
-                    code = proc.wait()
-                    self.procs.pop(jid, None)
-                    if job["state"] == "cancelled":
-                        tmp.unlink(missing_ok=True)
-                    elif code == 0 and tmp.exists():
-                        tmp.replace(dest)
-                        job["state"], job["done"] = "done", 100
-                        job["size"] = dest.stat().st_size
-                    else:
-                        tmp.unlink(missing_ok=True)
-                        job["state"], job["error"] = "failed", (err.strip().splitlines() or ["Export failed"])[-1]
-                except Exception as exc:
-                    job["state"], job["error"] = "failed", str(exc)
-
-
-# --------------------------------------------------------------------------
-# Timed recording and interval photos
-# --------------------------------------------------------------------------
-
-class Shooting:
-    def __init__(self, camera: BaseCamera):
-        self.camera = camera
-        self.stop_at: float | None = None
-        self._timer: threading.Timer | None = None
-        self.interval: dict | None = None
-        self._interval_stop = threading.Event()
-
-    # timed recording
-    def start_recording(self, stop_after: float | None) -> None:
-        self.camera.start_recording()
-        self._cancel_timer()
-        if stop_after and stop_after > 0:
-            self.stop_at = time.time() + stop_after
-            self._timer = threading.Timer(stop_after, self._auto_stop)
-            self._timer.daemon = True
-            self._timer.start()
-
-    def stop_recording(self) -> None:
-        self._cancel_timer()
-        self.camera.stop_recording()
-
-    def _auto_stop(self) -> None:
-        self.stop_at = None
-        if self.camera.recording_since is not None:
-            try:
-                self.camera.stop_recording()
-                log.info("Timed recording finished")
-            except Exception as exc:
-                log.warning("Timed stop failed: %s", exc)
-
-    def _cancel_timer(self) -> None:
-        if self._timer:
-            self._timer.cancel()
-        self._timer, self.stop_at = None, None
-
-    # interval photos
-    def start_interval(self, every: float, count: int) -> None:
-        if self.interval and self.interval["running"]:
-            return
-        if self.camera.mode != "photo":
-            self.camera.set_mode("photo")
-        every = max(2.0, float(every))
-        self._interval_stop.clear()
-        self.interval = {"running": True, "every": every, "count": int(count), "taken": 0,
-                         "next_at": time.time(), "error": None}
-        threading.Thread(target=self._interval_loop, daemon=True).start()
-
-    def stop_interval(self) -> None:
-        self._interval_stop.set()
-        if self.interval:
-            self.interval["running"] = False
-
-    def _interval_loop(self) -> None:
-        iv = self.interval
-        while not self._interval_stop.is_set():
-            wait = iv["next_at"] - time.time()
-            if wait > 0 and self._interval_stop.wait(wait):
-                break
-            try:
-                self.camera.take_photo()
-                iv["taken"] += 1
-            except Exception as exc:
-                iv["error"] = f"Stopped: {exc}"
-                break
-            if iv["count"] and iv["taken"] >= iv["count"]:
-                break
-            iv["next_at"] = max(iv["next_at"] + iv["every"], time.time())
-        iv["running"] = False
-
-    def status(self) -> dict:
-        return {"stop_at": self.stop_at, "interval": self.interval}
+                    pass  # no internet (e.g. on the camera's Wi-Fi): try again soon
+            time.sleep(900)
+
+
+def pick_folder(title: str) -> str | None:
+    """Show the system's folder picker (zenity or kdialog)."""
+    if shutil.which("zenity"):
+        r = subprocess.run(["zenity", "--file-selection", "--directory", f"--title={title}"],
+                           capture_output=True, text=True)
+        return r.stdout.strip() or None
+    if shutil.which("kdialog"):
+        r = subprocess.run(["kdialog", "--getexistingdirectory", str(Path.home()), "--title", title],
+                           capture_output=True, text=True)
+        return r.stdout.strip() or None
+    raise RuntimeError("No folder picker found. Type the folder path instead.")
 
 
 # --------------------------------------------------------------------------
 # Web app
 # --------------------------------------------------------------------------
 
-def create_app(camera: BaseCamera, save_dir: Path, demo: bool) -> Flask:
+def create_app(camera, cfg: Config, library: Library, demo: bool) -> Flask:
     app = Flask(__name__, static_folder=None)
-    downloads = Downloads(camera, save_dir)
-    exporter = Exporter(save_dir)
+    exporter = Exporter(cfg)
+
+    def on_copied(job, dest: Path):
+        look = job.get("look") or cfg.get("default_look")
+        if look in looks.LOOKS_BY_ID:
+            exporter.add_look(dest, look, job["path"])
+
+    downloads = Downloads(cfg, library, on_copied)
     shooting = Shooting(camera)
+    updates = UpdateChecker(cfg)
+    updates.start()
+    Supervisor(camera, cfg).start()
     thumb_sem = threading.Semaphore(2)
     files_cache: dict[str, dict] = {}
+    usb_cache = {"src": None, "at": 0.0}
+    dup_state = {"running": False}
 
     def ok(**extra):
         return jsonify({"ok": True, **extra})
 
-    def fail(exc: Exception, code=400):
-        msg = str(exc) or exc.__class__.__name__
-        cause = getattr(exc, "__cause__", None)
-        log.warning("%s (%s)", msg, cause)
+    def fail(exc, code=400, action=""):
+        msg = exc if isinstance(exc, str) else friendly(exc, action)
+        log.warning("%s", msg)
         return jsonify({"ok": False, "error": msg}), code
 
+    def usb() -> UsbSource | None:
+        if time.time() - usb_cache["at"] > 3:
+            usb_cache["src"], usb_cache["at"] = UsbSource.find(), time.time()
+        return usb_cache["src"]
+
+    def source():
+        """Where the Library reads from: the Wi-Fi camera, or the camera on USB."""
+        if camera.connected:
+            return camera
+        u = usb()
+        if u:
+            return u
+        raise RuntimeError("Connect to the camera's Wi-Fi, or plug the camera in by USB, to see its files.")
+
+    def resolve_local(name: str, size=None) -> Path | None:
+        p = library.copied_path(name, size)
+        if p:
+            return p
+        old = Path(os.path.expanduser("~/Videos/Ace Pro 2"))
+        for cand in (cfg.save_dir / name, cfg.save_dir / "Pictures" / name, cfg.save_dir / "Videos" / name, old / name):
+            if cand.is_file() and (not size or cand.stat().st_size == size):
+                return cand
+        return None
+
+    # ---- pages -----------------------------------------------------------
     @app.get("/")
     def index():
-        return send_from_directory(APP_DIR / "static", "index.html")
+        return send_from_directory(APP_DIR / "static", "index.html", max_age=0)
 
     @app.get("/static/<path:name>")
     def static_files(name):
         return send_from_directory(APP_DIR / "static", name)
 
+    # ---- status & settings ------------------------------------------------
     @app.get("/api/status")
     def status():
-        return jsonify({**camera.status(), **shooting.status(), "demo": demo, "save_dir": str(save_dir),
-                        "host": getattr(camera, "host", "demo")})
+        u = usb()
+        return jsonify({**camera.status(), **shooting.status(), "demo": demo, "version": __version__,
+                        "save_dir": str(cfg.save_dir).replace(str(Path.home()), "~", 1), "host": getattr(camera, "host", "demo"),
+                        "usb": {"label": u.label, "path": str(u.root)} if u else None,
+                        "update": updates.latest, "copying": downloads.active()})
 
+    @app.get("/api/config")
+    def get_config():
+        return ok(config=cfg.public(), looks=looks.catalog(), version=__version__, repo=REPO,
+                  tags=library.all_tags(), trips=library.trips())
+
+    @app.post("/api/config")
+    def set_config():
+        changes = request.json or {}
+        if "save_dir" in changes:
+            p = Path(os.path.expanduser(str(changes["save_dir"]).strip() or "~/Downloads/Ace Pro 2"))
+            try:
+                p.mkdir(parents=True, exist_ok=True)
+                test = p / ".ace-write-test"; test.write_text("ok"); test.unlink()
+            except Exception as exc:
+                return fail(friendly(exc) if not isinstance(exc, FileExistsError) else "That path isn't a folder.")
+        if changes.get("backup_dir"):
+            if not Path(os.path.expanduser(changes["backup_dir"])).is_dir():
+                return fail("That backup folder doesn't exist. Plug in the drive or pick another folder.")
+        if "default_look" in changes and changes["default_look"] not in ("", *looks.LOOKS_BY_ID):
+            return fail("Unknown look.")
+        if "camera_host" in changes and isinstance(camera, RealCamera):
+            camera.host = str(changes["camera_host"]).strip() or "192.168.42.1"
+        return ok(config=cfg.update(changes))
+
+    @app.post("/api/pick-folder")
+    def api_pick_folder():
+        try:
+            path = pick_folder((request.json or {}).get("title", "Choose a folder"))
+            return ok(path=path)
+        except Exception as exc:
+            return fail(exc)
+
+    @app.post("/api/update/check")
+    def update_check():
+        try:
+            updates.check()
+            return ok(update=updates.latest)
+        except Exception:
+            return fail("Couldn't check for updates. Connect to the internet (not the camera's Wi-Fi) and try again.")
+
+    @app.post("/api/open-url")
+    def open_url():
+        url = str((request.json or {}).get("url", ""))
+        if not url.startswith(f"https://github.com/{REPO}"):
+            return fail("That link isn't allowed.")
+        subprocess.Popen([shutil.which("xdg-open") or "xdg-open", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return ok()
+
+    # ---- connection -------------------------------------------------------
     @app.post("/api/connect")
     def connect():
         try:
+            camera.clock_mode = cfg.get("clock")
+            camera.user_disconnected = False
             camera.connect()
             return ok(**camera.status())
         except Exception as exc:
@@ -1043,9 +273,18 @@ def create_app(camera: BaseCamera, save_dir: Path, demo: bool) -> Flask:
 
     @app.post("/api/disconnect")
     def disconnect():
+        shooting.stop_interval()
         camera.disconnect()
         return ok()
 
+    @app.post("/api/demo/drop")
+    def demo_drop():
+        if not demo:
+            return fail("Only in demo mode.")
+        camera.simulate_drop(float((request.json or {}).get("seconds", 5)))
+        return ok()
+
+    # ---- capture ----------------------------------------------------------
     @app.post("/api/record")
     def record():
         body = request.json or {}
@@ -1057,7 +296,7 @@ def create_app(camera: BaseCamera, save_dir: Path, demo: bool) -> Flask:
                 shooting.stop_recording()
             return ok(**camera.status(), **shooting.status())
         except Exception as exc:
-            return fail(RuntimeError(f"Couldn't {'start' if action == 'start' else 'stop'} recording: {exc}"))
+            return fail(exc, action="start recording" if action == "start" else "stop recording")
 
     @app.post("/api/photo")
     def photo():
@@ -1065,7 +304,7 @@ def create_app(camera: BaseCamera, save_dir: Path, demo: bool) -> Flask:
             camera.take_photo()
             return ok()
         except Exception as exc:
-            return fail(RuntimeError(f"Couldn't take the photo: {exc}"))
+            return fail(exc, action="take the photo")
 
     @app.post("/api/interval")
     def interval():
@@ -1077,13 +316,7 @@ def create_app(camera: BaseCamera, save_dir: Path, demo: bool) -> Flask:
                 shooting.stop_interval()
             return ok(**shooting.status())
         except Exception as exc:
-            return fail(RuntimeError(f"Couldn't start interval photos: {exc}"))
-
-    @app.post("/api/share")
-    def share():
-        names = (request.json or {}).get("names", [])
-        exporter.add(names)
-        return ok()
+            return fail(exc, action="start interval photos")
 
     @app.post("/api/mode")
     def mode():
@@ -1092,16 +325,17 @@ def create_app(camera: BaseCamera, save_dir: Path, demo: bool) -> Flask:
             camera.set_mode("photo" if m == "photo" else "video")
             return ok(mode=camera.mode)
         except Exception as exc:
-            return fail(RuntimeError(f"The camera didn't switch modes: {exc}"))
+            return fail(exc, action="switch modes")
 
     @app.post("/api/preview")
     def preview():
         on = bool((request.json or {}).get("on"))
         try:
+            camera.preview_wanted = on
             camera.start_preview() if on else camera.stop_preview()
             return ok(preview=camera.preview is not None)
         except Exception as exc:
-            return fail(exc)
+            return fail(exc, action="start the live view")
 
     @app.get("/stream.mjpg")
     def stream():
@@ -1117,48 +351,235 @@ def create_app(camera: BaseCamera, save_dir: Path, demo: bool) -> Flask:
         return Response(gen(), mimetype="multipart/x-mixed-replace; boundary=frame",
                         headers={"Cache-Control": "no-store"})
 
+    # ---- library ----------------------------------------------------------
     @app.get("/api/files")
     def files():
         try:
-            items = camera.list_files()
+            src = source()
+            items = src.list_files()
         except Exception as exc:
-            return fail(RuntimeError(f"Couldn't read the camera's memory card: {exc}"))
-        have = downloads.downloaded()
+            return fail(exc, action="read the camera's memory card")
         shared = exporter.shared()
+        looks_done = exporter.looks_done()
+        elsewhere = library.data.get("elsewhere", {})
         files_cache.clear()
         for it in items:
-            local = have.get(it["name"])
-            # "Copied" only when the file on this computer is complete.
-            it["downloaded"] = local is not None and (not it.get("size") or local == it["size"])
-            it["incomplete"] = local is not None and not it["downloaded"]
-            it["shared"] = Exporter.share_name(it["name"]) in shared
+            local = resolve_local(it["name"], it.get("size"))
+            any_local = local or library.data["copies"].get(it["name"]) or (cfg.save_dir / it["name"]).exists()
+            it["downloaded"] = local is not None
+            it["incomplete"] = bool(any_local) and local is None
+            it["local"] = str(local) if local else None
+            it["shared"] = Exporter.share_name(Path(local).name if local else it["name"]) in shared
+            stem = os.path.splitext(Path(local).name if local else it["name"])[0]
+            it["looks"] = [lk.id for lk in looks.LOOKS if stem in looks_done.get(lk.name, ())]
+            meta = library.meta(it["name"])
+            it["fav"], it["note"], it["tags"] = bool(meta.get("fav")), meta.get("note", ""), meta.get("tags", [])
+            it["elsewhere"] = elsewhere.get(it["name"], [])
+            trip = library.trip_for((it.get("taken") or "")[:10])
+            it["trip"] = trip["id"] if trip else None
             files_cache[it["path"]] = it
         items.sort(key=lambda f: (f.get("taken") or "", f["name"]), reverse=True)
-        return jsonify({"ok": True, "files": items})
+        return jsonify({"ok": True, "files": items, "source": src.kind,
+                        "trips": library.trips(), "tags": library.all_tags(),
+                        "elsewhere_scanned": library.data.get("elsewhere_scanned")})
 
     @app.get("/api/thumb")
     def thumb():
         path = request.args.get("path", "")
         if not path.startswith("/DCIM/"):
             return ("bad path", 400)
+        try:
+            src = source()
+        except Exception:
+            return ("not connected", 404)
         THUMB_DIR.mkdir(parents=True, exist_ok=True)
-        key = hashlib.sha1(f"{getattr(camera, 'host', 'demo')}{path}".encode()).hexdigest()
+        size = (files_cache.get(path) or {}).get("size")
+        key = hashlib.sha1(f"{getattr(camera, 'host', 'demo')}{path}{size}".encode()).hexdigest()
         cached = THUMB_DIR / f"{key}.jpg"
         if not cached.exists():
             with thumb_sem:
                 if not cached.exists():
-                    data = camera.thumbnail(path, (files_cache.get(path) or {}).get("lrv"))
+                    try:
+                        data = src.thumbnail(path, (files_cache.get(path) or {}).get("lrv"))
+                    except Exception:
+                        data = None
                     if not data:
                         return ("no preview", 404)
                     cached.write_bytes(data)
         return send_from_directory(THUMB_DIR, cached.name, max_age=86400 * 30)
 
+    @app.get("/api/details")
+    def details():
+        path = request.args.get("path", "")
+        if not path.startswith("/DCIM/"):
+            return fail("Bad path.")
+        it = files_cache.get(path) or {}
+        try:
+            local = resolve_local(it.get("name", ""), it.get("size")) if it else None
+            if local:
+                from camera import photo_details, video_details
+                info = photo_details(str(local)) if local.suffix.lower() in (".jpg", ".jpeg") else video_details(str(local))
+            else:
+                info = source().details(path)
+            log.info("Details for %s: %s", path, info)
+            return ok(details=info)
+        except Exception as exc:
+            return fail(exc, action="read the file's details")
+
+    @app.post("/api/meta")
+    def meta():
+        b = request.json or {}
+        names = [str(n) for n in b.get("names", [])][:5000]
+        library.update_meta(names, fav=b.get("fav"), note=b.get("note"),
+                            add_tags=b.get("add_tags"), remove_tags=b.get("remove_tags"))
+        return ok(tags=library.all_tags())
+
+    @app.post("/api/trips")
+    def add_trip():
+        b = request.json or {}
+        if not b.get("start"):
+            return fail("Pick at least one day for the trip.")
+        return ok(trip=library.add_trip(str(b.get("name", "")), str(b["start"]), str(b.get("end") or b["start"])),
+                  trips=library.trips())
+
+    @app.post("/api/trips/delete")
+    def del_trip():
+        library.remove_trip(str((request.json or {}).get("id", "")))
+        return ok(trips=library.trips())
+
+    @app.post("/api/duplicates/scan")
+    def dup_scan():
+        if dup_state["running"]:
+            return ok(running=True)
+        wanted = {f["name"]: f.get("size") for f in files_cache.values()}
+        if not wanted:
+            return fail("Open the Library first so Ace Studio knows what's on the camera.")
+
+        def run():
+            dup_state["running"] = True
+            try:
+                library.set_elsewhere(scan_for_duplicates(wanted, cfg.get("dup_dirs"), cfg.save_dir))
+            finally:
+                dup_state["running"] = False
+
+        threading.Thread(target=run, daemon=True).start()
+        return ok(running=True)
+
+    @app.get("/api/duplicates/status")
+    def dup_status():
+        return ok(running=dup_state["running"], scanned=library.data.get("elsewhere_scanned"))
+
+    @app.post("/api/delete")
+    def delete():
+        """Delete files from the camera's memory card. Cannot be undone."""
+        paths = (request.json or {}).get("paths", [])
+        try:
+            src = source()
+        except Exception as exc:
+            return fail(exc)
+        if getattr(camera, "recording_since", None) and src is camera:
+            return fail("Stop recording before deleting files.")
+        busy = {j["path"] for j in downloads.snapshot() if j["state"] in ("queued", "running")}
+        items = [files_cache[p] for p in paths if p in files_cache and p not in busy]
+        if not items:
+            return fail("Those files are being copied right now. Wait for the copy to finish, then delete.")
+        try:
+            failed = src.delete_files(items)
+        except Exception as exc:
+            return fail(exc, action="delete the files")
+        for it in items:
+            if it["path"] not in failed:
+                files_cache.pop(it["path"], None)
+        n = len(items) - len(failed)
+        log.info("Deleted %d file(s) from the %s; %d failed", n, src.kind, len(failed))
+        if failed and not n:
+            return fail("The camera didn't delete the files. Check the card isn't locked and try again.")
+        return ok(deleted=n, failed=failed, skipped=len(paths) - len(items))
+
+    # ---- copying, share copies, looks ------------------------------------
     @app.post("/api/download")
     def download():
         paths = (request.json or {}).get("paths", [])
-        items = [files_cache.get(p, {"path": p, "size": None}) for p in paths if p.startswith("/DCIM/")]
-        downloads.add(items)
-        return ok(jobs=all_jobs())
+        look = (request.json or {}).get("look")
+        if look and look not in looks.LOOKS_BY_ID:
+            return fail("Unknown look.")
+        try:
+            src = source()
+        except Exception as exc:
+            return fail(exc)
+        items = [files_cache[p] for p in paths if p in files_cache]
+        n = downloads.add(items, src, look)
+        return ok(added=n, jobs=all_jobs())
+
+    def locals_for(names_or_paths: list[str]) -> list[tuple[Path, str | None]]:
+        out = []
+        for key in names_or_paths:
+            it = files_cache.get(key) or next((f for f in files_cache.values() if f["name"] == key), None)
+            if it:
+                p = resolve_local(it["name"], it.get("size"))
+                if p:
+                    out.append((p, it["path"]))
+        return out
+
+    @app.post("/api/share")
+    def share():
+        b = request.json or {}
+        targets = locals_for(b.get("paths") or b.get("names") or [])
+        if not targets:
+            return fail("Copy the files to this computer first, then make share copies.")
+        for p, cam_path in targets:
+            exporter.add_share(p, cam_path)
+        return ok(added=len(targets))
+
+    @app.post("/api/look")
+    def apply_look():
+        b = request.json or {}
+        look_id = b.get("look")
+        if look_id not in looks.LOOKS_BY_ID:
+            return fail("Pick a look first.")
+        targets = locals_for(b.get("paths") or [])
+        if not targets:
+            return fail("Copy the files to this computer first, then apply a look.")
+        for p, cam_path in targets:
+            exporter.add_look(p, look_id, cam_path)
+        return ok(added=len(targets))
+
+    @app.get("/api/look/preview")
+    def look_preview():
+        path, look_id = request.args.get("path", ""), request.args.get("look", "")
+        if look_id not in looks.LOOKS_BY_ID or not path.startswith("/DCIM/"):
+            return ("bad request", 400)
+        THUMB_DIR.mkdir(parents=True, exist_ok=True)
+        it = files_cache.get(path) or {}
+        key = hashlib.sha1(f"look{look_id}{path}{it.get('size')}".encode()).hexdigest()
+        cached = THUMB_DIR / f"{key}.jpg"
+        if not cached.exists():
+            base = None
+            local = resolve_local(it.get("name", ""), it.get("size")) if it else None
+            if local and local.suffix.lower() in (".jpg", ".jpeg"):
+                base = photo_thumbnail(str(local), 960)
+            if base is None:
+                try:
+                    base = source().thumbnail(path, it.get("lrv"))
+                except Exception:
+                    base = None
+            if not base:
+                return ("no preview", 404)
+            out = looks.preview_jpeg(base, look_id, 960)
+            if not out:
+                return ("no preview", 404)
+            cached.write_bytes(out)
+        return send_from_directory(THUMB_DIR, cached.name, max_age=86400)
+
+    @app.get("/api/local")
+    def local_file():
+        """Serve a copied file (for full-size viewing)."""
+        path = request.args.get("path", "")
+        it = files_cache.get(path) or {}
+        p = resolve_local(it.get("name", ""), it.get("size")) if it else None
+        if not p:
+            return ("not copied", 404)
+        return send_file(p, conditional=True)
 
     def all_jobs():
         return sorted(downloads.snapshot() + exporter.snapshot(), key=lambda j: j["created"])
@@ -1182,7 +603,13 @@ def create_app(camera: BaseCamera, save_dir: Path, demo: bool) -> Flask:
 
     @app.post("/api/open-folder")
     def open_folder():
-        folder = save_dir / "Share" if (request.json or {}).get("share") else save_dir
+        b = request.json or {}
+        which = b.get("which", "copies")
+        folder = {"share": exporter.share_dir, "looks": exporter.looks_dir}.get(which, cfg.save_dir)
+        if b.get("file"):
+            f = Path(str(b["file"]))
+            if f.is_file() and (cfg.save_dir in f.parents):
+                folder = f.parent
         folder.mkdir(parents=True, exist_ok=True)
         opener = shutil.which("xdg-open")
         if opener:
@@ -1196,14 +623,29 @@ def create_app(camera: BaseCamera, save_dir: Path, demo: bool) -> Flask:
 # Entry point
 # --------------------------------------------------------------------------
 
-def open_window(url: str, prefer_browser: bool) -> bool:
+def open_window(url: str, prefer_browser: bool, cfg: Config) -> bool:
     """Show the UI in a native window. Returns True if a blocking window ran."""
     if not prefer_browser:
         try:
             import webview  # pywebview
 
-            webview.create_window("Ace Studio", url, width=1280, height=820, min_size=(900, 600),
-                                  background_color="#14171A")
+            w, h = (cfg.get("window") or [1280, 820])[:2]
+            win = webview.create_window("Ace Studio", url, width=max(900, int(w)), height=max(600, int(h)),
+                                        min_size=(900, 600), background_color="#14171A")
+            size = {"wh": None}
+
+            def resized(width, height):
+                size["wh"] = [width, height]
+
+            def closing():
+                if size["wh"]:
+                    cfg.update({"window": size["wh"]})
+
+            try:
+                win.events.resized += resized
+                win.events.closing += closing
+            except Exception:
+                pass
             webview.start(gui="gtk")
             return True
         except Exception as exc:
@@ -1220,27 +662,32 @@ def open_window(url: str, prefer_browser: bool) -> bool:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Desktop companion for the Insta360 Ace Pro 2")
+    ap = argparse.ArgumentParser(description="Unofficial desktop app for the Insta360 Ace Pro 2")
     ap.add_argument("--demo", action="store_true", help="use a pretend camera")
-    ap.add_argument("--camera", default="192.168.42.1", help="camera IP on its Wi-Fi (default 192.168.42.1)")
+    ap.add_argument("--camera", default=None, help="camera IP on its Wi-Fi (default 192.168.42.1)")
     ap.add_argument("--port", type=int, default=8765, help="local port for the interface")
-    ap.add_argument("--save-dir", default=str(Path.home() / "Videos" / "Ace Pro 2"),
-                    help="where downloaded clips go")
+    ap.add_argument("--save-dir", default=None, help="where copies go (overrides Settings for this run)")
     ap.add_argument("--browser", action="store_true", help="open in the browser instead of a window")
     ap.add_argument("--headless", action="store_true", help="only run the server")
     ap.add_argument("--debug", action="store_true")
+    ap.add_argument("--version", action="version", version=f"Ace Studio {__version__}")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
 
     if not shutil.which("ffmpeg"):
-        print("ffmpeg is missing. Install it with:  sudo apt install ffmpeg", file=sys.stderr)
+        print("ffmpeg is missing. Install it with your package manager (for example: sudo apt install ffmpeg).",
+              file=sys.stderr)
         sys.exit(1)
 
-    camera = DemoCamera() if args.demo else RealCamera(args.camera)
-    app = create_app(camera, Path(args.save_dir).expanduser(), args.demo)
+    cfg = Config({"save_dir": args.save_dir, "camera_host": args.camera})
+    library = Library()
+    camera = DemoCamera() if args.demo else RealCamera(cfg.get("camera_host"))
+    camera.clock_mode = cfg.get("clock")
+    app = create_app(camera, cfg, library, args.demo)
     url = f"http://127.0.0.1:{args.port}/"
 
     server = threading.Thread(
@@ -1249,10 +696,10 @@ def main() -> None:
     )
     server.start()
     time.sleep(0.6)
-    print(f"Ace Studio running at {url}")
+    print(f"Ace Studio {__version__} running at {url}")
 
     try:
-        if args.headless or not open_window(url, args.browser):
+        if args.headless or not open_window(url, args.browser, cfg):
             while True:
                 time.sleep(3600)
     except KeyboardInterrupt:
