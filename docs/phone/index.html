@@ -155,7 +155,7 @@ svg { flex: none; }
 .cbtn { width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: #fff; position: relative; }
 .cbtn svg { width: 24px; height: 24px; }
 .cbtn[aria-pressed="true"] { color: #F2B66D; }
-#camNight svg { width: 20px; height: 20px; transform: translateY(-5px); }
+#camNight svg, #camHdr svg { width: 20px; height: 20px; transform: translateY(-5px); }
 .cbtn small { position: absolute; bottom: 3px; left: 0; right: 0; text-align: center; font-size: 9px; font-weight: 600; letter-spacing: .03em; }
 .finder { flex: 1; min-height: 0; position: relative; touch-action: none; overflow: hidden; }
 .finder canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
@@ -255,6 +255,7 @@ svg { flex: none; }
     <button class="cbtn" id="camClose" aria-label="Close camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <div class="grp">
       <button class="cbtn" id="camFlash" aria-label="Flash" aria-pressed="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 3 5 13.5h6L10 21l8-10.5h-6z"/></svg></button>
+      <button class="cbtn" id="camHdr" aria-label="HDR"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><small id="camHdrTxt">AUTO</small></button>
       <button class="cbtn" id="camNight" aria-label="Night mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><small id="camNightTxt">AUTO</small></button>
       <button class="cbtn" id="camGrid" aria-label="Grid" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.2 4.5v15M14.8 4.5v15M3.5 9.5h17M3.5 14.5h17"/></svg></button>
       <button class="cbtn" id="camLens" aria-label="Switch lens" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg></button>
@@ -264,6 +265,7 @@ svg { flex: none; }
     <div class="gridl"></div>
     <span class="pill" id="lookPill"></span>
     <span class="pill" id="nightPill" hidden>Night mode</span>
+    <span class="pill" id="hdrPill" hidden style="top:44px">HDR</span>
     <span class="focus" id="focusRing"></span>
     <div class="hold" id="hold" hidden><div id="holdTxt">Hold still…</div></div>
     <div class="zooms" id="zooms" hidden></div>
@@ -311,7 +313,7 @@ function preFor(p) {
   const ev = Math.pow(2, a.light);
   m = [m[0] * ev * (1 + 0.12 * a.warmth), m[1] * ev, m[2] * ev * (1 - 0.12 * a.warmth)];
   return { mul: m, contrast: a.contrast, grainMul: a.grain,
-           tone: settings.hdr && p.small ? toneOf(p) : null, toneAmt: settings.hdr ? (p.camera ? 0.55 : 0.35) : 0 };
+           tone: settings.hdr && p.small ? toneOf(p) : null, toneAmt: settings.hdr ? (p.fused ? 0.2 : p.camera ? 0.55 : 0.35) : 0 };
 }
 function toneOf(p) { if (!p.tone) p.tone = R.toneFor(p.small); return p.tone; }
 const adjusted = () => state.adj.light || state.adj.contrast || state.adj.warmth || state.adj.grain !== 1;
@@ -341,10 +343,19 @@ const R = (() => {
   uniform vec2 full; uniform vec4 tile; uniform bool original, hasGlow, usePre;
   uniform vec3 mul; uniform float contrast;
   uniform sampler2D toneTex; uniform bool hasTone; uniform float toneAmt; uniform uint seed;
+  uniform sampler2D underTex; uniform bool hasUnder; uniform float underK, underScale; uniform vec2 underOff;
   vec3 toLin(vec3 c){ return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
   vec3 toSrgb(vec3 x){ x = max(x, 0.0); return mix(x * 12.92, 1.055 * pow(x, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, x)); }
   vec3 pre(vec3 c, vec2 px){
-    vec3 l = toLin(c) * mul;
+    vec3 l = toLin(c);
+    if (hasUnder) {                      // HDR: take blown highlights from a darker shot of the same moment
+      vec2 t = (vec2(px.x / full.x, 1.0 - px.y / full.y) - 0.5) / underScale + 0.5 + underOff;
+      vec3 lu = toLin(texture(underTex, t).rgb) * underK;
+      float m = max(max(c.r, c.g), c.b);
+      float w = smoothstep(0.78, 0.97, m) * step(0.0, t.x) * step(t.x, 1.0) * step(0.0, t.y) * step(t.y, 1.0);
+      l = mix(l, max(l, lu), w);
+    }
+    l *= mul;
     if (hasTone) {                       // Smart HDR: lift dark areas, calm bright ones (local, like a phone camera)
       float t = texture(toneTex, vec2(px.x / full.x, 1.0 - px.y / full.y)).r;
       float loc = t * t;
@@ -396,13 +407,13 @@ const R = (() => {
   const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const U = {}; for (const n of ["img", "lut", "glowTex", "N", "amount", "grain", "grainPx", "vignette", "halation", "colorGrain", "full", "tile", "original", "hasGlow", "flipY", "usePre", "mul", "contrast", "toneTex", "hasTone", "toneAmt", "seed"]) U[n] = gl.getUniformLocation(prog, n);
-  gl.uniform1i(U.img, 0); gl.uniform1i(U.lut, 1); gl.uniform1i(U.glowTex, 2); gl.uniform1i(U.toneTex, 3);
+  const U = {}; for (const n of ["img", "lut", "glowTex", "N", "amount", "grain", "grainPx", "vignette", "halation", "colorGrain", "full", "tile", "original", "hasGlow", "flipY", "usePre", "mul", "contrast", "toneTex", "hasTone", "toneAmt", "seed", "underTex", "hasUnder", "underK", "underScale", "underOff"]) U[n] = gl.getUniformLocation(prog, n);
+  gl.uniform1i(U.img, 0); gl.uniform1i(U.lut, 1); gl.uniform1i(U.glowTex, 2); gl.uniform1i(U.toneTex, 3); gl.uniform1i(U.underTex, 7);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
   gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
 
-  const imgTex = gl.createTexture(), glowTex = gl.createTexture(), toneTex = gl.createTexture(), lutTexs = new Map();
-  for (const t of [imgTex, glowTex, toneTex]) {
+  const imgTex = gl.createTexture(), glowTex = gl.createTexture(), toneTex = gl.createTexture(), underTex = gl.createTexture(), lutTexs = new Map();
+  for (const t of [imgTex, glowTex, toneTex, underTex]) {
     gl.bindTexture(gl.TEXTURE_2D, t);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -462,7 +473,7 @@ const R = (() => {
     }
   }
 
-  let lastTone = null;
+  let lastTone = null, lastUnder = null;
   /* Smart HDR map: how bright each area of the photo is (blurred), from a small copy. */
   function toneFor(small) {
     const w = small.width, h = small.height, cv = document.createElement("canvas");
@@ -485,7 +496,13 @@ const R = (() => {
     const lk = look || {};
     const m = opts.mul || [1, 1, 1], ct = opts.contrast || 0;
     const tone = opts.tone && opts.toneAmt > 0;
-    gl.uniform1i(U.usePre, !!tone || m.some(x => Math.abs(x - 1) > 0.002) || Math.abs(ct) > 0.001);
+    const un = opts.under;
+    gl.uniform1i(U.hasUnder, !!un);
+    if (un) {
+      gl.uniform1f(U.underK, un.k); gl.uniform1f(U.underScale, un.scale || 1); gl.uniform2f(U.underOff, un.off[0], un.off[1]);
+      if (un.img !== lastUnder) { gl.activeTexture(gl.TEXTURE7); gl.bindTexture(gl.TEXTURE_2D, underTex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, un.img); gl.activeTexture(gl.TEXTURE0); lastUnder = un.img; }
+    }
+    gl.uniform1i(U.usePre, !!un || !!tone || m.some(x => Math.abs(x - 1) > 0.002) || Math.abs(ct) > 0.001);
     gl.uniform1i(U.hasTone, !!tone); gl.uniform1f(U.toneAmt, opts.toneAmt || 0);
     gl.uniform1ui(U.seed, opts.seed || 0);
     if (tone && opts.tone !== lastTone) {
@@ -581,13 +598,25 @@ const R = (() => {
   }`;
   const ffs = `#version 300 es
   precision highp float; in vec2 uv; out vec4 o;
-  uniform sampler2D acc; uniform float sharpen;
+  uniform sampler2D acc; uniform float sharpen, chromaNR;
   vec3 at(vec2 t){ vec4 a = texture(acc, t); return a.rgb / max(a.a, 1e-4); }
+  float Y(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }
   void main(){
     vec2 t = uv, px = 1.0 / vec2(textureSize(acc, 0));
     vec3 c = at(t);
     vec3 blur = (at(t + vec2(px.x, 0)) + at(t - vec2(px.x, 0)) + at(t + vec2(0, px.y)) + at(t - vec2(0, px.y))) * 0.25;
-    o = vec4(clamp(c + (c - blur) * sharpen, 0.0, 1.0), 1);
+    c = c + (c - blur) * sharpen;
+    if (chromaNR > 0.0) {                // smooth colour speckles, keep detail (edge-aware)
+      float y0 = Y(c); vec3 acc3 = vec3(0); float ws = 0.0;
+      for (int j = -2; j <= 2; j++) for (int i = -2; i <= 2; i++) {
+        vec3 s = at(t + vec2(float(i), float(j)) * px * 2.0);
+        float w = exp(-pow((Y(s) - y0) / 0.06, 2.0));
+        acc3 += (s - Y(s)) * w; ws += w;
+      }
+      vec3 chroma = acc3 / max(ws, 1e-4);
+      c = mix(c, y0 + chroma, chromaNR);
+    }
+    o = vec4(clamp(c, 0.0, 1.0), 1);
   }`;
   const mk = (v, f) => { const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, v)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, f)); gl.linkProgram(pr);
     if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr)); return pr; };
@@ -640,6 +669,7 @@ const R = (() => {
     gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D, accTex);
     gl.uniform1i(gl.getUniformLocation(fprog, "acc"), 6);
     gl.uniform1f(gl.getUniformLocation(fprog, "sharpen"), Math.min(0.6, 0.12 * mN));
+    gl.uniform1f(gl.getUniformLocation(fprog, "chromaNR"), mN >= 6 ? 0.85 : mN >= 3 ? 0.5 : 0.0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     out.getContext("2d").drawImage(canvas, 0, 0);
     gl.activeTexture(gl.TEXTURE0);
@@ -954,7 +984,8 @@ $("pickBtn").onclick = $("addBtn").onclick = () => $("file").click();
 $("file").onchange = () => { addFiles($("file").files); $("file").value = ""; };
 
 /* ======================= Film camera ======================= */
-const Cam = { stream: null, track: null, video: document.createElement("video"), ic: null, caps: {}, photoCaps: null,
+const Cam = { hdr: store.get("hdrCam", "auto"), clipped: 0, lensZoom: store.get("lensZoom", {}),
+  stream: null, track: null, video: document.createElement("video"), ic: null, caps: {}, photoCaps: null,
   facing: "environment", deviceId: null, backIds: [], flash: false, night: store.get("night", "auto"), dark: false,
   raf: 0, frame: 0, analysis: null, tone: null, busy: false, lastAt: 0, zoom: 1, live: false };
 Cam.video.muted = true; Cam.video.playsInline = true; Cam.video.setAttribute("playsinline", "");
@@ -985,6 +1016,14 @@ function renderCamUI() {
   $("camNight").setAttribute("aria-pressed", Cam.night === "on" || (Cam.night === "auto" && Cam.dark));
   const nightNow = Cam.night === "on" || (Cam.night === "auto" && Cam.dark);
   $("nightPill").hidden = !nightNow; $("shutter").classList.toggle("night", nightNow);
+  updateHdrUI();
+}
+const canHdr = () => !!(Cam.caps.exposureCompensation && Cam.caps.exposureCompensation.min <= -1 && Cam.ic && Cam.photoCaps);
+const hdrNow = () => canHdr() && !(Cam.night === "on" || (Cam.night === "auto" && Cam.dark)) && (Cam.hdr === "on" || (Cam.hdr === "auto" && Cam.clipped > 0.015));
+function updateHdrUI() {
+  $("camHdr").hidden = !canHdr();
+  $("camHdrTxt").textContent = Cam.hdr.toUpperCase();
+  const on = hdrNow(); $("camHdr").setAttribute("aria-pressed", on); $("hdrPill").hidden = !on || !$("nightPill").hidden;
 }
 function camPick(l) {
   state.look = l; state.userPicked = true;
@@ -1013,9 +1052,10 @@ function closeCamera() {
   $("cam").hidden = true; R.canvas.hidden = true; document.body.append(R.canvas);
   if (state.cur >= 0) { renderStrip(); renderView(); }
 }
-async function startStream() {
+async function startStream() { await startStreamRaw(); renderLenses(); }
+async function startStreamRaw() {
   Cam.stream?.getTracks().forEach(t => t.stop());
-  const video = { width: { ideal: 4032 }, height: { ideal: 3024 }, frameRate: { ideal: 30 } };
+  const video = { width: { ideal: 4032 }, height: { ideal: 3024 }, aspectRatio: { ideal: 4 / 3 }, frameRate: { ideal: 30 } };
   if (Cam.deviceId) video.deviceId = { exact: Cam.deviceId }; else video.facingMode = { ideal: Cam.facing };
   Cam.stream = await navigator.mediaDevices.getUserMedia({ video, audio: false });
   Cam.track = Cam.stream.getVideoTracks()[0];
@@ -1039,7 +1079,7 @@ async function startStream() {
   $("camFlash").hidden = !canFlash; Cam.flash = false; $("camFlash").setAttribute("aria-pressed", false);
   // zoom buttons
   const z = Cam.caps.zoom, zb = $("zooms"); zb.innerHTML = "";
-  if (z && z.max > z.min) {
+  if (z && z.max > z.min && !(Cam.facing !== "user" && Cam.backIds.length > 1)) {
     const stops = [z.min, 1, 2, 3, 5, 10].filter((v, i, a) => v >= z.min && v <= z.max && a.indexOf(v) === i).sort((a, b) => a - b);
     Cam.zoom = st.zoom || 1;
     for (const v of stops) { const b = document.createElement("button"); b.textContent = (v < 1 ? v.toFixed(1) : Math.round(v)) + "×"; b.dataset.z = v; b.onclick = () => setZoom(v); zb.append(b); }
@@ -1050,7 +1090,7 @@ async function startStream() {
     const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput");
     Cam.backIds = devs.filter(d => /back|rear|environment/i.test(d.label)).map(d => d.deviceId);
   } catch { Cam.backIds = []; }
-  $("camLens").hidden = !(Cam.facing !== "user" && Cam.backIds.length > 1);
+  $("camLens").hidden = true;
   Cam.analysis = null; Cam.tone = null; Cam.lastAt = 0;
 }
 function markZoom() { [...$("zooms").children].forEach(b => b.setAttribute("aria-pressed", Math.abs(Number(b.dataset.z) - Cam.zoom) < 0.05)); }
@@ -1074,10 +1114,14 @@ function loop() {
     tiny.getContext("2d", { willReadFrequently: true }).drawImage(v, 0, 0, tiny.width, tiny.height);
     const prevSug = Cam.analysis ? Cam.analysis.suggest.join() : "";
     Cam.analysis = analyzeImage(tiny);
+    { const d = tiny.getContext("2d").getImageData(0, 0, tiny.width, tiny.height).data; let c = 0;
+      for (let i = 0; i < d.length; i += 4) if (Math.max(d[i], d[i + 1], d[i + 2]) >= 250) c++;
+      Cam.clipped = c / (d.length / 4); Cam.lastFrame = Cam.lastFrame || document.createElement("canvas");
+      Cam.lastFrame.width = tiny.width; Cam.lastFrame.height = tiny.height; Cam.lastFrame.getContext("2d").drawImage(tiny, 0, 0); }
     const snap = document.createElement("canvas"); snap.width = tiny.width; snap.height = tiny.height; snap.getContext("2d").drawImage(tiny, 0, 0);
     Cam.tone = R.toneFor(snap);
     Cam.dark = Cam.analysis.tags.includes("night");
-    if (Cam.analysis.suggest.join() !== prevSug || !$("camStrip").children.length) renderCamUI(); else { const n = Cam.night === "on" || (Cam.night === "auto" && Cam.dark); $("nightPill").hidden = !n; $("shutter").classList.toggle("night", n); $("camNight").setAttribute("aria-pressed", n); }
+    if (Cam.analysis.suggest.join() !== prevSug || !$("camStrip").children.length) renderCamUI(); else { const n = Cam.night === "on" || (Cam.night === "auto" && Cam.dark); $("nightPill").hidden = !n; $("shutter").classList.toggle("night", n); $("camNight").setAttribute("aria-pressed", n); updateHdrUI(); }
   }
   R.drawLive(v, state.look, { amount: state.amount, seed: Cam.frame & 1023, grainScale: 0.75, ...camPre() });
 }
@@ -1145,7 +1189,7 @@ function align(refS, refM, cur) {
   const f = cur.width / refM.w;
   return [mx * f, my * f];
 }
-async function multiFrame(n, label) {
+async function multiFrame(n, label, keepOverlay) {
   $("hold").hidden = false; $("holdTxt").textContent = label;
   const ref = document.createElement("canvas"), cur = document.createElement("canvas");
   await nextFrame(); grabInto(ref);
@@ -1157,11 +1201,54 @@ async function multiFrame(n, label) {
     R.mergeAdd(cur, align(refS, refM, cur), n > 4 ? 0.09 : 0.06);
   }
   const out = R.mergeEnd(ref);
-  $("hold").hidden = true;
+  if (!keepOverlay) $("hold").hidden = true;
   return out;
 }
 const canvasBlob = (cv, q) => new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("Couldn't save the photo")), "image/jpeg", q));
 const stamp = () => { const d = new Date(), z = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}${z(d.getMonth() + 1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}`; };
+
+/* Exposure control (HDR and Night): set exposure compensation, then wait until the picture settles. */
+async function setEV(v) {
+  const r = Cam.caps.exposureCompensation; if (!r) return false;
+  const ev = Math.min(r.max, Math.max(r.min, v));
+  try { await Cam.track.applyConstraints({ advanced: [{ exposureCompensation: ev }] }); } catch { return false; }
+  return true;
+}
+function meanLuma(cv) {
+  const k = 64 / Math.max(cv.width, cv.height), w = Math.max(1, Math.round(cv.width * k)), h = Math.max(1, Math.round(cv.height * k));
+  const t = document.createElement("canvas"); t.width = w; t.height = h; const ctx = t.getContext("2d", { willReadFrequently: true }); ctx.drawImage(cv, 0, 0, w, h);
+  const d = ctx.getImageData(0, 0, w, h).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2]; return s / (d.length / 4) / 765;
+}
+async function settle(target, dir) {   // wait (max ~0.9 s) until brightness moves the right way and stops changing
+  const cv = document.createElement("canvas"); let prev = null;
+  for (let i = 0; i < 27; i++) {
+    await nextFrame(); grabInto(cv); const m = meanLuma(cv);
+    if (prev !== null && Math.abs(m - prev) < 0.004 && (dir === 0 || (dir < 0 ? m < target : m > target))) return;
+    prev = m;
+  }
+}
+/* Normalised small luminance, so shots at different brightness can be compared. */
+function normLuma(src, w) {
+  const s = lumaSmall(src, w); let m = 0; for (const v of s.L) m += v; m /= s.L.length || 1;
+  for (let i = 0; i < s.L.length; i++) s.L[i] = s.L[i] / Math.max(m, 1);
+  return s;
+}
+/** Find how much `cur` is zoomed and shifted compared with `ref` (both normalised luminance). */
+function matchScale(ref, cur, scales) {
+  let best = { s: 1, dx: 0, dy: 0, e: Infinity };
+  const cxr = ref.w / 2, cyr = ref.h / 2, cxc = cur.w / 2, cyc = cur.h / 2, k = cur.w / ref.w;
+  for (const s of scales) for (let dy = -4; dy <= 4; dy += 2) for (let dx = -4; dx <= 4; dx += 2) {
+    let e = 0, n = 0;
+    for (let y = 2; y < ref.h - 2; y += 2) for (let x = 2; x < ref.w - 2; x += 2) {
+      const X = Math.round(cxc + ((x - cxr) * k) / s + dx), Y = Math.round(cyc + ((y - cyr) * k) / s + dy);
+      if (X < 0 || Y < 0 || X >= cur.w || Y >= cur.h) continue;
+      e += Math.abs(ref.L[y * ref.w + x] - cur.L[Y * cur.w + X]); n++;
+    }
+    if (n < (ref.w * ref.h) / 4 * 0.12) continue;
+    e /= n; if (e < best.e) best = { s, dx, dy, e };
+  }
+  return best;
+}
 
 async function shoot() {
   if (Cam.busy || !Cam.track) return;
@@ -1169,34 +1256,70 @@ async function shoot() {
   const fl = document.createElement("div"); fl.className = "flash"; document.body.append(fl); setTimeout(() => fl.remove(), 300);
   navigator.vibrate?.(15);
   const night = Cam.night === "on" || (Cam.night === "auto" && Cam.dark);
-  let blob = null;
+  const hdr = !night && hdrNow();
+  let blob = null, under = null;
   try {
+    if (hdr) {
+      // 1) a darker shot for the bright parts, 2) the normal full-resolution photo
+      $("hold").hidden = false; $("holdTxt").textContent = "HDR · hold still";
+      const base = document.createElement("canvas"); await nextFrame(); grabInto(base);
+      const m0 = meanLuma(base);
+      if (await setEV(-2)) {
+        await settle(m0 * 0.6, -1);
+        const dark = await multiFrame(2, "HDR · hold still", true);
+        await setEV(0); await settle(m0 * 0.9, 0);
+        under = { img: dark };
+      }
+    }
     if (!night && Cam.ic && Cam.photoCaps) {
-      // full-resolution still from the camera sensor
       const o = {};
       if (Cam.photoCaps.imageWidth?.max) { o.imageWidth = Cam.photoCaps.imageWidth.max; o.imageHeight = Cam.photoCaps.imageHeight.max; }
       if (Cam.flash && Cam.photoCaps.fillLightMode?.includes("flash")) o.fillLightMode = "flash";
       try { blob = await Cam.ic.takePhoto(o); } catch { blob = await Cam.ic.takePhoto(); }
     }
+    let fused = false;
+    if (blob && under && under.img) {
+      // line the darker frames up with the full photo and measure how much darker they are
+      $("holdTxt").textContent = "HDR · blending";
+      const bmp = await createImageBitmap(blob, { imageOrientation: "from-image" });
+      const A = lumaSmall(bmp, 200), B = lumaSmall(under.img, 200);
+      const ratios = [];
+      for (let i = 0; i < A.L.length; i += 3) { const a = A.L[i], b = B.L[i] || 0; if (a > 40 && a < 220 && b > 12) ratios.push(Math.pow(a / 255, 2.2) / Math.pow(b / 255, 2.2)); }
+      ratios.sort((x, y) => x - y);
+      const k = ratios.length > 50 ? ratios[ratios.length >> 1] : 3.5;
+      if (k < 1.4) { under = null; bmp.close?.(); }      // the camera ignored the exposure change: nothing to blend
+      else {
+      const mt = matchScale(normLuma(bmp, 160), normLuma(under.img, 160), [0.94, 0.97, 1, 1.03, 1.06, 1.1]);
+      under.k = Math.min(8, Math.max(1.5, k)); under.scale = mt.s; under.off = [mt.dx / 160, mt.dy / Math.round(160 * under.img.height / under.img.width)];
+      const p0 = { small: await createImageBitmap(bmp, { resizeWidth: 480, resizeHeight: Math.round(480 * bmp.height / bmp.width) }) };
+      const out = await R.renderFull(bmp, null, { amount: 0, mul: [1, 1, 1], contrast: 0, under, tone: R.toneFor(p0.small), toneAmt: settings.hdr ? 0.45 : 0.3 });
+      blob = await canvasBlob(out, 0.95); out.width = out.height = 0; bmp.close?.(); fused = true;
+      }
+    }
     if (!blob) {
-      // night: merge 8 frames to cut noise; otherwise 3 for a cleaner picture
-      const merged = await multiFrame(night ? 8 : 3, night ? "Night mode · hold still" : "Hold still");
-      blob = await canvasBlob(merged, 0.96);
+      // Night: more frames the darker it is, a little brighter exposure, then merge to cut noise
+      const veryDark = Cam.analysis && Cam.analysis.tags.includes("night") && Cam.dark;
+      const n = night ? (veryDark ? 12 : 8) : 3;
+      const raised = night && (await setEV(1));
+      if (raised) await settle(0, 0);
+      const merged = await multiFrame(n, night ? "Night mode · hold still" : "Hold still");
+      if (raised) setEV(0);
+      blob = await canvasBlob(merged, 0.96); fused = night;
     }
     const name = `ACE_${stamp()}.jpg`;
     const file = new File([blob], name, { type: "image/jpeg", lastModified: Date.now() });
-    const p = await loadPhoto(file, { camera: true });
+    const p = await loadPhoto(file, { camera: true, fused });
     state.photos.push(p);
     $("camLast").innerHTML = `<img alt="" src="${p.thumbUrl}">`;
     const lk = state.look;
     if (lk) {
       $("hold").hidden = false; $("holdTxt").textContent = "Saving…";
-      const out = await makeJpeg(p, lk);
-      download(out, outName(p, lk));
+      const outB = await makeJpeg(p, lk);
+      download(outB, outName(p, lk));
     }
     if (!lk || settings.keepOriginal) download(blob, name);
-    toast(lk ? `Saved with ${lk.name}` + (settings.keepOriginal ? " + original" : "") : "Saved");
-  } catch (e) { console.error(e); toast("Couldn't take the photo: " + (e.message || e.name), "err"); }
+    toast((hdr && fused ? "HDR · " : night ? "Night · " : "") + (lk ? `Saved with ${lk.name}` + (settings.keepOriginal ? " + original" : "") : "Saved"));
+  } catch (e) { console.error(e); setEV(0); toast("Couldn't take the photo: " + (e.message || e.name), "err"); }
   finally {
     $("hold").hidden = true; Cam.busy = false; $("shutter").disabled = false;
   }
@@ -1205,6 +1328,7 @@ $("shutter").onclick = shoot;
 $("camBtn").onclick = $("camBtn2").onclick = openCamera;
 $("camClose").onclick = closeCamera;
 $("camGrid").onclick = () => { const on = !$("finder").classList.contains("grid"); $("finder").classList.toggle("grid", on); $("camGrid").setAttribute("aria-pressed", on); };
+$("camHdr").onclick = () => { Cam.hdr = { auto: "on", on: "off", off: "auto" }[Cam.hdr]; store.set("hdrCam", Cam.hdr); updateHdrUI(); toast("HDR: " + Cam.hdr); };
 $("camNight").onclick = () => { Cam.night = { auto: "on", on: "off", off: "auto" }[Cam.night]; store.set("night", Cam.night); renderCamUI(); toast("Night mode: " + Cam.night); };
 $("camFlash").onclick = () => {
   Cam.flash = !Cam.flash; $("camFlash").setAttribute("aria-pressed", Cam.flash);
@@ -1214,6 +1338,49 @@ $("camFlip").onclick = async () => {
   Cam.facing = Cam.facing === "user" ? "environment" : "user"; Cam.deviceId = null;
   try { await startStream(); renderCamUI(); } catch (e) { camError(e); }
 };
+function renderLenses() {
+  const zb = $("zooms");
+  if (Cam.facing === "user" || Cam.backIds.length < 2) return;     // single lens: zoom buttons stay as they are
+  const cur = Cam.track.getSettings().deviceId;
+  const known = Cam.backIds.map(id => [id, Cam.lensZoom[id]]);
+  if (known.some(([, z]) => z === undefined)) { zb.hidden = true; if (!Cam.measuring) measureLenses(); return; }
+  // one button per distinct lens, sorted wide to tele
+  const uniq = []; for (const [id, z] of known.sort((a, b) => a[1] - b[1])) if (!uniq.some(u => Math.abs(u[1] - z) / z < 0.15)) uniq.push([id, z]);
+  if (uniq.length < 2) return;
+  zb.innerHTML = "";
+  for (const [id, z] of uniq) {
+    const b = document.createElement("button"); b.textContent = (z < 0.95 ? z.toFixed(1) : Math.round(z)) + "×";
+    b.setAttribute("aria-pressed", id === cur);
+    b.onclick = async () => { if (id === Cam.track.getSettings().deviceId) return; Cam.deviceId = id; try { await startStream(); renderCamUI(); } catch (e) { camError(e); } };
+    zb.append(b);
+  }
+  zb.hidden = false;
+}
+/* Work out each back lens's zoom (ultra-wide, main, tele) once, by comparing what it sees with the main lens. */
+async function measureLenses() {
+  Cam.measuring = true;
+  const main = Cam.track.getSettings().deviceId;
+  try {
+    $("hold").hidden = false; $("holdTxt").textContent = "Setting up lenses…";
+    await new Promise(r => setTimeout(r, 600));
+    const ref = document.createElement("canvas"); await nextFrame(); grabInto(ref);
+    const R0 = normLuma(ref, 200);
+    Cam.lensZoom[main] = 1;
+    for (const id of Cam.backIds) {
+      if (Cam.lensZoom[id] !== undefined) continue;
+      Cam.deviceId = id; await startStreamRaw();
+      await new Promise(r => setTimeout(r, 700));
+      const cv = document.createElement("canvas"); await nextFrame(); grabInto(cv);
+      const m = matchScale(R0, normLuma(cv, 200), [0.4, 0.45, 0.5, 0.55, 0.6, 0.7, 0.8, 1, 1.25, 1.6, 2, 2.5, 3, 3.5, 4, 5]);
+      Cam.lensZoom[id] = 1 / m.s;     // wider lens -> below 1 (0.5x), tele -> above 1 (3x)
+    }
+    store.set("lensZoom", Cam.lensZoom);
+  } catch (e) { console.warn("lens check", e); }
+  Cam.deviceId = main;
+  try { await startStreamRaw(); } catch {}
+  $("hold").hidden = true; Cam.measuring = false;
+  renderLenses(); renderCamUI();
+}
 $("camLens").onclick = async () => {
   if (Cam.backIds.length < 2) return;
   const cur = Cam.track.getSettings().deviceId, i = Cam.backIds.indexOf(cur);
