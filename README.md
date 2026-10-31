@@ -43,20 +43,21 @@ Insta360 doesn't make software for Linux. Ace Studio fills part of that gap.
 
   | Look | Inspired by | | Look | Inspired by |
   |---|---|---|---|---|
-  | Golden Portrait | Kodak Portra 400 | | Night Tungsten | CineStill 800T |
-  | Sunny Gold | Kodak Gold 200 | | Positive | Ricoh GR Positive Film |
-  | Bright Landscape | Kodak Ektar 100 | | Negative Snap | Ricoh GR Negative Film |
-  | Pastel Portrait | Fujifilm Pro 400H | | Bleach Bypass | Ricoh GR Bleach Bypass |
-  | Soft Negative | Fujifilm Classic Negative | | Rangefinder Natural | Leica standard colour |
-  | Warm Memory | Fujifilm Nostalgic Neg | | Rangefinder Chrome | Leica Looks Chrome |
-  | Muted Chrome | Fujifilm Classic Chrome | | Silver Mono | Leica Monochrom |
-  | Velvet Slide | Fujifilm Velvia 50 | | Fine Mono | Fujifilm Acros |
-  | Iconic Slide | Kodak Kodachrome 64 | | Classic Grain | Kodak Tri-X 400 |
-  | Cine Flat | Fujifilm Eterna | | Hard Mono | Ricoh GR Hi-Contrast B&W |
-  | Instant Photo | Polaroid 600 | | Purple Dream | LomoChrome Purple |
+  | Golden Portrait `GP` | Kodak Portra 400 | | Night Tungsten `NT` | CineStill 800T |
+  | Sunny Gold `SG` | Kodak Gold 200 | | Positive `PO` | Ricoh GR Positive Film |
+  | Bright Landscape `BL` | Kodak Ektar 100 | | Negative Snap `NS` | Ricoh GR Negative Film |
+  | Pastel Portrait `PP` | Fujifilm Pro 400H | | Bleach Bypass `BB` | Ricoh GR Bleach Bypass |
+  | Soft Negative `SN` | Fujifilm Classic Negative | | Rangefinder Natural `RN` | Leica standard colour |
+  | Warm Memory `WM` | Fujifilm Nostalgic Neg | | Rangefinder Chrome `RC` | Leica Looks Chrome |
+  | Muted Chrome `MC` | Fujifilm Classic Chrome | | Silver Mono `SM` | Leica Monochrom |
+  | Velvet Slide `VS` | Fujifilm Velvia 50 | | Fine Mono `FM` | Fujifilm Acros |
+  | Iconic Slide `IS` | Kodak Kodachrome 64 | | Classic Grain `CG` | Kodak Tri-X 400 |
+  | Cine Flat `CF` | Fujifilm Eterna | | Hard Mono `HM` | Ricoh GR Hi-Contrast B&W |
+  | Instant Photo `IP` | Polaroid 600 | | Purple Dream `PD` | LomoChrome Purple |
 
-- Preview any look on your own shot, apply it to a selection, or pick one for every new copy
-- Looks are added to **new copies** in a `Looks` folder. Your originals are never changed.
+- Preview any look on your own shot, apply one or **all 22 at once**, or pick one for every new copy
+- Looks are added to **new copies**, all in one `Looks` folder with a short code in the file name.
+  Your originals are never changed.
 
 **Comfort**
 - **Settings** page, a short **welcome guide**, and **keyboard shortcuts** (press <kbd>?</kbd>)
@@ -113,7 +114,8 @@ Or plug the camera in with a USB cable and choose **Open Library** to copy strai
 
 Copies go to `~/Downloads/Ace Pro 2`, with pictures in `Pictures` and videos in `Videos`
 (change both in Settings). Share copies go to the `Share` folder inside it, and film-look copies
-to `Looks/<look name>`.
+to the `Looks` folder, with the look's code at the end of the name
+(`IMG_1124 SN.jpg` = Soft Negative). `Look codes.txt` in that folder lists every code.
 
 **Keyboard:** press <kbd>?</kbd> in the app for the full list. The main ones:
 <kbd>Space</kbd> records or takes a photo, <kbd>L</kbd> toggles live view, <kbd>1</kbd> <kbd>2</kbd>

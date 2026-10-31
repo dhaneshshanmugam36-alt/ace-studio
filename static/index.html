@@ -435,6 +435,7 @@ dialog.looks-dlg { width: min(1040px, 94vw); }
 .look .pv img { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; display: block; }
 .look .pv .sw { position: absolute; inset: 0; }
 .look b { display: block; padding: 10px 12px 2px; font: 500 14px/20px var(--font); }
+.look b .code { display: inline-block; padding: 0 6px; margin-left: 4px; border-radius: 6px; background: var(--secondary-container); color: var(--on-secondary-container); font: 600 11px/18px var(--font); letter-spacing: .04em; vertical-align: 1px; }
 .look .insp { display: block; padding: 0 12px 4px; font: 500 12px/16px var(--font); font-style: normal; color: var(--primary); }
 .look span { display: block; padding: 0 12px 12px; color: var(--on-surface-variant); font-size: 12px; line-height: 16px; }
 .look[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--primary); border-radius: 20px; }
@@ -775,6 +776,7 @@ body.has-tray .toasts { bottom: 96px; }
       <div class="acts">
         <button class="btn text sl" id="viewerDelete" style="color:var(--error)"><span data-t>Delete from camera</span></button>
         <button class="btn text sl" id="viewerClose"><span data-t>Close</span></button>
+        <button class="btn outlined sl" id="viewerAll"><span data-t>Apply all looks</span></button>
         <button class="btn tonal sl" id="viewerApply" hidden></button>
         <button class="btn tonal sl" id="viewerShare" hidden>Make share copy</button>
         <button class="btn filled sl" id="viewerCopy">Copy to computer</button>
@@ -791,6 +793,7 @@ body.has-tray .toasts { bottom: 96px; }
     <div class="look-grid" id="lookGrid"></div>
     <p class="body-s" style="color:var(--on-surface-variant);margin:0 0 12px" data-t>These are Ace Studio's own colour styles, hand-tuned to resemble each film or camera mode. Ace Studio isn't affiliated with Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid or Lomography.</p>
     <div class="dlg-actions">
+      <button class="btn outlined sl" id="looksAll" style="margin-right:auto"></button>
       <button class="btn text sl" id="looksCancel"><span data-t>Cancel</span></button>
       <button class="btn filled sl" id="looksApply" disabled></button>
     </div>
@@ -1128,6 +1131,10 @@ const MS = {
   "Pictures go in a Pictures folder and videos in a Videos folder.": "Gambar disimpan dalam folder Pictures dan video dalam folder Videos.",
   "Inspired by {x}": "Diilhamkan oleh {x}",
   "These are Ace Studio's own colour styles, hand-tuned to resemble each film or camera mode. Ace Studio isn't affiliated with Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid or Lomography.": "Ini gaya warna Ace Studio sendiri, dilaras tangan supaya menyerupai setiap filem atau mod kamera. Ace Studio tidak berkaitan dengan Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid atau Lomography.",
+  "Apply all {n} looks": "Guna kesemua {n} rupa", "Apply all {n} looks?": "Guna kesemua {n} rupa?", "Apply all": "Guna semua",
+  "Apply all looks": "Guna semua rupa", "All looks": "Semua rupa",
+  "This makes {n} new copies of each file. Videos take a while: about {n} times as long as one look.": "Ini membuat {n} salinan baharu bagi setiap fail. Video mengambil masa: kira-kira {n} kali lebih lama daripada satu rupa.",
+  "Adding all {k} looks to {n} files": "Menambah kesemua {k} rupa pada {n} fail",
   "Delay": "Kelewatan", "Saved": "Disimpan", "Copy is incomplete": "Salinan tidak lengkap",
 };
 const t = (s, vars) => {
@@ -1873,7 +1880,7 @@ function openLooks(targets) {
     if (l.family !== fam) { fam = l.family; grid.insertAdjacentHTML("beforeend", `<span class="look-fam label-l">${esc(fam)}</span>`); }
     const b = document.createElement("button");
     b.className = "look sl"; b.setAttribute("aria-pressed", "false");
-    b.innerHTML = `<div class="pv"><div class="sw" style="background:${swatchCss(l)}"></div>${sample ? `<img alt="" loading="lazy" src="${lookUrl(sample.path, l.id)}">` : ""}</div><b>${esc(l.name)}</b><em class="insp">${esc(t("Inspired by {x}", { x: l.inspired }))}</em><span>${esc(l.style)}</span>`;
+    b.innerHTML = `<div class="pv"><div class="sw" style="background:${swatchCss(l)}"></div>${sample ? `<img alt="" loading="lazy" src="${lookUrl(sample.path, l.id)}">` : ""}</div><b>${esc(l.name)} <span class="code">${esc(l.code)}</span></b><em class="insp">${esc(t("Inspired by {x}", { x: l.inspired }))}</em><span>${esc(l.style)}</span>`;
     const img = b.querySelector("img"); if (img) img.onerror = () => img.remove();
     b.onclick = () => {
       if (!targets.length) return;
@@ -1889,11 +1896,24 @@ function openLooks(targets) {
     ? t("Pick a look. Ace Studio makes new copies with it; your originals stay as they are.") + (uncopied ? " " + t("{n} not copied yet will be copied first.", { n: uncopied }) : "")
     : t("Previews use one of your shots. Select files in the Library to apply a look.");
   $("looksApply").hidden = !targets.length;
+  $("looksAll").hidden = !targets.length;
+  $("looksAll").textContent = t("Apply all {n} looks", { n: LOOKS.length });
   $("looksApply").disabled = true;
   $("looksApply").textContent = t("Apply to {n}", { n: targets.length });
   $("looksDlg").showModal();
 }
 $("looksCancel").onclick = () => $("looksDlg").close();
+$("looksAll").onclick = async () => {
+  const targets = lookPick.targets, vids = targets.filter(f => f.kind === "video");
+  $("looksDlg").close();
+  if (vids.length) {
+    const r = await ask({ title: t("Apply all {n} looks?", { n: LOOKS.length }),
+      text: t("This makes {n} new copies of each file. Videos take a while: about {n} times as long as one look.", { n: LOOKS.length }),
+      ok: t("Apply all") });
+    if (r.choice !== "ok") return;
+  }
+  applyLook("all", targets);
+};
 $("looksApply").onclick = () => { $("looksDlg").close(); applyLook(lookPick.chosen, lookPick.targets); };
 async function applyLook(id, targets) {
   if (!id || !targets.length) return;
@@ -1901,7 +1921,8 @@ async function applyLook(id, targets) {
   try {
     if (copied.length) await api("/api/look", { look: id, paths: copied.map(f => f.path) });
     if (fresh.length) await api("/api/download", { paths: fresh.map(f => f.path), look: id });
-    toast(t("Adding {look} to {n} files", { look: LOOK[id].name, n: targets.length }));
+    toast(id === "all" ? t("Adding all {k} looks to {n} files", { k: LOOKS.length, n: targets.length })
+                       : t("Adding {look} to {n} files", { look: LOOK[id].name, n: targets.length }));
     state.selected.clear(); syncSelection(); pollJobs(); openDrawer(true);
   } catch (e) { toast(e.message, "error"); }
 }
@@ -1962,7 +1983,7 @@ function renderViewerLooks() {
   box.append(orig);
   for (const l of LOOKS) {
     const b = document.createElement("button"); b.setAttribute("aria-pressed", viewerLook === l.id);
-    b.innerHTML = `<i style="background:${swatchCss(l)}"></i>${esc(l.name)}${(f.looks || []).includes(l.id) ? " ✓" : ""}`;
+    b.innerHTML = `<i style="background:${swatchCss(l)}"></i>${esc(l.name)} <small style="opacity:.7">${esc(l.code)}</small>${(f.looks || []).includes(l.id) ? " ✓" : ""}`;
     b.title = t("Inspired by {x}", { x: l.inspired }) + " — " + l.style;
     b.onclick = () => {
       viewerLook = l.id; $("viewerImg").src = lookUrl(f.path, l.id);
@@ -1999,6 +2020,15 @@ $("viewer").addEventListener("close", () => { if (document.activeElement === $("
 $("viewerCopy").onclick = () => { $("viewer").close(); startDownload([viewerFile.path]); };
 $("viewerShare").onclick = () => { $("viewer").close(); startShare([viewerFile.path]); };
 $("viewerApply").onclick = () => { $("viewer").close(); applyLook(viewerLook, [viewerFile]); };
+$("viewerAll").onclick = async () => {
+  const f = viewerFile; $("viewer").close();
+  if (f.kind === "video") {
+    const r = await ask({ title: t("Apply all {n} looks?", { n: LOOKS.length }),
+      text: t("This makes {n} new copies of each file. Videos take a while: about {n} times as long as one look.", { n: LOOKS.length }), ok: t("Apply all") });
+    if (r.choice !== "ok") return;
+  }
+  applyLook("all", [f]);
+};
 
 /* ---------- Settings ---------- */
 function renderSwatches() {
@@ -2023,7 +2053,7 @@ function renderSwatches() {
 }
 function renderSettings() {
   const dl = $("sDefaultLook"), cur = CFG.default_look || "";
-  dl.innerHTML = `<option value="">${esc(t("None"))}</option>` + LOOKS.map(l => `<option value="${l.id}">${esc(l.name)} (${esc(l.inspired)})</option>`).join("");
+  dl.innerHTML = `<option value="">${esc(t("None"))}</option><option value="all">${esc(t("All looks"))}</option>` + LOOKS.map(l => `<option value="${l.id}">${esc(l.code)} · ${esc(l.name)} (${esc(l.inspired)})</option>`).join("");
   document.querySelectorAll("[data-cfg]").forEach(el => {
     const k = el.dataset.cfg;
     if (el.type === "checkbox") el.checked = !!CFG[k];

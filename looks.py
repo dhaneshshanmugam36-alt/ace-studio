@@ -401,9 +401,19 @@ LOOKS: list[Look] = [
 ]
 LOOKS_BY_ID = {lk.id: lk for lk in LOOKS}
 
+# Short codes added to the end of file names, e.g. "IMG_1124 SN.jpg" = Soft Negative.
+CODES = {'golden-portrait': 'GP', 'sunny-gold': 'SG', 'bright-landscape': 'BL', 'pastel-portrait': 'PP', 'soft-negative': 'SN', 'warm-memory': 'WM', 'muted-chrome': 'MC', 'velvet-slide': 'VS', 'iconic-slide': 'IS', 'cine-flat': 'CF', 'night-tungsten': 'NT', 'positive': 'PO', 'negative-snap': 'NS', 'bleach-bypass': 'BB', 'rangefinder': 'RN', 'leica-chrome': 'RC', 'silver-mono': 'SM', 'fine-mono': 'FM', 'classic-grain': 'CG', 'hard-mono': 'HM', 'instant-photo': 'IP', 'purple-dream': 'PD'}
+LOOK_BY_CODE = {v: k for k, v in CODES.items()}
+
+
+def legend_text() -> str:
+    lines = ["Ace Studio film looks", "The letters at the end of each file name say which look it has:", ""]
+    lines += [f"{CODES[lk.id]:<3} {lk.name}  (inspired by {lk.inspired})" for lk in LOOKS]
+    return "\n".join(lines) + "\n"
+
 
 def catalog() -> list[dict]:
-    return [{"id": lk.id, "name": lk.name, "family": lk.family, "inspired": lk.inspired, "style": lk.style,
+    return [{"id": lk.id, "code": CODES[lk.id], "name": lk.name, "family": lk.family, "inspired": lk.inspired, "style": lk.style,
              "mono": lk.mono, "swatch": list(lk.swatch)} for lk in LOOKS]
 
 

@@ -216,7 +216,7 @@ class Exporter:
     def look_path(self, src_name: str, look_id: str) -> Path:
         lk = looks.LOOKS_BY_ID[look_id]
         stem, ext = os.path.splitext(src_name)
-        return self.looks_dir / lk.name / f"{stem}{'.jpg' if ext.lower() in ('.jpg', '.jpeg') else '.mp4'}"
+        return self.looks_dir / f"{stem} {looks.CODES[lk.id]}{'.jpg' if ext.lower() in ('.jpg', '.jpeg') else '.mp4'}"
 
     def shared(self) -> set[str]:
         try:
@@ -225,15 +225,39 @@ class Exporter:
             return set()
 
     def looks_done(self) -> dict[str, set[str]]:
-        """{look folder name: {file stems}} for marking Library items."""
+        """{look id: {source file stems that have it}} for marking Library items."""
         out: dict[str, set[str]] = {}
         try:
-            for d in self.looks_dir.iterdir():
-                if d.is_dir():
-                    out[d.name] = {os.path.splitext(p.name)[0] for p in d.iterdir() if p.is_file() and not p.name.startswith(".")}
+            entries = list(self.looks_dir.iterdir())
+        except OSError:
+            return out
+        for p in entries:
+            if p.name.startswith("."):
+                continue
+            if p.is_file():
+                stem, _, code = os.path.splitext(p.name)[0].rpartition(" ")
+                lid = looks.LOOK_BY_CODE.get(code)
+                if lid and stem:
+                    out.setdefault(lid, set()).add(stem)
+            elif p.is_dir():  # 2.0.0-2.0.2 kept one folder per look
+                lk = next((x for x in looks.LOOKS if x.name == p.name), None)
+                if lk:
+                    try:
+                        out.setdefault(lk.id, set()).update(os.path.splitext(f.name)[0] for f in p.iterdir()
+                                                            if f.is_file() and not f.name.startswith("."))
+                    except OSError:
+                        pass
+        return out
+
+    def _write_legend(self) -> None:
+        try:
+            self.looks_dir.mkdir(parents=True, exist_ok=True)
+            legend = self.looks_dir / "Look codes.txt"
+            text = looks.legend_text()
+            if not legend.exists() or legend.read_text() != text:
+                legend.write_text(text)
         except OSError:
             pass
-        return out
 
     # -- queue ---------------------------------------------------------------
     def _add(self, job: dict) -> None:
@@ -254,6 +278,7 @@ class Exporter:
         if look_id not in looks.LOOKS_BY_ID:
             raise ValueError("Unknown look")
         out = self.look_path(src.name, look_id)
+        self._write_legend()
         self._add({"kind": "look", "look": look_id, "look_name": looks.LOOKS_BY_ID[look_id].name,
                    "name": src.name, "src": str(src), "out": str(out), "path": camera_path})
 

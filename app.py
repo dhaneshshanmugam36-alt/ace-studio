@@ -22,7 +22,7 @@ Public License v3 or later; see the LICENSE file. No warranty.
 
 from __future__ import annotations
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 REPO = "dhaneshshanmugam36-alt/ace-studio"
 
 import argparse
@@ -148,8 +148,9 @@ def create_app(camera, cfg: Config, library: Library, demo: bool) -> Flask:
 
     def on_copied(job, dest: Path):
         look = job.get("look") or cfg.get("default_look")
-        if look in looks.LOOKS_BY_ID:
-            exporter.add_look(dest, look, job["path"])
+        for lid in ([lk.id for lk in looks.LOOKS] if look == "all" else [look]):
+            if lid in looks.LOOKS_BY_ID:
+                exporter.add_look(dest, lid, job["path"])
 
     downloads = Downloads(cfg, library, on_copied)
     shooting = Shooting(camera)
@@ -229,7 +230,7 @@ def create_app(camera, cfg: Config, library: Library, demo: bool) -> Flask:
         if changes.get("backup_dir"):
             if not Path(os.path.expanduser(changes["backup_dir"])).is_dir():
                 return fail("That backup folder doesn't exist. Plug in the drive or pick another folder.")
-        if "default_look" in changes and changes["default_look"] not in ("", *looks.LOOKS_BY_ID):
+        if "default_look" in changes and changes["default_look"] not in ("", "all", *looks.LOOKS_BY_ID):
             return fail("Unknown look.")
         if "camera_host" in changes and isinstance(camera, RealCamera):
             camera.host = str(changes["camera_host"]).strip() or "192.168.42.1"
@@ -371,7 +372,7 @@ def create_app(camera, cfg: Config, library: Library, demo: bool) -> Flask:
             it["local"] = str(local) if local else None
             it["shared"] = Exporter.share_name(Path(local).name if local else it["name"]) in shared
             stem = os.path.splitext(Path(local).name if local else it["name"])[0]
-            it["looks"] = [lk.id for lk in looks.LOOKS if stem in looks_done.get(lk.name, ())]
+            it["looks"] = [lk.id for lk in looks.LOOKS if stem in looks_done.get(lk.id, ())]
             meta = library.meta(it["name"])
             it["fav"], it["note"], it["tags"] = bool(meta.get("fav")), meta.get("note", ""), meta.get("tags", [])
             it["elsewhere"] = elsewhere.get(it["name"], [])
@@ -501,7 +502,7 @@ def create_app(camera, cfg: Config, library: Library, demo: bool) -> Flask:
     def download():
         paths = (request.json or {}).get("paths", [])
         look = (request.json or {}).get("look")
-        if look and look not in looks.LOOKS_BY_ID:
+        if look and look != "all" and look not in looks.LOOKS_BY_ID:
             return fail("Unknown look.")
         try:
             src = source()
@@ -535,14 +536,16 @@ def create_app(camera, cfg: Config, library: Library, demo: bool) -> Flask:
     def apply_look():
         b = request.json or {}
         look_id = b.get("look")
-        if look_id not in looks.LOOKS_BY_ID:
+        ids = [lk.id for lk in looks.LOOKS] if look_id == "all" else [look_id]
+        if look_id != "all" and look_id not in looks.LOOKS_BY_ID:
             return fail("Pick a look first.")
         targets = locals_for(b.get("paths") or [])
         if not targets:
             return fail("Copy the files to this computer first, then apply a look.")
         for p, cam_path in targets:
-            exporter.add_look(p, look_id, cam_path)
-        return ok(added=len(targets))
+            for lid in ids:
+                exporter.add_look(p, lid, cam_path)
+        return ok(added=len(targets) * len(ids))
 
     @app.get("/api/look/preview")
     def look_preview():
