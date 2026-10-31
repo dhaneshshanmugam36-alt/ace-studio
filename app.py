@@ -22,7 +22,7 @@ Public License v3 or later; see the LICENSE file. No warranty.
 
 from __future__ import annotations
 
-__version__ = "2.0.4"
+__version__ = "2.0.6"
 REPO = "dhaneshshanmugam36-alt/ace-studio"
 
 import argparse
@@ -554,25 +554,48 @@ def create_app(camera, cfg: Config, library: Library, demo: bool) -> Flask:
             return ("bad request", 400)
         THUMB_DIR.mkdir(parents=True, exist_ok=True)
         it = files_cache.get(path) or {}
-        key = hashlib.sha1(f"look{look_id}{path}{it.get('size')}".encode()).hexdigest()
+        auto = bool(cfg.get("auto_fix"))
+        key = hashlib.sha1(f"look{look_id}{path}{it.get('size')}{auto}{looks.LUT_VERSION}".encode()).hexdigest()
         cached = THUMB_DIR / f"{key}.jpg"
         if not cached.exists():
-            base = None
-            local = resolve_local(it.get("name", ""), it.get("size")) if it else None
-            if local and local.suffix.lower() in (".jpg", ".jpeg"):
-                base = photo_thumbnail(str(local), 960)
-            if base is None:
-                try:
-                    base = source().thumbnail(path, it.get("lrv"))
-                except Exception:
-                    base = None
+            base = preview_base(path)
             if not base:
                 return ("no preview", 404)
-            out = looks.preview_jpeg(base, look_id, 960)
+            out = looks.preview_jpeg(base, look_id, 960, auto=auto)
             if not out:
                 return ("no preview", 404)
             cached.write_bytes(out)
         return send_from_directory(THUMB_DIR, cached.name, max_age=86400)
+
+    def preview_base(path):
+        it = files_cache.get(path) or {}
+        base = None
+        local = resolve_local(it.get("name", ""), it.get("size")) if it else None
+        if local and local.suffix.lower() in (".jpg", ".jpeg"):
+            base = photo_thumbnail(str(local), 960)
+        if base is None:
+            try:
+                base = source().thumbnail(path, it.get("lrv"))
+            except Exception:
+                base = None
+        return base
+
+    suggest_cache: dict[str, list] = {}
+
+    @app.get("/api/look/suggest")
+    def look_suggest():
+        """Looks that suit this photo, best first (from a quick look at its colours)."""
+        path = request.args.get("path", "")
+        if not path.startswith("/DCIM/"):
+            return fail("Bad path.")
+        if path not in suggest_cache:
+            base = preview_base(path)
+            if not base:
+                return ok(suggest=[], tags=[])
+            a = looks.analyze_image(base)
+            suggest_cache[path] = [a["suggest"], a["tags"]]
+        sug, tags = suggest_cache[path]
+        return ok(suggest=sug, tags=tags)
 
     @app.get("/api/local")
     def local_file():

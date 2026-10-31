@@ -436,6 +436,9 @@ dialog.looks-dlg { width: min(1040px, 94vw); }
 .look .pv .sw { position: absolute; inset: 0; }
 .look b { display: block; padding: 10px 12px 2px; font: 500 14px/20px var(--font); }
 .look b .code { display: inline-block; padding: 0 6px; margin-left: 4px; border-radius: 6px; background: var(--secondary-container); color: var(--on-secondary-container); font: 600 11px/18px var(--font); letter-spacing: .04em; vertical-align: 1px; }
+.look { position: relative; }
+.look .foryou { position: absolute; left: 8px; top: 8px; z-index: 2; height: 22px; padding: 0 8px; border-radius: 11px; background: var(--primary); color: var(--on-primary); font: 600 11px/22px var(--font); font-style: normal; }
+.look .lstar { position: absolute; right: 8px; top: 8px; z-index: 2; width: 30px; height: 30px; border-radius: 15px; background: rgba(0,0,0,.5); color: #FFD54F; display: grid; place-items: center; font: 18px/1 var(--font); font-style: normal; cursor: pointer; }
 .look .insp { display: block; padding: 0 12px 4px; font: 500 12px/16px var(--font); font-style: normal; color: var(--primary); }
 .look span { display: block; padding: 0 12px 12px; color: var(--on-surface-variant); font-size: 12px; line-height: 16px; }
 .look[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--primary); border-radius: 20px; }
@@ -679,9 +682,11 @@ body.has-tray .toasts { bottom: 96px; }
           <div class="card">
             <div class="srow"><div class="txt"><b data-t>Look for every new copy</b><span data-t>Also makes a copy with this look in the Looks folder. Your original copy is never changed.</span></div>
               <div class="ctl"><select data-cfg="default_look" id="sDefaultLook"></select></div></div>
+            <div class="srow"><div class="txt"><b data-t>Auto fix photos</b><span data-t>Fix brightness and colour cast before adding a look, for better results.</span></div>
+              <div class="ctl"><label class="switch"><input type="checkbox" data-cfg="auto_fix"><span class="tr"></span><span class="th"></span></label></div></div>
             <div class="srow"><div class="txt"><b data-t>Video size for looks</b><span data-t>1080p is quicker and smaller. Full size keeps the camera's resolution.</span></div>
               <div class="ctl"><select data-cfg="look_video_size"><option value="1080p">1080p</option><option value="full" data-t>Full size</option></select></div></div>
-            <div class="srow"><div class="txt"><b data-t>Browse the looks</b><span data-t>Twenty-two film-inspired colour styles you can add to copied photos and videos.</span></div>
+            <div class="srow"><div class="txt"><b data-t>Browse the looks</b><span data-t>Thirty-two film-inspired colour styles you can add to copied photos and videos.</span></div>
               <div class="ctl"><button class="btn outlined sl small" id="browseLooks"><span data-t>Show looks</span></button><button class="btn text sl small" data-open="looks"><span data-t>Open</span></button></div></div>
           </div>
 
@@ -1035,7 +1040,7 @@ const MS = {
   "Film looks": "Rupa filem", "Look for every new copy": "Rupa untuk setiap salinan baharu",
   "Also makes a copy with this look in the Looks folder. Your original copy is never changed.": "Turut membuat salinan dengan rupa ini dalam folder Looks. Salinan asal anda tidak pernah diubah.",
   "Video size for looks": "Saiz video untuk rupa", "1080p is quicker and smaller. Full size keeps the camera's resolution.": "1080p lebih cepat dan kecil. Saiz penuh mengekalkan resolusi kamera.",
-  "Full size": "Saiz penuh", "Browse the looks": "Lihat rupa-rupa", "Twenty-two film-inspired colour styles you can add to copied photos and videos.": "Dua puluh dua gaya warna ala filem untuk foto dan video yang sudah disalin.",
+  "Full size": "Saiz penuh", "Browse the looks": "Lihat rupa-rupa", "Thirty-two film-inspired colour styles you can add to copied photos and videos.": "Tiga puluh dua gaya warna ala filem untuk foto dan video yang sudah disalin.",
   "Show looks": "Tunjuk rupa", "Camera": "Kamera", "Connect automatically": "Sambung secara automatik",
   "Connect as soon as this computer joins the camera's Wi-Fi.": "Sambung sebaik sahaja komputer ini menyertai Wi-Fi kamera.",
   "Reconnect after drops": "Sambung semula selepas terputus", "If the Wi-Fi drops, keep trying and pick up where you left off.": "Jika Wi-Fi terputus, terus mencuba dan sambung dari tempat anda berhenti.",
@@ -1105,7 +1110,7 @@ const MS = {
   "Copy and keep track": "Salin dan jejak",
   "Copy all new copies everything you haven't copied yet and checks each file. Favourites, notes, tags and trips help you find clips later.": "Salin semua yang baharu menyalin semua yang belum disalin dan menyemak setiap fail. Kegemaran, nota, tag dan percutian membantu anda mencari klip kemudian.",
   "Give copies a film look": "Beri salinan rupa filem",
-  "Twenty-two colour looks inspired by classic film and cameras. Ace Studio adds them to new copies, so your originals never change.": "Dua puluh dua rupa warna yang diilhamkan oleh filem dan kamera klasik. Ace Studio menambahnya pada salinan baharu, jadi fail asal tidak pernah berubah.",
+  "Thirty-two colour looks inspired by classic film and cameras. Ace Studio adds them to new copies, so your originals never change.": "Tiga puluh dua rupa warna yang diilhamkan oleh filem dan kamera klasik. Ace Studio menambahnya pada salinan baharu, jadi fail asal tidak pernah berubah.",
   "Make it yours": "Jadikan milik anda",
   "Settings has the save folder, folders by date, a backup drive, the theme and the language. Press ? any time for keyboard shortcuts.": "Tetapan ada folder simpanan, folder ikut tarikh, pemacu sandaran, tema dan bahasa. Tekan ? bila-bila masa untuk pintasan papan kekunci.",
   "Record or take a photo": "Rakam atau ambil foto", "Live view on or off": "Hidup atau matikan paparan langsung",
@@ -1135,6 +1140,8 @@ const MS = {
   "Apply all looks": "Guna semua rupa", "All looks": "Semua rupa",
   "This makes {n} new copies of each file. Videos take a while: about {n} times as long as one look.": "Ini membuat {n} salinan baharu bagi setiap fail. Video mengambil masa: kira-kira {n} kali lebih lama daripada satu rupa.",
   "Adding all {k} looks to {n} files": "Menambah kesemua {k} rupa pada {n} fail",
+  "For you": "Untuk anda", "Auto fix photos": "Baiki foto secara automatik",
+  "Fix brightness and colour cast before adding a look, for better results.": "Baiki kecerahan dan warna sebelum menambah rupa, untuk hasil yang lebih baik.",
   "Delay": "Kelewatan", "Saved": "Disimpan", "Copy is incomplete": "Salinan tidak lengkap",
 };
 const t = (s, vars) => {
@@ -1875,22 +1882,50 @@ function openLooks(targets) {
   lookPick.targets = targets; lookPick.chosen = null;
   const sample = targets.find(f => f.kind === "photo") || targets[0] || state.files.find(f => f.kind === "photo") || state.files[0];
   const grid = $("lookGrid"); grid.innerHTML = "";
-  let fam = "";
-  for (const l of LOOKS) {
-    if (l.family !== fam) { fam = l.family; grid.insertAdjacentHTML("beforeend", `<span class="look-fam label-l">${esc(fam)}</span>`); }
+  const favs = new Set(CFG.fav_looks || []);
+  const sections = (sug) => {
+    const out = [];
+    if (sug.length) out.push([t("For you"), sug.map(id => LOOK[id]).filter(Boolean)]);
+    const fl = LOOKS.filter(l => favs.has(l.id));
+    if (fl.length) out.push(["★ " + t("Favourites"), fl]);
+    const fams = [...new Set(LOOKS.map(l => l.family))];
+    for (const f of fams) out.push([f, LOOKS.filter(l => l.family === f)]);
+    return out;
+  };
+  const draw = (sug) => {
+    grid.innerHTML = "";
+    for (const [title, list] of sections(sug)) {
+      grid.insertAdjacentHTML("beforeend", `<span class="look-fam label-l">${esc(title)}</span>`);
+      for (const l of list) grid.append(card(l, sug.includes(l.id)));
+    }
+  };
+  const card = (l, isSug) => {
     const b = document.createElement("button");
-    b.className = "look sl"; b.setAttribute("aria-pressed", "false");
-    b.innerHTML = `<div class="pv"><div class="sw" style="background:${swatchCss(l)}"></div>${sample ? `<img alt="" loading="lazy" src="${lookUrl(sample.path, l.id)}">` : ""}</div><b>${esc(l.name)} <span class="code">${esc(l.code)}</span></b><em class="insp">${esc(t("Inspired by {x}", { x: l.inspired }))}</em><span>${esc(l.style)}</span>`;
+    b.className = "look sl"; b.setAttribute("aria-pressed", String(lookPick.chosen === l.id)); b.dataset.id = l.id;
+    b.innerHTML = `<div class="pv"><div class="sw" style="background:${swatchCss(l)}"></div>${sample ? `<img alt="" loading="lazy" src="${lookUrl(sample.path, l.id)}">` : ""}</div><b>${esc(l.name)} <span class="code">${esc(l.code)}</span></b><em class="insp">${esc(t("Inspired by {x}", { x: l.inspired }))}</em><span>${esc(l.style)}</span>
+      ${isSug ? `<i class="foryou">${esc(t("For you"))}</i>` : ""}<i class="lstar" role="button" aria-label="Favourite" aria-pressed="${favs.has(l.id)}">${favs.has(l.id) ? "★" : "☆"}</i>`;
     const img = b.querySelector("img"); if (img) img.onerror = () => img.remove();
+    b.querySelector(".lstar").onclick = async (e) => {
+      e.stopPropagation();
+      favs.has(l.id) ? favs.delete(l.id) : favs.add(l.id);
+      await setCfg({ fav_looks: [...favs] });
+      draw(lookPick.sug || []);
+    };
     b.onclick = () => {
       if (!targets.length) return;
       lookPick.chosen = l.id;
-      grid.querySelectorAll(".look").forEach(x => x.setAttribute("aria-pressed", x === b));
+      grid.querySelectorAll(".look").forEach(x => x.setAttribute("aria-pressed", x.dataset.id === l.id));
       $("looksApply").disabled = false;
       $("looksApply").textContent = t("Apply {look}", { look: l.name }) + ` (${targets.length})`;
     };
-    grid.append(b);
-  }
+    return b;
+  };
+  lookPick.sug = [];
+  draw([]);
+  if (sample) api(`/api/look/suggest?path=${encodeURIComponent(sample.path)}`).then(d => {
+    if (lookPick.targets !== targets) return;
+    lookPick.sug = d.suggest || []; draw(lookPick.sug); grid.scrollTop = 0;
+  }).catch(() => {});
   const uncopied = targets.filter(f => !f.downloaded).length;
   $("looksNote").textContent = targets.length
     ? t("Pick a look. Ace Studio makes new copies with it; your originals stay as they are.") + (uncopied ? " " + t("{n} not copied yet will be copied first.", { n: uncopied }) : "")
@@ -2173,7 +2208,7 @@ async function pollJobs() {
 const GUIDE = [
   [ICON.wifi, "Welcome to Ace Studio", "Join the camera's Wi-Fi and Ace Studio connects by itself, no phone needed. You can also plug the camera in by USB to copy straight from its card."],
   [ICON.laptop, "Copy and keep track", "Copy all new copies everything you haven't copied yet and checks each file. Favourites, notes, tags and trips help you find clips later."],
-  [ICON.film, "Give copies a film look", "Twenty-two colour looks inspired by classic film and cameras. Ace Studio adds them to new copies, so your originals never change."],
+  [ICON.film, "Give copies a film look", "Thirty-two colour looks inspired by classic film and cameras. Ace Studio adds them to new copies, so your originals never change."],
   [ICON.sliders, "Make it yours", "Settings has the save folder, folders by date, a backup drive, the theme and the language. Press ? any time for keyboard shortcuts."],
 ];
 let guideStep = 0;

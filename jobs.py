@@ -348,7 +348,7 @@ class Exporter:
                     code, err = 0, ""
                     if job["kind"] == "look" and is_photo:
                         job["done"] = 30
-                        looks.apply_photo(src, str(tmp), job["look"])
+                        looks.apply_photo(src, str(tmp), job["look"], auto=bool(self.cfg.get("auto_fix")))
                     elif job["kind"] == "look":
                         cmd = looks.video_cmd(src, str(tmp), job["look"], self.cfg.get("look_video_size"))
                         code, err = self._run_ffmpeg(jid, job, cmd, self._duration(src))

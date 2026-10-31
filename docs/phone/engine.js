@@ -94,20 +94,85 @@
     return (c) => { for (const f of fns) f(c); return c; };
   }
 
+  const smooth = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); };
+  function skinMask(r, g, b) {
+    const [h, s, v] = rgb2hsv(clamp(r, 0, 1), clamp(g, 0, 1), clamp(b, 0, 1));
+    const dist = Math.abs(((h * 360 - 22 + 180) % 360 + 360) % 360 - 180);
+    return Math.exp(-0.5 * (dist / 14) ** 2) * smooth(0.08, 0.18, s) * (1 - smooth(0.6, 0.75, s)) * smooth(0.15, 0.3, v);
+  }
+  const srgbToLin = (c) => { c = Math.max(c, 0); return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+
+  /** Auto fix settings + scene + suggested looks, from a small RGBA image (like the desktop app). */
+  function analyze(data, w, h, codeToId) {
+    const n = w * h, L = new Float64Array(n), mx = new Float64Array(n), S = new Float64Array(n), lin = new Float64Array(n * 3);
+    let skin = 0, green = 0, sky = 0, skyN = 0, ssum = 0;
+    const topRows = Math.max(1, Math.floor(h / 3));
+    for (let i = 0; i < n; i++) {
+      const r = data[i * 4] / 255, g = data[i * 4 + 1] / 255, b = data[i * 4 + 2] / 255;
+      const lr = srgbToLin(r), lg = srgbToLin(g), lb = srgbToLin(b);
+      lin[i * 3] = lr; lin[i * 3 + 1] = lg; lin[i * 3 + 2] = lb;
+      L[i] = lr * 0.2126 + lg * 0.7152 + lb * 0.0722; mx[i] = Math.max(lr, lg, lb);
+      const [hh, s, v] = rgb2hsv(r, g, b); S[i] = s; ssum += s;
+      const deg = hh * 360;
+      if (skinMask(r, g, b) > 0.5) skin++;
+      if (deg > 70 && deg < 165 && s > 0.25 && v > 0.15) green++;
+      if (i < topRows * w) { skyN++; if (deg > 185 && deg < 245 && s > 0.15 && v > 0.35) sky++; }
+    }
+    const pct = (arr, q) => { const a = Float64Array.from(arr).sort(); const k = (a.length - 1) * q / 100, f = Math.floor(k), c = Math.min(a.length - 1, f + 1); return a[f] + (a[c] - a[f]) * (k - f); };
+    const p50 = pct(L, 50), p995 = pct(mx, 99.5), p20 = pct(L, 20), p95 = pct(L, 95);
+    skin /= n; green /= n; sky = sky / skyN;
+    const night = p50 < 0.025, dull = ssum / n < 0.16;
+    let gain = clamp(0.18 / Math.max(p50, 1e-4), 0.8, 2.0);
+    if (night) gain = Math.min(gain, 1.15);
+    gain = Math.min(gain, Math.max(1.0, 0.97 / Math.max(p995, 1e-4)));
+    gain = gain ** 0.6;
+    let cnt = 0; const avg = [0, 0, 0], all = [0, 0, 0];
+    for (let i = 0; i < n; i++) {
+      for (let k = 0; k < 3; k++) all[k] += lin[i * 3 + k];
+      if (S[i] < 0.25 && L[i] > p20 && L[i] < p95) { cnt++; for (let k = 0; k < 3; k++) avg[k] += lin[i * 3 + k]; }
+    }
+    const A = cnt > 50 ? avg.map(x => x / cnt) : all.map(x => x / n);
+    const mean = (A[0] + A[1] + A[2]) / 3;
+    let wbm = A.map(x => clamp((mean / Math.max(x, 1e-4)) ** 0.5, 0.88, 1.14));
+    const lw = wbm[0] * 0.2126 + wbm[1] * 0.7152 + wbm[2] * 0.0722; wbm = wbm.map(x => x / lw);
+    const indoor = A[0] / Math.max(A[2], 1e-4) > 1.3 && !night;
+    const S_ = { night: ["NT", "EM", "CD", "HM"], people: ["GP", "DP", "PP", "WM"], landscape: ["BL", "VI", "VS", "EG"],
+      sky: ["BL", "SR", "MC", "VI"], indoor: ["CC", "WM", "GP", "SN"], dull: ["SN", "MC", "CD", "ST"], everyday: ["GP", "MC", "WE", "CC"] };
+    let tags = [["night", night], ["people", skin > 0.03 && skin < 0.25], ["landscape", green > 0.2], ["sky", sky > 0.25], ["indoor", indoor], ["dull", dull]].filter(t => t[1]).map(t => t[0]);
+    if (!tags.length) tags = ["everyday"];
+    let order = [];
+    if (tags.includes("people") && (tags.includes("landscape") || tags.includes("sky"))) {
+      const other = tags.includes("landscape") ? "landscape" : "sky";
+      order = S_.people.slice(0, 2).concat(S_[other].slice(0, 2));
+    }
+    for (const t of tags.concat(["everyday"])) order = order.concat(S_[t]);
+    const picks = [...new Set(order)].slice(0, 4);
+    return { mul: wbm.map(x => Math.round(gain * x * 1e4) / 1e4), tags, suggest: codeToId ? picks.map(c => codeToId[c]).filter(Boolean) : picks };
+  }
+
   const softClip = (x) => (x > 0.9 ? 0.9 + 0.1 * Math.tanh((x - 0.9) / 0.1) : Math.max(x, 0));
 
   /** Build a 3D colour table: Float32Array of n*n*n*4 (RGBA, red changes fastest). */
   function buildLut(look, n) {
-    const f = compile(look.ops), out = new Float32Array(n * n * n * 4), c = [0, 0, 0];
+    const f = compile(look.ops), out = new Float32Array(n * n * n * 4), c = [0, 0, 0], prot = look.skin || 0;
     let o = 0;
     for (let b = 0; b < n; b++) for (let g = 0; g < n; g++) for (let r = 0; r < n; r++) {
       c[0] = r / (n - 1); c[1] = g / (n - 1); c[2] = b / (n - 1);
+      const x0 = r / (n - 1), x1 = g / (n - 1), x2 = b / (n - 1);
       f(c);
+      if (prot > 0) {
+        const m = skinMask(x0, x1, x2) * prot;
+        if (m > 0) {
+          const lx = x0 * 0.2126 + x1 * 0.7152 + x2 * 0.0722, lg = c[0] * 0.2126 + c[1] * 0.7152 + c[2] * 0.0722;
+          const k = lg / Math.max(lx, 1e-4);
+          c[0] = c[0] * (1 - m) + x0 * k * m; c[1] = c[1] * (1 - m) + x1 * k * m; c[2] = c[2] * (1 - m) + x2 * k * m;
+        }
+      }
       out[o++] = clamp(softClip(c[0]), 0, 1); out[o++] = clamp(softClip(c[1]), 0, 1); out[o++] = clamp(softClip(c[2]), 0, 1); out[o++] = 1;
     }
     return out;
   }
 
-  const api = { buildLut, compile };
+  const api = { buildLut, compile, analyze, skinMask };
   if (typeof module !== "undefined") module.exports = api; else root.AceEngine = api;
 })(this);

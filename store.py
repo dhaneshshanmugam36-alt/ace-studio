@@ -20,6 +20,8 @@ DEFAULTS = {
     "backup_dir": "",
     "default_look": "",              # look applied to every new copy ("" = none)
     "look_video_size": "1080p",      # "1080p" | "full"
+    "auto_fix": True,                # fix brightness/white balance of photos before a look
+    "fav_looks": [],
     # Camera
     "camera_host": "192.168.42.1",
     "auto_connect": True,

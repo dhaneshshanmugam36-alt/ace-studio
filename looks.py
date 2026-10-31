@@ -19,6 +19,8 @@ tuned approximations, not their processing.
 from __future__ import annotations
 
 import hashlib
+import io
+import tempfile
 import json
 import os
 import subprocess
@@ -30,7 +32,7 @@ import numpy as np
 
 LUT_SIZE = 65
 LUT_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "ace-studio" / "luts"
-LUT_VERSION = "5"
+LUT_VERSION = "6"
 
 
 # --------------------------------------------------------------------------
@@ -172,6 +174,7 @@ class Look:
     halation: float = 0      # 0-1, red glow around bright lights
     mono: bool = False
     swatch: tuple = ("#888", "#444")
+    skin: float = 0.4        # 0-1, how much to keep skin tones natural
 
     def grade(self, c):
         return run_ops(c, self.ops)
@@ -218,6 +221,121 @@ def run_ops(c, ops):
     return c
 
 
+def _smooth(e0, e1, x):
+    t = np.clip((x - e0) / (e1 - e0), 0, 1)
+    return t * t * (3 - 2 * t)
+
+
+def skin_mask(c):
+    """How skin-like each colour is (0-1). Works on any skin tone, light to dark."""
+    h, s, v = _rgb_to_hsv(np.clip(c, 0, 1))
+    deg = h * 360
+    dist = np.abs((deg - 22 + 180) % 360 - 180)
+    return (np.exp(-0.5 * (dist / 14) ** 2) * _smooth(0.08, 0.18, s) * (1 - _smooth(0.6, 0.75, s))
+            * _smooth(0.15, 0.3, v))
+
+
+def protect_skin(x, g, amount):
+    """Keep skin close to its own colour, taking only the look's brightness."""
+    if amount <= 0:
+        return g
+    m = (skin_mask(x) * amount)[..., None]
+    lx, lg = luma(x)[..., None], luma(g)[..., None]
+    keep = x * (lg / np.maximum(lx, 1e-4))
+    return g * (1 - m) + keep * m
+
+
+def srgb_to_lin(c):
+    c = np.clip(c, 0, None)
+    return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+
+
+def lin_to_srgb(x):
+    x = np.clip(x, 0, None)
+    return np.where(x <= 0.0031308, x * 12.92, 1.055 * np.power(x, 1 / 2.4) - 0.055)
+
+
+def pre_curve(x, mul: float, contrast: float = 0.0):
+    """Auto fix and Adjust, one colour channel: exposure/white balance in linear light
+    with a soft highlight roll-off, then contrast. The phone app does the same maths."""
+    lin = srgb_to_lin(x) * mul
+    lin = np.where(lin > 0.8, 0.8 + 0.2 * np.tanh((lin - 0.8) / 0.2), lin)
+    y = np.clip(lin_to_srgb(lin), 0, 1)
+    if contrast:
+        y = y - contrast * 0.08 * np.sin(2 * np.pi * y)
+    return np.clip(y, 0, 1)
+
+
+# Look suggestions: what each kind of photo tends to suit, best first.
+SUGGEST = {
+    "night": ["NT", "EM", "CD", "HM"],
+    "people": ["GP", "DP", "PP", "WM"],
+    "landscape": ["BL", "VI", "VS", "EG"],
+    "sky": ["BL", "SR", "MC", "VI"],
+    "indoor": ["CC", "WM", "GP", "SN"],
+    "dull": ["SN", "MC", "CD", "ST"],
+    "everyday": ["GP", "MC", "WE", "CC"],
+}
+
+
+def analyze(rgb) -> dict:
+    """Look at a small copy of a photo (HxWx3 floats 0-1): auto-fix settings,
+    what's in it, and which looks suit it."""
+    c = np.asarray(rgb, float)
+    H = c.shape[0]
+    flat = c.reshape(-1, 3)
+    lin = srgb_to_lin(flat)
+    L = lin @ np.array([0.2126, 0.7152, 0.0722])
+    p50 = float(np.median(L))
+    p995 = float(np.percentile(lin.max(1), 99.5))
+    h, s, v = _rgb_to_hsv(np.clip(flat, 0, 1))
+    deg = h * 360
+    skin = float((skin_mask(flat) > 0.5).mean())
+    green = float(((deg > 70) & (deg < 165) & (s > 0.25) & (v > 0.15)).mean())
+    top = c[: max(1, H // 3)].reshape(-1, 3)
+    th, ts, tv = _rgb_to_hsv(np.clip(top, 0, 1))
+    sky = float(((th * 360 > 185) & (th * 360 < 245) & (ts > 0.15) & (tv > 0.35)).mean())
+    night = p50 < 0.025
+    dull = float(s.mean()) < 0.16
+
+    gain = float(np.clip(0.18 / max(p50, 1e-4), 0.8, 2.0))
+    if night:
+        gain = min(gain, 1.15)
+    gain = min(gain, max(1.0, 0.97 / max(p995, 1e-4)))
+    gain = gain ** 0.6
+    p20, p95 = np.percentile(L, 20), np.percentile(L, 95)
+    neutral = (s < 0.25) & (L > p20) & (L < p95)
+    avg = lin[neutral].mean(0) if neutral.sum() > 50 else lin.mean(0)
+    wbm = np.clip((avg.mean() / np.maximum(avg, 1e-4)) ** 0.5, 0.88, 1.14)
+    wbm = wbm / float(wbm @ np.array([0.2126, 0.7152, 0.0722]))
+    indoor = avg[0] / max(avg[2], 1e-4) > 1.3 and not night
+
+    tags = [t for t, on in (("night", night), ("people", 0.03 < skin < 0.25), ("landscape", green > 0.2),
+                            ("sky", sky > 0.25), ("indoor", indoor), ("dull", dull)) if on] or ["everyday"]
+    order = []
+    if "people" in tags and ("landscape" in tags or "sky" in tags):
+        other = "landscape" if "landscape" in tags else "sky"
+        order = SUGGEST["people"][:2] + SUGGEST[other][:2]
+    for t in tags + ["everyday"]:
+        order += SUGGEST[t]
+    seen, picks = set(), []
+    for code in order:
+        if code not in seen:
+            seen.add(code); picks.append(code)
+    return {"mul": [round(float(gain * w), 4) for w in wbm], "tags": tags,
+            "suggest": [LOOK_BY_CODE_LATE[c] for c in picks[:4] if c in LOOK_BY_CODE_LATE]}
+
+
+def analyze_image(img) -> dict:
+    """analyze() for a Pillow image or JPEG bytes."""
+    from PIL import Image, ImageOps
+    if isinstance(img, (bytes, bytearray)):
+        img = Image.open(io.BytesIO(img))
+    img = ImageOps.exif_transpose(img).convert("RGB")
+    img.thumbnail((256, 256))
+    return analyze(np.asarray(img, float) / 255)
+
+
 RECIPES_FILE = Path(__file__).resolve().parent / "looks.json"
 _RECIPES = json.loads(RECIPES_FILE.read_text())
 
@@ -225,7 +343,7 @@ LOOKS: list[Look] = [
     Look(id=d["id"], code=d["code"], name=d["name"], family=d["family"], inspired=d["inspired"], style=d["style"],
          ops=tuple(tuple(o) if not isinstance(o, dict) else o for o in d["ops"]), grain=d.get("grain", 0),
          grain_size=d.get("grain_size", 1.0), vignette=d.get("vignette", 0), halation=d.get("halation", 0),
-         mono=d.get("mono", False), swatch=tuple(d.get("swatch", ("#888", "#444"))))
+         mono=d.get("mono", False), swatch=tuple(d.get("swatch", ("#888", "#444"))), skin=d.get("skin", 0.4))
     for d in _RECIPES["looks"]
 ]
 LOOKS_BY_ID = {lk.id: lk for lk in LOOKS}
@@ -233,6 +351,7 @@ LOOKS_BY_ID = {lk.id: lk for lk in LOOKS}
 # Short codes added to the end of file names, e.g. "IMG_1124 SN.jpg" = Soft Negative.
 CODES = {lk.id: lk.code for lk in LOOKS}
 LOOK_BY_CODE = {v: k for k, v in CODES.items()}
+LOOK_BY_CODE_LATE = LOOK_BY_CODE
 
 
 def legend_text() -> str:
@@ -242,7 +361,7 @@ def legend_text() -> str:
 
 
 def catalog() -> list[dict]:
-    return [{"id": lk.id, "code": lk.code, "name": lk.name, "family": lk.family, "inspired": lk.inspired, "style": lk.style,
+    return [{"id": lk.id, "code": lk.code, "name": lk.name, "family": lk.family, "skin": lk.skin, "inspired": lk.inspired, "style": lk.style,
              "mono": lk.mono, "swatch": list(lk.swatch)} for lk in LOOKS]
 
 
@@ -253,7 +372,8 @@ def catalog() -> list[dict]:
 def lut_path(look: Look) -> Path:
     """Write the look's .cube file once (cached) and return its path."""
     import inspect
-    src = json.dumps(look.ops) + inspect.getsource(hue) + inspect.getsource(split) + inspect.getsource(film)
+    src = (json.dumps(look.ops) + str(look.skin) + inspect.getsource(hue) + inspect.getsource(split)
+           + inspect.getsource(film) + inspect.getsource(protect_skin) + inspect.getsource(skin_mask))
     key = hashlib.sha1((LUT_VERSION + src).encode()).hexdigest()[:10]
     path = LUT_DIR / f"{look.id}-{key}.cube"
     if path.exists():
@@ -262,7 +382,7 @@ def lut_path(look: Look) -> Path:
     v = np.linspace(0, 1, n)
     b, g, r = np.meshgrid(v, v, v, indexing="ij")          # red changes fastest in .cube
     grid = np.stack([r, g, b], -1).reshape(-1, 3)
-    out = np.clip(soft_clip(look.grade(grid.copy())), 0, 1)
+    out = np.clip(soft_clip(protect_skin(grid, look.grade(grid.copy()), look.skin)), 0, 1)
     LUT_DIR.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
     with open(tmp, "w") as fh:
@@ -275,6 +395,28 @@ def lut_path(look: Look) -> Path:
     return path
 
 
+def pre_lut_path(mul, contrast: float = 0.0) -> Path:
+    """A small 1D table for Auto fix (per photo), cached by its settings."""
+    key = "_".join(f"{m:.3f}" for m in mul) + f"_{contrast:.2f}"
+    d = LUT_DIR / "auto"
+    path = d / f"pre-{key}.cube"
+    if path.exists():
+        return path
+    d.mkdir(parents=True, exist_ok=True)
+    n = 1024
+    x = np.linspace(0, 1, n)
+    out = np.stack([pre_curve(x, m, contrast) for m in mul], -1)
+    tmp = path.with_suffix(".tmp")
+    with open(tmp, "w") as fh:
+        fh.write(f"LUT_1D_SIZE {n}\nDOMAIN_MIN 0 0 0\nDOMAIN_MAX 1 1 1\n")
+        np.savetxt(fh, out, fmt="%.6f")
+    tmp.replace(path)
+    old = sorted(d.glob("pre-*.cube"), key=lambda p: p.stat().st_mtime)
+    for p in old[:-200]:
+        p.unlink(missing_ok=True)
+    return path
+
+
 def _q(p: Path) -> str:
     return str(p).replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
 
@@ -283,7 +425,8 @@ def _q(p: Path) -> str:
 # ffmpeg filter graphs
 # --------------------------------------------------------------------------
 
-def filter_chain(look: Look, kind: str, width: int | None = None, scale_to: int | None = None) -> str:
+def filter_chain(look: Look, kind: str, width: int | None = None, scale_to: int | None = None,
+                 mul=None) -> str:
     """One-input, one-output ffmpeg filter graph for a look.
 
     width: the width of the picture going through the look (for grain and glow size).
@@ -294,7 +437,10 @@ def filter_chain(look: Look, kind: str, width: int | None = None, scale_to: int 
     if scale_to:
         parts.append(f"scale={scale_to}:-2:flags=lanczos")
     # 16 bits per channel so smooth skies don't band
-    parts.append(f"format=gbrp16le,lut3d=file='{_q(lut_path(look))}':interp=tetrahedral")
+    parts.append("format=gbrp16le")
+    if mul is not None and any(abs(m - 1) > 0.005 for m in mul):
+        parts.append(f"lut1d=file='{_q(pre_lut_path(mul))}':interp=cubic")
+    parts.append(f"lut3d=file='{_q(lut_path(look))}':interp=tetrahedral")
     graph = ",".join(parts)
     if look.halation:
         sigma = max(2.0, w / 160)
@@ -315,16 +461,17 @@ def filter_chain(look: Look, kind: str, width: int | None = None, scale_to: int 
     return graph
 
 
-def preview_jpeg(src_jpeg: bytes, look_id: str, width: int = 640) -> bytes:
+def preview_jpeg(src_jpeg: bytes, look_id: str, width: int = 640, auto: bool = False) -> bytes:
     """Render a small preview of a look from JPEG bytes (a thumbnail)."""
     look = LOOKS_BY_ID[look_id]
-    chain = filter_chain(look, "photo", scale_to=width)
+    mul = analyze_image(src_jpeg)["mul"] if auto else None
+    chain = filter_chain(look, "photo", scale_to=width, mul=mul)
     cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "image2pipe", "-i", "pipe:0",
            "-vf", chain, "-frames:v", "1", "-q:v", "3", "-f", "image2", "-vcodec", "mjpeg", "pipe:1"]
     return subprocess.run(cmd, input=src_jpeg, capture_output=True, timeout=60).stdout
 
 
-def apply_photo(src_path: str, dst_path: str, look_id: str) -> None:
+def apply_photo(src_path: str, dst_path: str, look_id: str, auto: bool = False) -> None:
     """Apply a look to a full-size photo, keeping its EXIF data (date, camera)."""
     from PIL import Image, ImageOps
 
@@ -335,8 +482,9 @@ def apply_photo(src_path: str, dst_path: str, look_id: str) -> None:
         im = ImageOps.exif_transpose(im).convert("RGB")
         w, h = im.size
         raw = im.tobytes()
+        mul = analyze_image(im)["mul"] if auto else None
     cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
-           "-s", f"{w}x{h}", "-i", "pipe:0", "-vf", filter_chain(look, "photo", width=w),
+           "-s", f"{w}x{h}", "-i", "pipe:0", "-vf", filter_chain(look, "photo", width=w, mul=mul),
            "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"]
     out = subprocess.run(cmd, input=raw, capture_output=True, timeout=600)
     if out.returncode != 0 or len(out.stdout) != w * h * 3:

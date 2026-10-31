@@ -37,25 +37,35 @@ Insta360 doesn't make software for Linux. Ace Studio fills part of that gap.
 - **Delete from the camera** to free up the card, with a check that stops you deleting what isn't copied
 
 **Film looks**
-- 22 colour looks, each built as a proper 3D colour table (the kind pro editors use) and
-  processed in 16-bit, with mid-tone film grain, red glow around lights on the night look,
-  and soft vignettes. Each one shows what it's inspired by:
+- 32 colour looks, each built as a proper 3D colour table (the kind pro editors use) and
+  processed in 16-bit, with film-style highlight roll-off, mid-tone grain, red glow around lights
+  on the night looks, and soft vignettes. Each one shows what it's inspired by:
 
   | Look | Inspired by | | Look | Inspired by |
   |---|---|---|---|---|
   | Golden Portrait `GP` | Kodak Portra 400 | | Night Tungsten `NT` | CineStill 800T |
-  | Sunny Gold `SG` | Kodak Gold 200 | | Positive `PO` | Ricoh GR Positive Film |
-  | Bright Landscape `BL` | Kodak Ektar 100 | | Negative Snap `NS` | Ricoh GR Negative Film |
-  | Pastel Portrait `PP` | Fujifilm Pro 400H | | Bleach Bypass `BB` | Ricoh GR Bleach Bypass |
-  | Soft Negative `SN` | Fujifilm Classic Negative | | Rangefinder Natural `RN` | Leica standard colour |
-  | Warm Memory `WM` | Fujifilm Nostalgic Neg | | Rangefinder Chrome `RC` | Leica Looks Chrome |
-  | Muted Chrome `MC` | Fujifilm Classic Chrome | | Silver Mono `SM` | Leica Monochrom |
-  | Velvet Slide `VS` | Fujifilm Velvia 50 | | Fine Mono `FM` | Fujifilm Acros |
-  | Iconic Slide `IS` | Kodak Kodachrome 64 | | Classic Grain `CG` | Kodak Tri-X 400 |
-  | Cine Flat `CF` | Fujifilm Eterna | | Hard Mono `HM` | Ricoh GR Hi-Contrast B&W |
-  | Instant Photo `IP` | Polaroid 600 | | Purple Dream `PD` | LomoChrome Purple |
+  | Sunny Gold `SG` | Kodak Gold 200 | | Clean Cinema `CC` | CineStill 50D |
+  | Bright Landscape `BL` | Kodak Ektar 100 | | Cine Daylight `CD` | Kodak Vision3 250D |
+  | Pastel Portrait `PP` | Fujifilm Pro 400H | | Positive `PO` | Ricoh GR Positive Film |
+  | Soft Negative `SN` | Fujifilm Classic Negative | | Negative Snap `NS` | Ricoh GR Negative Film |
+  | Warm Memory `WM` | Fujifilm Nostalgic Neg | | Bleach Bypass `BB` | Ricoh GR Bleach Bypass |
+  | Daylight Portrait `DP` | Kodak Portra 160 | | Rangefinder Natural `RN` | Leica standard colour |
+  | Everyday Green `EG` | Fujifilm Superia 400 | | Rangefinder Chrome `RC` | Leica Looks Chrome |
+  | Warm Everyday `WE` | Kodak Ultramax 400 | | Silver Mono `SM` | Leica Monochrom |
+  | Golden Hour `GH` | Kodak ColorPlus 200 | | Fine Mono `FM` | Fujifilm Acros |
+  | Summer Red `SR` | Agfa Vista 200 | | Classic Grain `CG` | Kodak Tri-X 400 |
+  | Muted Chrome `MC` | Fujifilm Classic Chrome | | Hard Mono `HM` | Ricoh GR Hi-Contrast B&W |
+  | Velvet Slide `VS` | Fujifilm Velvia 50 | | Street Mono `ST` | Ilford HP5 Plus |
+  | Iconic Slide `IS` | Kodak Kodachrome 64 | | Instant Photo `IP` | Polaroid 600 |
+  | Vivid Slide `VI` | Fujifilm Velvia 100 | | Purple Dream `PD` | LomoChrome Purple |
+  | Cine Flat `CF` | Fujifilm Eterna | | Ember `EM` | Harman Phoenix 200 |
 
-- Preview any look on your own shot, apply one or **all 22 at once**, or pick one for every new copy
+- **For you:** Ace Studio looks at each photo (people, greenery, sky, night, indoor light) and
+  puts the 4 looks that suit it first
+- **Auto fix:** brightness and colour cast are fixed before the look goes on (photos)
+- **Natural skin:** strong looks never turn faces orange, green or purple
+- **Favourites:** star the looks you use most so they stay at the front
+- Apply one look, or **all 32 at once**, or pick one for every new copy
 - Looks are added to **new copies**, all in one `Looks` folder with a short code in the file name.
   Your originals are never changed.
 
@@ -72,12 +82,18 @@ Insta360 doesn't make software for Linux. Ace Studio fills part of that gap.
 
 ## Ace Looks for your phone
 
-The same 22 film looks also run on your phone, for photos:
+The same 32 film looks also run on your phone, for photos:
 **[dhaneshshanmugam36-alt.github.io/ace-studio/phone](https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/)**
 
 - Open it in Chrome on Android and choose **Install app** (or Add to Home screen). It then works offline.
-- Pick photos, preview every look live, hold the photo to compare, and set the strength.
-- **Save** one look or **Save all 22**, at full resolution with the photo's date, camera and location
+- **Film camera:** see the film look live while you shoot. Swipe to change looks, tap to focus,
+  pinch to zoom. Daylight shots use the camera's full-resolution stills; in low light, **Night mode**
+  merges 8 frames to cut noise, and **Smart HDR** brings out shadows. It saves the photo with the
+  look and the clean original.
+- Or use **your phone's own camera app** and the photo comes straight into Ace Looks.
+- Pick photos and the looks that suit them show first. Hold the photo to compare, set the strength,
+  and use **Adjust** for light, contrast, warmth and grain.
+- **Save** one look, your favourites, the suggested looks, or **all 32**, at full resolution with the photo's date, camera and location
   kept. Files are named like `IMG_1124 SN.jpg`, same as on the computer.
 - Once installed, you can share photos from your gallery straight to Ace Looks.
 - Everything runs on the phone. Photos are never uploaded anywhere.
