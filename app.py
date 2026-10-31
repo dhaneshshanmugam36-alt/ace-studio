@@ -22,7 +22,7 @@ Public License v3 or later; see the LICENSE file. No warranty.
 
 from __future__ import annotations
 
-__version__ = "2.0.3"
+__version__ = "2.0.4"
 REPO = "dhaneshshanmugam36-alt/ace-studio"
 
 import argparse

@@ -72,7 +72,7 @@ python3 -m venv --help >/dev/null 2>&1 || stop "Python's venv module is missing 
 step "Copying the app to $DEST"
 mkdir -p "$DEST" "$BIN" "$APPS"
 rm -rf "$DEST/static"
-cp "$SRC"/*.py "$SRC/icon.svg" "$DEST/"
+cp "$SRC"/*.py "$SRC/looks.json" "$SRC/icon.svg" "$DEST/"
 cp -r "$SRC/static" "$DEST/"
 
 # --- Python packages -----------------------------------------------------

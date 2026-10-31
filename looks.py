@@ -28,9 +28,9 @@ from typing import Callable
 
 import numpy as np
 
-LUT_SIZE = 33
+LUT_SIZE = 65
 LUT_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "ace-studio" / "luts"
-LUT_VERSION = "4"
+LUT_VERSION = "5"
 
 
 # --------------------------------------------------------------------------
@@ -160,11 +160,12 @@ def soft_clip(c):
 @dataclass(frozen=True)
 class Look:
     id: str
+    code: str               # short code added to file names, e.g. "SN"
     name: str
     family: str
     inspired: str            # what it's modelled on
     style: str               # plain-language description
-    grade: Callable = field(repr=False, compare=False)
+    ops: tuple = field(repr=False, compare=False)
     grain: float = 0         # 0-10
     grain_size: float = 1.0  # 1 = fine 35 mm, bigger = coarser
     vignette: float = 0      # 0-1
@@ -172,237 +173,65 @@ class Look:
     mono: bool = False
     swatch: tuple = ("#888", "#444")
 
-
-def _golden_portrait(c):
-    c = wb(c, 0.035, 0.005)
-    c = hue(c, {0: (6, 0.88, 1.0), 30: (2, 0.9, 1.04), 120: (-12, 0.78, 1.0), 220: (-10, 0.85, 1.0)})
-    c = tone(c, [(0, 0.045), (0.2, 0.2), (0.5, 0.52), (0.8, 0.8), (1, 0.955)])
-    c = split(c, (0.0, 0.004, 0.012), (0.012, 0.004, -0.012))
-    return sat(c, 0.92)
+    def grade(self, c):
+        return run_ops(c, self.ops)
 
 
-def _sunny_gold(c):
-    c = wb(c, 0.035, -0.005)
-    c = hue(c, {0: (4, 1.12, 1.0), 55: (-4, 1.25, 1.05), 120: (-14, 0.9, 1.0), 220: (-6, 0.92, 0.96)})
-    c = tone(c, [(0, 0.02), (0.22, 0.2), (0.5, 0.52), (0.78, 0.81), (1, 0.97)])
-    c = split(c, (0.004, 0.002, -0.006), (0.014, 0.008, -0.014))
-    return sat(c, 1.1)
+def film(c, amount=0.3):
+    """Film loses colour in its brightest highlights and deepest shadows."""
+    L = luma(np.clip(c, 0, 1))[..., None]
+    t_hi = np.clip((L - 0.72) / 0.28, 0, 1)
+    t_lo = np.clip(1 - L / 0.12, 0, 1)
+    w = amount * (t_hi * t_hi * (3 - 2 * t_hi)) + 0.6 * amount * (t_lo * t_lo * (3 - 2 * t_lo))
+    return L + (c - L) * (1 - w)
 
 
-def _soft_negative(c):
-    c = hue(c, {0: (-6, 0.85, 0.96), 55: (-10, 0.7, 1.0), 120: (25, 0.6, 0.94), 220: (-12, 0.85, 0.95)})
-    c = tone(c, [(0, 0), (0.18, 0.12), (0.5, 0.5), (0.82, 0.86), (1, 0.97)])
-    c = split(c, (-0.02, 0.012, 0.03), (0.03, 0.0, -0.01), 0.45)
-    return sat(c, 0.72)
-
-
-def _muted_chrome(c):
-    c = hue(c, {0: (4, 0.68, 0.94), 30: (0, 0.85, 1.0), 120: (-6, 0.72, 0.95), 200: (-10, 0.9, 0.9), 225: (-6, 0.9, 0.92)})
-    c = tone(c, [(0, 0.0), (0.18, 0.13), (0.5, 0.49), (0.8, 0.82), (1, 0.97)])
-    c = split(c, (0.0, 0.004, 0.012), (0.012, 0.006, -0.008))
-    return sat(c, 0.74)
-
-
-def _velvet_slide(c):
-    c = wb(c, 0.0, 0.012)
-    c = hue(c, {0: (0, 1.2, 0.98), 55: (-4, 1.2, 1.0), 120: (-6, 1.35, 0.94), 220: (-4, 1.3, 0.9), 300: (0, 1.2, 1.0)})
-    c = tone(c, [(0, 0), (0.2, 0.14), (0.5, 0.5), (0.8, 0.86), (1, 1)])
-    return sat(c, 1.22)
-
-
-def _cine_flat(c):
-    c = hue(c, {30: (0, 0.95, 1.0), 120: (8, 0.8, 1.0), 220: (-8, 0.85, 1.0)})
-    c = tone(c, [(0, 0.06), (0.25, 0.27), (0.5, 0.5), (0.75, 0.72), (1, 0.92)])
-    c = split(c, (-0.012, 0.008, 0.02), (0.015, 0.006, -0.008))
-    return sat(c, 0.76)
-
-
-def _positive(c):
-    c = wb(c, 0.03, 0.01)
-    c = hue(c, {0: (2, 1.25, 1.0), 30: (0, 1.15, 1.03), 55: (-3, 1.2, 1.03), 120: (-8, 1.0, 0.96), 220: (6, 1.05, 0.92)})
-    c = tone(c, [(0, 0), (0.22, 0.18), (0.5, 0.52), (0.78, 0.83), (1, 1)])
-    return sat(c, 1.12)
-
-
-def _hard_mono(c):
-    c = mono(c, 0.35, 0.55, 0.10)
-    return tone(c, [(0, 0), (0.18, 0.05), (0.45, 0.4), (0.7, 0.85), (1, 1)])
-
-
-def _rangefinder(c):
-    c = wb(c, 0.02, 0.0)
-    c = hue(c, {0: (2, 1.04, 0.97), 30: (2, 0.95, 1.02), 120: (-4, 0.9, 0.96), 220: (-4, 1.0, 0.95)})
-    c = tone(c, [(0, 0), (0.12, 0.08), (0.5, 0.5), (0.88, 0.91), (1, 0.98)])
-    return sat(c, 0.97)
-
-
-def _silver_mono(c):
-    c = mono(c, 0.33, 0.52, 0.15)
-    return tone(c, [(0, 0), (0.15, 0.1), (0.5, 0.5), (0.85, 0.89), (1, 0.985)])
-
-
-def _bright_landscape(c):
-    c = wb(c, -0.005, 0.0)
-    c = hue(c, {0: (0, 1.3, 0.98), 30: (0, 1.25, 1.02), 55: (-2, 1.1, 1.02), 120: (4, 1.15, 0.95), 220: (-4, 1.3, 0.94)})
-    c = tone(c, [(0, 0), (0.2, 0.16), (0.5, 0.5), (0.8, 0.84), (1, 0.99)])
-    return sat(c, 1.18)
-
-
-def _night_tungsten(c):
-    c = wb(c, -0.07, 0.01)
-    c = hue(c, {0: (0, 1.1, 1.0), 30: (-6, 1.05, 1.02), 185: (-5, 1.15, 1.0), 220: (-6, 1.1, 1.0)})
-    c = tone(c, [(0, 0.035), (0.2, 0.17), (0.5, 0.5), (0.82, 0.85), (1, 0.97)])
-    c = split(c, (-0.01, 0.015, 0.03), (0.02, 0.0, -0.01), 0.4)
-    return sat(c, 1.04)
-
-
-def _iconic_slide(c):
-    c = wb(c, 0.02, 0.0)
-    c = hue(c, {0: (-4, 1.3, 0.92), 30: (-4, 1.1, 1.0), 55: (-6, 1.0, 1.0), 120: (-10, 0.9, 0.9), 220: (6, 1.2, 0.85)})
-    c = tone(c, [(0, 0), (0.2, 0.13), (0.5, 0.48), (0.8, 0.84), (1, 0.98)])
-    return sat(c, 1.08)
-
-
-def _classic_grain(c):
-    c = mono(c, 0.42, 0.48, 0.10)
-    return tone(c, [(0, 0.02), (0.15, 0.08), (0.5, 0.5), (0.85, 0.9), (1, 0.98)])
-
-
-def _pastel_portrait(c):
-    c = wb(c, -0.01, -0.006)
-    c = hue(c, {0: (6, 0.85, 1.02), 30: (0, 0.85, 1.04), 120: (22, 0.8, 1.04), 220: (-8, 0.8, 1.03)})
-    c = tone(c, [(0, 0.07), (0.25, 0.33), (0.5, 0.6), (0.78, 0.84), (1, 0.97)])
-    c = split(c, (-0.005, 0.01, 0.015), (0.0, 0.006, 0.004))
-    return sat(c, 0.82)
-
-
-def _warm_memory(c):
-    c = wb(c, 0.03, 0.0)
-    c = hue(c, {0: (6, 1.05, 0.98), 30: (2, 1.1, 1.02), 55: (-6, 1.05, 1.0), 120: (-16, 0.8, 0.96), 220: (-8, 0.85, 0.95)})
-    c = tone(c, [(0, 0.03), (0.2, 0.18), (0.5, 0.5), (0.8, 0.8), (1, 0.95)])
-    c = split(c, (0.0, 0.006, 0.01), (0.035, 0.015, -0.025), 0.45)
-    return sat(c, 0.95)
-
-
-def _fine_mono(c):
-    c = mono(c, 0.25, 0.65, 0.10)
-    return tone(c, [(0, 0), (0.15, 0.09), (0.5, 0.49), (0.85, 0.88), (1, 0.99)])
-
-
-def _negative_snap(c):
-    c = wb(c, -0.015, 0.0)
-    c = hue(c, {0: (-4, 0.85, 1.0), 55: (-4, 0.85, 1.0), 120: (12, 0.8, 1.0), 220: (-6, 0.9, 1.0)})
-    c = tone(c, [(0, 0.04), (0.22, 0.22), (0.5, 0.5), (0.78, 0.78), (1, 0.95)])
-    c = split(c, (-0.01, 0.006, 0.015), (0.005, 0.004, 0.0))
-    return sat(c, 0.84)
-
-
-def _bleach_bypass(c):
+def bleach(c, amount=0.55):
     L = mono(c, 0.2126, 0.7152, 0.0722)
-    c = c * 0.45 + L * 0.55
-    return tone(c, [(0, 0), (0.2, 0.12), (0.5, 0.5), (0.8, 0.9), (1, 1)])
+    return c * (1 - amount) + L * amount
 
 
-def _leica_chrome(c):
-    c = wb(c, -0.02, 0.0)
-    c = hue(c, {0: (0, 0.92, 0.97), 30: (0, 0.92, 1.0), 120: (4, 0.9, 0.96), 220: (-4, 1.1, 0.9)})
-    c = tone(c, [(0, 0), (0.15, 0.1), (0.5, 0.5), (0.85, 0.89), (1, 0.99)])
-    return sat(c, 0.92)
+def run_ops(c, ops):
+    """Apply a look's recipe (from looks.json). The phone app runs the same recipe."""
+    for op in ops:
+        name, args = op[0], op[1:]
+        if name == "wb":
+            c = wb(c, *args)
+        elif name == "hue":
+            c = hue(c, {int(k): tuple(v) for k, v in args[0].items()}, args[1] if len(args) > 1 else 28)
+        elif name == "tone":
+            c = tone(c, [tuple(p) for p in args[0]])
+        elif name == "split":
+            c = split(c, tuple(args[0]), tuple(args[1]), args[2] if len(args) > 2 else 0.5)
+        elif name == "sat":
+            c = sat(c, args[0])
+        elif name == "mono":
+            c = mono(c, *args)
+        elif name == "bleach":
+            c = bleach(c, *args)
+        elif name == "film":
+            c = film(c, *args)
+        elif name == "fade":
+            c = fade(c, *args)
+        else:
+            raise ValueError(f"Unknown look step: {name}")
+    return c
 
 
-def _instant_photo(c):
-    c = wb(c, 0.025, -0.01)
-    c = hue(c, {0: (6, 0.9, 1.0), 120: (16, 0.75, 1.0), 220: (-10, 0.8, 1.0)})
-    c = tone(c, [(0, 0.09), (0.25, 0.27), (0.5, 0.52), (0.8, 0.8), (1, 0.93)])
-    c = split(c, (-0.01, 0.025, 0.02), (0.03, 0.02, -0.02), 0.45)
-    return sat(c, 0.85)
-
-
-def _purple_dream(c):
-    c = hue(c, {55: (-55, 1.0, 1.0), 95: (-160, 1.15, 0.92), 135: (-170, 1.15, 0.9), 220: (-45, 0.95, 1.0)}, width=24)
-    c = tone(c, [(0, 0), (0.2, 0.15), (0.5, 0.5), (0.8, 0.84), (1, 0.99)])
-    return sat(c, 1.1)
-
+RECIPES_FILE = Path(__file__).resolve().parent / "looks.json"
+_RECIPES = json.loads(RECIPES_FILE.read_text())
 
 LOOKS: list[Look] = [
-    # Colour negative film
-    Look("golden-portrait", "Golden Portrait", "Colour negative", "Kodak Portra 400",
-         "Warm, soft and flattering. Gentle contrast, smooth skin tones, calm greens.",
-         _golden_portrait, grain=4, swatch=("#E8B27A", "#7A5A44")),
-    Look("sunny-gold", "Sunny Gold", "Colour negative", "Kodak Gold 200",
-         "Golden-yellow everyday film. Rich reds and yellows, a holiday-snapshot feel.",
-         _sunny_gold, grain=5, swatch=("#F2B33D", "#B0452A")),
-    Look("bright-landscape", "Bright Landscape", "Colour negative", "Kodak Ektar 100",
-         "Vivid, clean and very fine grained. Bold reds and blues, made for scenery.",
-         _bright_landscape, grain=1.5, swatch=("#D2452E", "#2A6FB5")),
-    Look("pastel-portrait", "Pastel Portrait", "Colour negative", "Fujifilm Pro 400H",
-         "Bright and airy pastels with minty greens and soft, cool skin.",
-         _pastel_portrait, grain=3.5, swatch=("#BFE3D0", "#E9C9C1")),
-    Look("soft-negative", "Soft Negative", "Colour negative", "Fujifilm Classic Negative",
-         "Muted colour with hard shadows: teal darks, warm highlights, faded greens.",
-         _soft_negative, grain=4.5, swatch=("#8FA7A0", "#B07C6E")),
-    Look("warm-memory", "Warm Memory", "Colour negative", "Fujifilm Nostalgic Neg",
-         "Amber highlights and soft shadows, like prints from the 70s.",
-         _warm_memory, grain=4, swatch=("#E0A458", "#5E6B5C")),
-    # Slide and chrome
-    Look("muted-chrome", "Muted Chrome", "Slide & chrome", "Fujifilm Classic Chrome",
-         "Documentary-magazine look: low saturation, deep shadows, calm reds, cyan skies.",
-         _muted_chrome, grain=2.5, swatch=("#7E8C8E", "#3A4448")),
-    Look("velvet-slide", "Velvet Slide", "Slide & chrome", "Fujifilm Velvia 50",
-         "Very saturated landscape slide film. Deep greens and blues, strong contrast.",
-         _velvet_slide, grain=1.5, swatch=("#2E8B57", "#1F4E9A")),
-    Look("iconic-slide", "Iconic Slide", "Slide & chrome", "Kodak Kodachrome 64",
-         "The classic magazine slide: deep reds, dark blue skies, warm mid-tones.",
-         _iconic_slide, grain=2.5, vignette=0.25, swatch=("#C0392B", "#1E3F66")),
-    # Cinema
-    Look("cine-flat", "Cine Flat", "Cinema", "Fujifilm Eterna",
-         "Soft cinema stock: low contrast, gentle colour and a teal shadow. Good to grade further.",
-         _cine_flat, grain=2.5, swatch=("#6F8C8A", "#C2A48A")),
-    Look("night-tungsten", "Night Tungsten", "Cinema", "CineStill 800T",
-         "Cool night film with red glow around lights. Made for city lights and neon.",
-         _night_tungsten, grain=5.5, grain_size=1.3, halation=0.8, swatch=("#2F5D7C", "#E0503C")),
-    # Compact cameras
-    Look("positive", "Positive", "Compact camera", "Ricoh GR Positive Film",
-         "Bright, punchy and warm, with strong reds and yellows.",
-         _positive, grain=3, swatch=("#E0533A", "#F0C445")),
-    Look("negative-snap", "Negative Snap", "Compact camera", "Ricoh GR Negative Film",
-         "Soft and slightly cool, with lifted shadows and quiet colour.",
-         _negative_snap, grain=3.5, swatch=("#9DB4B8", "#C9B8A6")),
-    Look("bleach-bypass", "Bleach Bypass", "Compact camera", "Ricoh GR Bleach Bypass",
-         "Silvery, low colour and high contrast. Gritty and dramatic for action.",
-         _bleach_bypass, grain=4.5, vignette=0.35, swatch=("#8D9396", "#2B2E30")),
-    # Rangefinder
-    Look("rangefinder", "Rangefinder Natural", "Rangefinder", "Leica standard colour",
-         "Natural and slightly warm, with rich blacks and smooth highlights.",
-         _rangefinder, grain=2, vignette=0.3, swatch=("#A9865B", "#2F3A40")),
-    Look("leica-chrome", "Rangefinder Chrome", "Rangefinder", "Leica Looks Chrome",
-         "Cooler, cleaner and crisper, with deep blues.",
-         _leica_chrome, grain=1.5, vignette=0.25, swatch=("#4F6D8A", "#B7B9B5")),
-    # Black and white
-    Look("silver-mono", "Silver Mono", "Black & white", "Leica Monochrom",
-         "Smooth black and white with deep blacks and a wide range of greys.",
-         _silver_mono, grain=3, vignette=0.3, mono=True, swatch=("#2A2A2A", "#BDBDBD")),
-    Look("fine-mono", "Fine Mono", "Black & white", "Fujifilm Acros",
-         "Very fine grain and smooth tones, with rich mid-greys.",
-         _fine_mono, grain=2, mono=True, swatch=("#3A3A3A", "#D6D6D6")),
-    Look("classic-grain", "Classic Grain", "Black & white", "Kodak Tri-X 400",
-         "Gritty documentary black and white with punchy contrast and visible grain.",
-         _classic_grain, grain=7, grain_size=1.4, vignette=0.3, mono=True, swatch=("#1E1E1E", "#A8A8A8")),
-    Look("hard-mono", "Hard Mono", "Black & white", "Ricoh GR Hi-Contrast B&W",
-         "Crushed blacks, bright whites and heavy grain. Bold street style.",
-         _hard_mono, grain=8, grain_size=1.5, vignette=0.55, mono=True, swatch=("#111111", "#EEEEEE")),
-    # Instant and creative
-    Look("instant-photo", "Instant Photo", "Instant & creative", "Polaroid 600",
-         "Faded blacks, green-tinted shadows and warm, creamy highlights.",
-         _instant_photo, grain=3, vignette=0.45, swatch=("#E8D9B0", "#5F7F72")),
-    Look("purple-dream", "Purple Dream", "Instant & creative", "LomoChrome Purple",
-         "Dreamy colour swap: greens turn purple, blues turn teal. Best on nature shots.",
-         _purple_dream, grain=5, grain_size=1.2, vignette=0.3, swatch=("#8E44AD", "#D4708F")),
+    Look(id=d["id"], code=d["code"], name=d["name"], family=d["family"], inspired=d["inspired"], style=d["style"],
+         ops=tuple(tuple(o) if not isinstance(o, dict) else o for o in d["ops"]), grain=d.get("grain", 0),
+         grain_size=d.get("grain_size", 1.0), vignette=d.get("vignette", 0), halation=d.get("halation", 0),
+         mono=d.get("mono", False), swatch=tuple(d.get("swatch", ("#888", "#444"))))
+    for d in _RECIPES["looks"]
 ]
 LOOKS_BY_ID = {lk.id: lk for lk in LOOKS}
 
 # Short codes added to the end of file names, e.g. "IMG_1124 SN.jpg" = Soft Negative.
-CODES = {'golden-portrait': 'GP', 'sunny-gold': 'SG', 'bright-landscape': 'BL', 'pastel-portrait': 'PP', 'soft-negative': 'SN', 'warm-memory': 'WM', 'muted-chrome': 'MC', 'velvet-slide': 'VS', 'iconic-slide': 'IS', 'cine-flat': 'CF', 'night-tungsten': 'NT', 'positive': 'PO', 'negative-snap': 'NS', 'bleach-bypass': 'BB', 'rangefinder': 'RN', 'leica-chrome': 'RC', 'silver-mono': 'SM', 'fine-mono': 'FM', 'classic-grain': 'CG', 'hard-mono': 'HM', 'instant-photo': 'IP', 'purple-dream': 'PD'}
+CODES = {lk.id: lk.code for lk in LOOKS}
 LOOK_BY_CODE = {v: k for k, v in CODES.items()}
 
 
@@ -413,7 +242,7 @@ def legend_text() -> str:
 
 
 def catalog() -> list[dict]:
-    return [{"id": lk.id, "code": CODES[lk.id], "name": lk.name, "family": lk.family, "inspired": lk.inspired, "style": lk.style,
+    return [{"id": lk.id, "code": lk.code, "name": lk.name, "family": lk.family, "inspired": lk.inspired, "style": lk.style,
              "mono": lk.mono, "swatch": list(lk.swatch)} for lk in LOOKS]
 
 
@@ -424,7 +253,7 @@ def catalog() -> list[dict]:
 def lut_path(look: Look) -> Path:
     """Write the look's .cube file once (cached) and return its path."""
     import inspect
-    src = inspect.getsource(look.grade) + inspect.getsource(hue) + inspect.getsource(split)
+    src = json.dumps(look.ops) + inspect.getsource(hue) + inspect.getsource(split) + inspect.getsource(film)
     key = hashlib.sha1((LUT_VERSION + src).encode()).hexdigest()[:10]
     path = LUT_DIR / f"{look.id}-{key}.cube"
     if path.exists():

@@ -70,6 +70,20 @@ Insta360 doesn't make software for Linux. Ace Studio fills part of that gap.
 |---|---|---|
 | ![Library](docs/screenshots/library.png) | ![Film looks](docs/screenshots/looks.png) | ![Settings](docs/screenshots/settings.png) |
 
+## Ace Looks for your phone
+
+The same 22 film looks also run on your phone, for photos:
+**[dhaneshshanmugam36-alt.github.io/ace-studio/phone](https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/)**
+
+- Open it in Chrome on Android and choose **Install app** (or Add to Home screen). It then works offline.
+- Pick photos, preview every look live, hold the photo to compare, and set the strength.
+- **Save** one look or **Save all 22**, at full resolution with the photo's date, camera and location
+  kept. Files are named like `IMG_1124 SN.jpg`, same as on the computer.
+- Once installed, you can share photos from your gallery straight to Ace Looks.
+- Everything runs on the phone. Photos are never uploaded anywhere.
+
+The phone and the computer use the same recipe file (`looks.json`), so a look comes out the same on both.
+
 ## Tested on
 
 | | Status |

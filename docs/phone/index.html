@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ace Looks</title>
+<meta name="description" content="22 film looks for your photos. Free, offline, and your photos never leave your phone.">
+<meta name="theme-color" content="#14171A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root {
+  --bg: #111316; --surface: #1A1D21; --surface-2: #22262B; --surface-3: #2B3036; --line: #3A4047;
+  --text: #E6E8EB; --muted: #A3A9B0; --primary: #F2B66D; --on-primary: #3A2400; --primary-soft: #4A3516;
+  --error: #FFB4AB; --ok: #8FD6A0;
+  --font: "Google Sans Text", "Google Sans", Roboto, "Noto Sans", system-ui, sans-serif;
+  --display: "Google Sans Display", "Google Sans", Roboto, system-ui, sans-serif;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #F6F4F1; --surface: #FFFFFF; --surface-2: #EFECE8; --surface-3: #E5E1DC; --line: #D3CEC8;
+    --text: #1C1B1A; --muted: #5F5B57; --primary: #8A5300; --on-primary: #FFFFFF; --primary-soft: #FFE2C1;
+    --error: #BA1A1A; --ok: #1B6D3A; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #F6F4F1; --surface: #FFFFFF; --surface-2: #EFECE8; --surface-3: #E5E1DC; --line: #D3CEC8;
+  --text: #1C1B1A; --muted: #5F5B57; --primary: #8A5300; --on-primary: #FFFFFF; --primary-soft: #FFE2C1;
+  --error: #BA1A1A; --ok: #1B6D3A; color-scheme: light;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 400 15px/21px var(--font); }
+body { display: flex; flex-direction: column; overflow: hidden; padding-bottom: env(safe-area-inset-bottom); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; }
+[hidden] { display: none !important; }
+svg { flex: none; }
+
+/* top bar */
+.bar { display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 8px 0 16px; padding-top: env(safe-area-inset-top); flex: none; }
+.bar h1 { margin: 0 auto 0 0; font: 400 22px/28px var(--display); letter-spacing: 0; }
+.bar h1 b { color: var(--primary); font-weight: 500; }
+.ibtn { width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: var(--muted); }
+.ibtn:active { background: var(--surface-2); }
+.ibtn svg { width: 24px; height: 24px; }
+
+/* empty state */
+.empty { flex: 1; display: grid; place-items: center; padding: 24px; text-align: center; }
+.empty .art { width: 96px; height: 96px; margin: 0 auto 20px; border-radius: 28px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); }
+.empty .art svg { width: 48px; height: 48px; }
+.empty h2 { margin: 0 0 8px; font: 400 28px/36px var(--display); }
+.empty p { margin: 0 auto 28px; color: var(--muted); max-width: 32ch; }
+.big { height: 56px; padding: 0 28px; border-radius: 28px; background: var(--primary); color: var(--on-primary); font-weight: 500; font-size: 16px; display: inline-flex; align-items: center; gap: 10px; }
+.big svg { width: 22px; height: 22px; }
+.fine { margin-top: 20px; color: var(--muted); font-size: 13px; }
+
+/* editor */
+.editor { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.stage { flex: 1; min-height: 0; position: relative; display: grid; place-items: center; padding: 4px 12px; touch-action: none; user-select: none; -webkit-user-select: none; }
+.stage canvas { position: absolute; left: 12px; top: 4px; width: calc(100% - 24px); height: calc(100% - 8px); object-fit: contain; display: block; }
+.badge { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); padding: 4px 12px; border-radius: 12px; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; font-weight: 500; pointer-events: none; transition: opacity .2s; }
+.hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); padding: 4px 12px; border-radius: 12px; background: rgba(0,0,0,.5); color: #ddd; font-size: 12px; pointer-events: none; white-space: nowrap; }
+.busy { position: absolute; inset: 0; display: grid; place-items: center; }
+.spin { width: 36px; height: 36px; border-radius: 50%; border: 4px solid var(--primary); border-right-color: transparent; animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.photos { display: flex; gap: 8px; padding: 6px 12px 2px; overflow-x: auto; flex: none; scrollbar-width: none; }
+.photos::-webkit-scrollbar, .strip::-webkit-scrollbar, .fams::-webkit-scrollbar { display: none; }
+.pthumb { width: 48px; height: 48px; border-radius: 10px; flex: none; overflow: hidden; padding: 0; outline: 2px solid transparent; outline-offset: 1px; }
+.pthumb[aria-current="true"] { outline-color: var(--primary); }
+.pthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.padd { width: 48px; height: 48px; border-radius: 10px; flex: none; display: grid; place-items: center; background: var(--surface-2); color: var(--muted); }
+
+.panel { flex: none; background: var(--surface); border-radius: 24px 24px 0 0; padding: 10px 0 12px; }
+.info { padding: 2px 18px 8px; min-height: 64px; }
+.info .row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; }
+.info b { white-space: nowrap; }
+.info b { font: 500 17px/24px var(--font); }
+.code { display: inline-block; padding: 0 7px; border-radius: 6px; background: var(--primary-soft); color: var(--primary); font: 600 12px/20px var(--font); letter-spacing: .05em; }
+.insp { color: var(--primary); font-size: 13px; font-weight: 500; }
+.style { color: var(--muted); font-size: 13px; line-height: 18px; }
+
+.fams { display: flex; gap: 8px; overflow-x: auto; padding: 4px 16px 8px; scrollbar-width: none; }
+.fam { height: 32px; padding: 0 14px; border-radius: 16px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; font-size: 13px; font-weight: 500; flex: none; }
+.fam[aria-pressed="true"] { background: var(--surface-3); color: var(--text); border-color: transparent; }
+
+.strip { display: flex; gap: 10px; overflow-x: auto; padding: 4px 16px 10px; scroll-snap-type: x proximity; scrollbar-width: none; }
+.lk { flex: none; width: 76px; padding: 0; text-align: center; scroll-snap-align: center; }
+.lk canvas, .lk .none { width: 76px; height: 76px; border-radius: 16px; display: block; background: var(--surface-2); transition: border-radius .25s var(--ease); }
+.lk .none { display: grid; place-items: center; color: var(--muted); font-size: 12px; }
+.lk span { display: block; margin-top: 5px; font-size: 11px; line-height: 14px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lk span i { font-style: normal; font-weight: 600; color: var(--text); }
+.lk[aria-pressed="true"] canvas, .lk[aria-pressed="true"] .none { border-radius: 26px; box-shadow: 0 0 0 3px var(--primary); }
+.lk[aria-pressed="true"] span { color: var(--text); }
+
+.amount { display: flex; align-items: center; gap: 12px; padding: 2px 18px 8px; color: var(--muted); font-size: 13px; }
+.amount input { flex: 1; accent-color: var(--primary); height: 28px; }
+.amount output { width: 40px; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 16px 0; }
+.btn { height: 48px; border-radius: 24px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; }
+.btn svg { width: 20px; height: 20px; }
+.btn.fill { background: var(--primary); color: var(--on-primary); }
+.btn.tonal { background: var(--surface-3); color: var(--text); }
+.btn:disabled { opacity: .4; }
+
+/* sheets & dialogs */
+.scrim { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 20; animation: fade .2s; }
+@keyframes fade { from { opacity: 0; } }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--surface); border-radius: 28px 28px 0 0; padding: 12px 20px calc(20px + env(safe-area-inset-bottom)); animation: up .3s var(--ease); max-height: 86vh; overflow: auto; }
+@keyframes up { from { transform: translateY(40px); opacity: 0; } }
+.sheet .grab { width: 32px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 16px; }
+.sheet h3 { margin: 0 0 4px; font: 400 22px/28px var(--display); }
+.sheet p { margin: 0 0 16px; color: var(--muted); }
+.opt { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.opt div { flex: 1; }
+.opt b { display: block; font-weight: 500; }
+.opt small { display: block; color: var(--muted); font-size: 13px; line-height: 18px; }
+.opt select { background: var(--surface-2); border: 0; border-radius: 10px; height: 40px; padding: 0 10px; }
+.opt input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--primary); }
+.menu-btn { width: 100%; text-align: left; display: flex; align-items: center; gap: 14px; padding: 14px 4px; border-top: 1px solid var(--line); }
+.menu-btn svg { width: 22px; height: 22px; color: var(--muted); }
+.menu-btn small { display: block; color: var(--muted); font-size: 13px; }
+.prog { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; margin: 8px 0 16px; }
+.prog i { display: block; height: 100%; width: 0; background: var(--primary); transition: width .2s; }
+.legal { color: var(--muted); font-size: 12px; line-height: 17px; margin-top: 16px; }
+
+.toast { position: fixed; left: 16px; right: 16px; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 30; padding: 14px 16px; border-radius: 12px; background: var(--text); color: var(--bg); box-shadow: 0 6px 20px rgba(0,0,0,.35); animation: up .25s var(--ease); display: flex; align-items: center; gap: 12px; }
+.toast button { margin-left: auto; color: var(--primary-soft); font-weight: 600; }
+:root[data-theme="light"] .toast button { color: #FFB869; }
+.toast.err { background: var(--error); color: #410002; }
+
+@media (min-width: 900px) {
+  body { max-width: 560px; margin: 0 auto; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1>Ace <b>Looks</b></h1>
+  <button class="ibtn" id="addBtn" aria-label="Add photos" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button class="ibtn" id="menuBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg></button>
+</header>
+
+<section class="empty" id="empty">
+  <div>
+    <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 4v16M17 4v16M3 8h4M3 12h4M3 16h4M17 8h4M17 12h4M17 16h4"/></svg></div>
+    <h2>Film looks for your photos</h2>
+    <p>22 looks inspired by Kodak, Fujifilm, Ricoh, Leica and more. Full resolution, and your photos never leave your phone.</p>
+    <button class="big" id="pickBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="m4 17 5-4.5 3.5 3 3-2.5L20 17"/></svg>Choose photos</button>
+    <div class="fine">Tip: you can also share photos from your gallery straight to Ace Looks once it's installed.</div>
+  </div>
+</section>
+
+<section class="editor" id="editor" hidden>
+  <div class="stage" id="stage">
+    <canvas id="view"></canvas>
+    <span class="badge" id="badge" style="opacity:0">Original</span>
+    <span class="hint" id="hint">Hold the photo to see the original</span>
+    <div class="busy" id="busy" hidden><span class="spin"></span></div>
+  </div>
+  <div class="photos" id="photos"></div>
+  <div class="panel">
+    <div class="info" id="info"></div>
+    <div class="fams" id="fams"></div>
+    <div class="strip" id="strip"></div>
+    <label class="amount">Strength <input type="range" id="amount" min="0" max="100" value="100"><output id="amountOut">100%</output></label>
+    <div class="acts">
+      <button class="btn tonal" id="saveAllBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Save all 22</button>
+      <button class="btn fill" id="saveBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>Save</button>
+    </div>
+  </div>
+</section>
+
+<input type="file" id="file" accept="image/*" multiple hidden>
+<canvas id="gl" hidden></canvas>
+
+<script src="engine.js"></script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("acelooks." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("acelooks." + k, JSON.stringify(v)); } catch {} },
+};
+const settings = { quality: store.get("quality", 0.95), exif: store.get("exif", true), theme: store.get("theme", "system") };
+const applyThemeSetting = () => { if (settings.theme === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = settings.theme; };
+applyThemeSetting();
+
+let LOOKS = [];
+const state = { photos: [], cur: -1, look: null, amount: 1, fam: "All", busy: false };
+
+function toast(msg, kind = "", action) {
+  document.querySelectorAll(".toast").forEach(t => t.remove());
+  const el = document.createElement("div"); el.className = "toast " + kind;
+  const s = document.createElement("span"); s.textContent = msg; el.append(s);
+  if (action) { const b = document.createElement("button"); b.textContent = action.label; b.onclick = () => { el.remove(); action.run(); }; el.append(b); }
+  document.body.append(el);
+  setTimeout(() => el.remove(), action ? 7000 : kind === "err" ? 6000 : 3000);
+}
+
+/* ======================= WebGL renderer ======================= */
+const R = (() => {
+  const canvas = $("gl");
+  const gl = canvas.getContext("webgl2", { premultipliedAlpha: false, preserveDrawingBuffer: true, antialias: false });
+  if (!gl) return null;
+  const vs = `#version 300 es
+  in vec2 p; out vec2 uv; uniform bool flipY;
+  void main(){ uv = p * 0.5 + 0.5; gl_Position = vec4(p.x, flipY ? -p.y : p.y, 0, 1); }`;
+  const fs = `#version 300 es
+  precision highp float; precision highp sampler3D;
+  in vec2 uv; out vec4 o;
+  uniform sampler2D img; uniform sampler3D lut; uniform sampler2D glowTex;
+  uniform float N, amount, grain, grainPx, vignette, halation, colorGrain;
+  uniform vec2 full; uniform vec4 tile; uniform bool original, hasGlow;
+  uint hash(uvec3 x){ x = x*1664525u + 1013904223u; x.x += x.y*x.z; x.y += x.z*x.x; x.z += x.x*x.y; x ^= x >> 16u; x.x += x.y*x.z; x.y += x.z*x.x; x.z += x.x*x.y; return x.x ^ x.y ^ x.z; }
+  float rnd(ivec2 c, uint k){ return float(hash(uvec3(uvec2(c + 65536), k)) & 0xFFFFu) / 65535.0; }
+  float vnoise(vec2 q, uint k){
+    vec2 i = floor(q), f = fract(q); f = f*f*(3.0-2.0*f); ivec2 c = ivec2(i);
+    float a = rnd(c,k), b = rnd(c+ivec2(1,0),k), d = rnd(c+ivec2(0,1),k), e = rnd(c+ivec2(1,1),k);
+    return mix(mix(a,b,f.x), mix(d,e,f.x), f.y);
+  }
+  void main(){
+    vec2 px = tile.xy + uv * tile.zw;                 // position in the full photo, in pixels
+    vec3 src = texture(img, vec2(uv.x, 1.0 - uv.y)).rgb;
+    if (original) { o = vec4(src, 1); return; }
+    vec3 g = texture(lut, src * ((N - 1.0) / N) + 0.5 / N).rgb;
+    if (hasGlow) g += texture(glowTex, vec2(px.x / full.x, 1.0 - px.y / full.y)).rgb * halation;
+    if (vignette > 0.0) {
+      vec2 d = (px / full - 0.5) * vec2(full.x / full.y, 1.0);
+      float r = length(d) / length(vec2(full.x / full.y, 1.0) * 0.5);
+      float ang = 0.25 + 0.45 * vignette;
+      g *= pow(cos(min(r * ang, 1.5)), 4.0);
+    }
+    vec3 c = mix(src, g, amount);
+    if (grain > 0.0) {
+      vec2 q = px / grainPx;
+      float n = (vnoise(q, 1u) - 0.5) * 0.72 + (vnoise(q * 2.03 + 17.0, 2u) - 0.5) * 0.36 + (rnd(ivec2(px), 3u) - 0.5) * 0.22;
+      vec3 nc = vec3(vnoise(q * 1.7, 4u), vnoise(q * 1.7, 5u), vnoise(q * 1.7, 6u)) - 0.5;
+      vec3 noise = vec3(n) + nc * colorGrain;
+      vec3 w = 2.0 * min(c, 1.0 - c) + 0.08;             // strongest in the mid-tones, like film
+      c += noise * w * grain * amount;
+    }
+    c += (rnd(ivec2(px), 9u) - 0.5) / 255.0;            // dither: no banding in skies
+    o = vec4(clamp(c, 0.0, 1.0), 1);
+  }`;
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const U = {}; for (const n of ["img", "lut", "glowTex", "N", "amount", "grain", "grainPx", "vignette", "halation", "colorGrain", "full", "tile", "original", "hasGlow", "flipY"]) U[n] = gl.getUniformLocation(prog, n);
+  gl.uniform1i(U.img, 0); gl.uniform1i(U.lut, 1); gl.uniform1i(U.glowTex, 2);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+  gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+
+  const imgTex = gl.createTexture(), glowTex = gl.createTexture(), lutTexs = new Map();
+  for (const t of [imgTex, glowTex]) {
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  }
+  const maxTex = Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE), 4096);
+
+  function lutTex(look, n) {
+    const key = look.id + ":" + n;
+    if (lutTexs.has(key)) return lutTexs.get(key);
+    const data = AceEngine.buildLut(look, n);
+    const t = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_3D, t);
+    gl.texImage3D(gl.TEXTURE_3D, 0, gl.RGBA16F, n, n, n, 0, gl.RGBA, gl.FLOAT, data);
+    for (const p of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER]) gl.texParameteri(gl.TEXTURE_3D, p, gl.LINEAR);
+    for (const p of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T, gl.TEXTURE_WRAP_R]) gl.texParameteri(gl.TEXTURE_3D, p, gl.CLAMP_TO_EDGE);
+    gl.activeTexture(gl.TEXTURE0);
+    lutTexs.set(key, t);
+    return t;
+  }
+
+  /* Red glow around bright lights (for the night look), made from a small copy of the photo. */
+  function glowFor(small) {
+    const w = small.width, h = small.height, cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext("2d", { willReadFrequently: true }); ctx.drawImage(small, 0, 0);
+    const im = ctx.getImageData(0, 0, w, h), d = im.data, f = new Float32Array(w * h * 3);
+    for (let i = 0, j = 0; i < d.length; i += 4, j += 3) {
+      const t = (v) => Math.max(0, (v / 255 - 0.7) / 0.3);
+      const r = t(d[i]), g = t(d[i + 1]), b = t(d[i + 2]);
+      f[j] = 0.45 * r + 0.45 * g + 0.1 * b; f[j + 1] = 0.06 * (r + g) + 0.02 * b; f[j + 2] = 0.02 * (r + g) + 0.01 * b;
+    }
+    const sigma = Math.max(2, w / 160), rad = Math.max(1, Math.round(sigma * 0.95));
+    const tmp = new Float32Array(f.length);
+    for (let pass = 0; pass < 3; pass++) { boxH(f, tmp, w, h, rad); boxV(tmp, f, w, h, rad); }
+    for (let i = 0, j = 0; i < d.length; i += 4, j += 3) { d[i] = Math.min(255, f[j] * 255); d[i + 1] = Math.min(255, f[j + 1] * 255); d[i + 2] = Math.min(255, f[j + 2] * 255); d[i + 3] = 255; }
+    ctx.putImageData(im, 0, 0);
+    return cv;
+  }
+  function boxH(src, dst, w, h, r) {
+    for (let y = 0; y < h; y++) for (let k = 0; k < 3; k++) {
+      let acc = 0; const row = y * w;
+      for (let x = -r; x <= r; x++) acc += src[(row + Math.min(w - 1, Math.max(0, x))) * 3 + k];
+      for (let x = 0; x < w; x++) {
+        dst[(row + x) * 3 + k] = acc / (2 * r + 1);
+        acc += src[(row + Math.min(w - 1, x + r + 1)) * 3 + k] - src[(row + Math.max(0, x - r)) * 3 + k];
+      }
+    }
+  }
+  function boxV(src, dst, w, h, r) {
+    for (let x = 0; x < w; x++) for (let k = 0; k < 3; k++) {
+      let acc = 0;
+      for (let y = -r; y <= r; y++) acc += src[(Math.min(h - 1, Math.max(0, y)) * w + x) * 3 + k];
+      for (let y = 0; y < h; y++) {
+        dst[(y * w + x) * 3 + k] = acc / (2 * r + 1);
+        acc += src[(Math.min(h - 1, y + r + 1) * w + x) * 3 + k] - src[(Math.max(0, y - r) * w + x) * 3 + k];
+      }
+    }
+  }
+
+  function setLook(look, n, full, opts) {
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_3D, lutTex(look || LOOKS[0], n)); gl.activeTexture(gl.TEXTURE0);
+    gl.uniform1f(U.N, n);
+    gl.uniform1i(U.original, !look);
+    gl.uniform1f(U.amount, opts.amount);
+    const lk = look || {};
+    gl.uniform1f(U.grain, (lk.grain || 0) * 0.0042 * (opts.grainScale ?? 1));
+    gl.uniform1f(U.grainPx, Math.max(1.0, full[0] / 2600) * (lk.grain_size || 1) * (opts.grainPxScale ?? 1));
+    gl.uniform1f(U.colorGrain, lk.mono ? 0 : 0.25);
+    gl.uniform1f(U.vignette, lk.vignette || 0);
+    gl.uniform1f(U.halation, (lk.halation || 0) * 0.9 * opts.amount);
+    gl.uniform2f(U.full, full[0], full[1]);
+    const glow = lk.halation && opts.glow;
+    gl.uniform1i(U.hasGlow, !!glow);
+    if (glow) {
+      gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, glowTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, glow);
+      gl.activeTexture(gl.TEXTURE0);
+    }
+  }
+  function drawTile(source, tile, flip) {
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, imgTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    canvas.width = tile[2]; canvas.height = tile[3];
+    gl.viewport(0, 0, tile[2], tile[3]);
+    gl.uniform4f(U.tile, ...tile);
+    gl.uniform1i(U.flipY, !!flip);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  /** Render a small image (preview or thumbnail) into a 2D canvas. */
+  function renderTo(dest, source, look, opts) {
+    const w = source.width, h = source.height;
+    setLook(look, opts.n || 33, opts.full || [w, h], opts);
+    drawTile(source, [0, 0, w, h], false);
+    dest.width = w; dest.height = h;
+    dest.getContext("2d").drawImage(canvas, 0, 0);
+  }
+
+  /** Full-resolution render in tiles; returns a canvas the size of the photo. */
+  async function renderFull(bitmap, look, opts) {
+    const W = bitmap.width, H = bitmap.height, T = maxTex;
+    setLook(look, 65, [W, H], opts);
+    const out = document.createElement("canvas"); out.width = W; out.height = H;
+    const octx = out.getContext("2d");
+    for (let y = 0; y < H; y += T) for (let x = 0; x < W; x += T) {
+      const tw = Math.min(T, W - x), th = Math.min(T, H - y);
+      const part = (x === 0 && y === 0 && tw === W && th === H) ? bitmap : await createImageBitmap(bitmap, x, y, tw, th);
+      drawTile(part, [x, H - y - th, tw, th], false);
+      octx.drawImage(canvas, x, y);
+      if (part !== bitmap) part.close?.();
+      await new Promise(r => setTimeout(r, 0));
+    }
+    return out;
+  }
+  return { renderTo, renderFull, glowFor, maxTex };
+})();
+
+/* ======================= Photos ======================= */
+async function addFiles(files) {
+  const list = [...files].filter(f => f.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif|avif)$/i.test(f.name));
+  if (!list.length) return;
+  showBusy(true);
+  let failed = 0;
+  for (const file of list) {
+    try {
+      const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+      const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      const preview = await createImageBitmap(bmp, { resizeWidth: Math.round(bmp.width * scale), resizeHeight: Math.round(bmp.height * scale), resizeQuality: "high" });
+      const ts = Math.min(1, 140 / Math.min(bmp.width, bmp.height));
+      const thumb = await createImageBitmap(bmp, { resizeWidth: Math.round(bmp.width * ts), resizeHeight: Math.round(bmp.height * ts), resizeQuality: "high" });
+      const gs = Math.min(1, 480 / Math.max(bmp.width, bmp.height));
+      const small = await createImageBitmap(bmp, { resizeWidth: Math.round(bmp.width * gs), resizeHeight: Math.round(bmp.height * gs), resizeQuality: "medium" });
+      const tcv = document.createElement("canvas"); tcv.width = thumb.width; tcv.height = thumb.height; tcv.getContext("2d").drawImage(thumb, 0, 0);
+      const ss = Math.min(1, 160 / Math.min(bmp.width, bmp.height));
+      const stripSrc = await createImageBitmap(bmp, { resizeWidth: Math.round(bmp.width * ss), resizeHeight: Math.round(bmp.height * ss), resizeQuality: "high" });
+      const w = bmp.width, h = bmp.height;
+      bmp.close?.();
+      state.photos.push({ file, name: file.name, w, h, preview, stripSrc, small, glow: null, thumbUrl: tcv.toDataURL("image/jpeg", 0.8) });
+    } catch (e) { console.error(e); failed++; }
+  }
+  showBusy(false);
+  if (failed) toast(failed === list.length ? "This phone's browser can't open that photo format. Try a JPEG." : `${failed} photo(s) couldn't be opened.`, "err");
+  if (state.cur < 0 && state.photos.length) selectPhoto(0); else renderPhotos();
+}
+function showBusy(on) { $("busy").hidden = !on; }
+
+function selectPhoto(i) {
+  state.cur = i;
+  $("empty").hidden = true; $("editor").hidden = false; $("addBtn").hidden = false;
+  renderPhotos(); renderStrip(); renderView();
+}
+function renderPhotos() {
+  const box = $("photos"); box.innerHTML = "";
+  box.hidden = state.photos.length < 2;
+  state.photos.forEach((p, i) => {
+    const b = document.createElement("button"); b.className = "pthumb"; b.setAttribute("aria-current", i === state.cur);
+    b.innerHTML = `<img alt="" src="${p.thumbUrl}">`; b.onclick = () => selectPhoto(i);
+    box.append(b);
+  });
+}
+const cur = () => state.photos[state.cur];
+function glowOf(p) { if (!p.glow) p.glow = R.glowFor(p.small); return p.glow; }
+
+/* ======================= Editor ======================= */
+let viewOriginal = false, rafPending = false;
+function renderView() {
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => {
+    rafPending = false;
+    const p = cur(); if (!p) return;
+    const lk = viewOriginal ? null : state.look;
+    // preview: grain sized for how the photo looks on screen
+    const scale = p.preview.width / p.w;
+    R.renderTo($("view"), p.preview, lk, { n: 65, amount: state.amount, glow: lk && lk.halation ? glowOf(p) : null,
+      grainScale: Math.min(1, Math.max(0.35, Math.sqrt(scale) * 1.4)) });
+    $("badge").style.opacity = viewOriginal ? 1 : 0;
+  });
+}
+function renderInfo() {
+  const lk = state.look, box = $("info");
+  if (!lk) { box.innerHTML = `<div class="row"><b>Original</b></div><div class="style">Pick a look below. Hold the photo any time to compare with the original.</div>`; return; }
+  box.innerHTML = `<div class="row"><b></b><span class="code"></span><span class="insp"></span></div><div class="style"></div>`;
+  box.querySelector("b").textContent = lk.name; box.querySelector(".code").textContent = lk.code;
+  box.querySelector(".insp").textContent = "Inspired by " + lk.inspired; box.querySelector(".style").textContent = lk.style;
+}
+function renderFams() {
+  const fams = ["All", ...new Set(LOOKS.map(l => l.family))], box = $("fams"); box.innerHTML = "";
+  for (const f of fams) {
+    const b = document.createElement("button"); b.className = "fam"; b.textContent = f; b.setAttribute("aria-pressed", f === state.fam);
+    b.onclick = () => { state.fam = f; renderFams(); renderStrip(); };
+    box.append(b);
+  }
+}
+let stripToken = 0;
+async function renderStrip() {
+  const p = cur(), box = $("strip"), token = ++stripToken;
+  box.innerHTML = "";
+  const none = document.createElement("button"); none.className = "lk"; none.setAttribute("aria-pressed", !state.look);
+  none.innerHTML = `<div class="none">None</div><span>Original</span>`;
+  none.onclick = () => pickLook(null); box.append(none);
+  const shown = LOOKS.filter(l => state.fam === "All" || l.family === state.fam);
+  const items = [];
+  for (const lk of shown) {
+    const b = document.createElement("button"); b.className = "lk"; b.setAttribute("aria-pressed", state.look === lk);
+    const cv = document.createElement("canvas"); cv.width = 76; cv.height = 76;
+    b.append(cv); b.insertAdjacentHTML("beforeend", `<span><i>${lk.code}</i> ${lk.name}</span>`);
+    b.onclick = () => pickLook(lk);
+    box.append(b); items.push([lk, cv]);
+  }
+  // draw the little previews a few at a time so the screen stays responsive
+  for (const [lk, cv] of items) {
+    if (token !== stripToken) return;
+    const tmp = document.createElement("canvas");
+    R.renderTo(tmp, p.stripSrc, lk, { n: 33, amount: 1, glow: lk.halation ? glowOf(p) : null, grainScale: 0.6 });
+    const ctx = cv.getContext("2d"), s = Math.min(tmp.width, tmp.height);
+    cv.width = 152; cv.height = 152;
+    ctx.drawImage(tmp, (tmp.width - s) / 2, (tmp.height - s) / 2, s, s, 0, 0, 152, 152);
+    await new Promise(r => setTimeout(r, 0));
+  }
+  const sel = box.querySelector('[aria-pressed="true"]'); sel?.scrollIntoView({ inline: "center", block: "nearest" });
+}
+function pickLook(lk) {
+  state.look = lk; store.set("look", lk ? lk.id : null);
+  document.querySelectorAll(".lk").forEach((b, i) => b.setAttribute("aria-pressed", false));
+  const btns = [...$("strip").children];
+  const idx = lk ? 1 + LOOKS.filter(l => state.fam === "All" || l.family === state.fam).indexOf(lk) : 0;
+  btns[idx]?.setAttribute("aria-pressed", true);
+  btns[idx]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  $("saveBtn").disabled = !lk;
+  renderInfo(); renderView();
+}
+$("amount").oninput = () => { state.amount = $("amount").value / 100; $("amountOut").textContent = $("amount").value + "%"; renderView(); };
+
+// Hold to compare
+const stage = $("stage");
+const holdOn = (e) => { if (e.target.closest("button")) return; viewOriginal = true; $("hint").hidden = true; renderView(); };
+const holdOff = () => { if (!viewOriginal) return; viewOriginal = false; renderView(); };
+stage.addEventListener("pointerdown", holdOn); ["pointerup", "pointercancel", "pointerleave"].forEach(ev => stage.addEventListener(ev, holdOff));
+stage.addEventListener("contextmenu", e => e.preventDefault());
+
+/* ======================= Saving ======================= */
+function outName(p, lk) { return p.name.replace(/\.[^.]+$/, "") + " " + lk.code + ".jpg"; }
+
+/* Copy the photo's EXIF (date, camera, location) into the new JPEG, marked upright. */
+async function withExif(blob, file) {
+  if (!settings.exif || !/jpe?g$/i.test(file.type.split("/")[1] || file.name)) return blob;
+  try {
+    const src = new Uint8Array(await file.slice(0, 256 * 1024).arrayBuffer());
+    if (src[0] !== 0xFF || src[1] !== 0xD8) return blob;
+    let i = 2, app1 = null;
+    while (i + 4 < src.length && src[i] === 0xFF) {
+      const marker = src[i + 1], len = (src[i + 2] << 8) | src[i + 3];
+      if (marker === 0xE1 && src[i + 4] === 0x45 && src[i + 5] === 0x78) { app1 = src.slice(i, i + 2 + len); break; }
+      if (marker === 0xDA) break;
+      i += 2 + len;
+    }
+    if (!app1) return blob;
+    fixOrientation(app1);
+    const out = new Uint8Array(await blob.arrayBuffer());
+    return new Blob([out.subarray(0, 2), app1, out.subarray(2)], { type: "image/jpeg" });
+  } catch { return blob; }
+}
+function fixOrientation(seg) {
+  const t = 10, le = seg[t] === 0x49;
+  const u16 = (o) => le ? seg[o] | (seg[o + 1] << 8) : (seg[o] << 8) | seg[o + 1];
+  const u32 = (o) => le ? (seg[o] | (seg[o + 1] << 8) | (seg[o + 2] << 16) | (seg[o + 3] << 24)) >>> 0 : ((seg[o] << 24) | (seg[o + 1] << 16) | (seg[o + 2] << 8) | seg[o + 3]) >>> 0;
+  const ifd = t + u32(t + 4), n = u16(ifd);
+  for (let k = 0; k < n; k++) {
+    const e = ifd + 2 + k * 12;
+    if (u16(e) === 0x0112) { if (le) { seg[e + 8] = 1; seg[e + 9] = 0; } else { seg[e + 8] = 0; seg[e + 9] = 1; } }
+  }
+}
+
+async function makeJpeg(p, lk) {
+  const bmp = await createImageBitmap(p.file, { imageOrientation: "from-image" });
+  try {
+    const out = await R.renderFull(bmp, lk, { amount: state.amount, glow: lk.halation ? glowOf(p) : null });
+    const blob = await new Promise((res, rej) => out.toBlob(b => b ? res(b) : rej(new Error("Couldn't make the JPEG")), "image/jpeg", settings.quality));
+    out.width = out.height = 0;
+    return await withExif(blob, p.file);
+  } finally { bmp.close?.(); }
+}
+function download(blob, name) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+async function shareFiles(files) {
+  if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files }); return true; } catch (e) { if (e.name === "AbortError") return true; } }
+  return false;
+}
+
+function progressSheet(title) {
+  const scrim = document.createElement("div"); scrim.className = "scrim";
+  const sh = document.createElement("div"); sh.className = "sheet";
+  sh.innerHTML = `<div class="grab"></div><h3></h3><p class="pt"></p><div class="prog"><i></i></div><button class="btn tonal" style="width:100%">Cancel</button>`;
+  sh.querySelector("h3").textContent = title;
+  document.body.append(scrim, sh);
+  const ctl = { cancelled: false,
+    set(i, n, text) { sh.querySelector(".pt").textContent = text; sh.querySelector(".prog i").style.width = (i / n * 100) + "%"; },
+    close() { scrim.remove(); sh.remove(); } };
+  sh.querySelector("button").onclick = () => { ctl.cancelled = true; };
+  return ctl;
+}
+
+async function saveJobs(jobs, title) {
+  if (state.busy) return; state.busy = true;
+  const ui = progressSheet(title), done = [];
+  try {
+    for (let i = 0; i < jobs.length; i++) {
+      if (ui.cancelled) break;
+      const [p, lk] = jobs[i];
+      ui.set(i, jobs.length, `${i + 1} of ${jobs.length} · ${outName(p, lk)}`);
+      const blob = await makeJpeg(p, lk);
+      const file = new File([blob], outName(p, lk), { type: "image/jpeg" });
+      done.push(file);
+      download(blob, file.name);
+      await new Promise(r => setTimeout(r, 250));   // let the browser start each download
+    }
+    ui.set(jobs.length, jobs.length, "Done");
+  } catch (e) {
+    console.error(e);
+    toast(e.message && /memory|allocation|size/i.test(e.message) ? "This photo is too big for the phone's memory. Close other apps and try again." : "Saving failed: " + e.message, "err");
+  } finally { ui.close(); state.busy = false; }
+  if (done.length) {
+    toast(`Saved ${done.length} photo${done.length > 1 ? "s" : ""} to Downloads`, "", navigator.canShare ? { label: "Share", run: () => shareFiles(done) } : null);
+  }
+}
+$("saveBtn").onclick = () => state.look && saveJobs([[cur(), state.look]], "Saving");
+$("saveAllBtn").onclick = () => saveJobs(LOOKS.map(lk => [cur(), lk]), "Saving all 22 looks");
+
+/* ======================= Menus ======================= */
+function sheet(html) {
+  const scrim = document.createElement("div"); scrim.className = "scrim";
+  const sh = document.createElement("div"); sh.className = "sheet"; sh.innerHTML = `<div class="grab"></div>` + html;
+  const close = () => { scrim.remove(); sh.remove(); };
+  scrim.onclick = close; document.body.append(scrim, sh);
+  return { el: sh, close };
+}
+$("menuBtn").onclick = () => {
+  const s = sheet(`<h3>Ace Looks</h3><p>Film looks for your photos, made by the Ace Studio project.</p>
+    ${state.photos.length > 1 && state.look ? `<button class="menu-btn" id="mAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 17 5-4.5 3.5 3 3-2.5L20 17"/></svg><span>Apply this look to all ${state.photos.length} photos<small>Saves ${state.photos.length} photos with ${state.look.name}</small></span></button>` : ""}
+    ${state.photos.length ? `<button class="menu-btn" id="mClear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg><span>Start over<small>Remove the photos from this screen (your gallery isn't touched)</small></span></button>` : ""}
+    <div class="opt"><div><b>JPEG quality</b><small>Higher keeps more detail and makes bigger files</small></div>
+      <select id="mQ"><option value="0.92">High (92)</option><option value="0.95">Very high (95)</option><option value="1">Maximum (100)</option></select></div>
+    <div class="opt"><div><b>Keep photo details</b><small>Date, camera and location from the original</small></div><input type="checkbox" id="mExif"></div>
+    <div class="opt"><div><b>Theme</b></div><select id="mTheme"><option value="system">System</option><option value="dark">Dark</option><option value="light">Light</option></select></div>
+    <p class="legal">Saved photos keep their full size and get the look's code in the name, like <b>IMG_1124 SN.jpg</b>. Looks are Ace Studio's own colour styles, hand-tuned to resemble each film or camera mode. Ace Studio isn't affiliated with Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid or Lomography. Everything runs on your phone; photos are never uploaded.</p>`);
+  const q = s.el.querySelector("#mQ"); q.value = String(settings.quality); q.onchange = () => { settings.quality = Number(q.value); store.set("quality", settings.quality); };
+  const ex = s.el.querySelector("#mExif"); ex.checked = settings.exif; ex.onchange = () => { settings.exif = ex.checked; store.set("exif", ex.checked); };
+  const th = s.el.querySelector("#mTheme"); th.value = settings.theme; th.onchange = () => { settings.theme = th.value; store.set("theme", th.value); applyThemeSetting(); };
+  const all = s.el.querySelector("#mAll"); if (all) all.onclick = () => { s.close(); saveJobs(state.photos.map(p => [p, state.look]), `Saving ${state.photos.length} photos`); };
+  const clr = s.el.querySelector("#mClear"); if (clr) clr.onclick = () => { s.close(); state.photos = []; state.cur = -1; $("editor").hidden = true; $("empty").hidden = false; $("addBtn").hidden = true; };
+};
+$("pickBtn").onclick = $("addBtn").onclick = () => $("file").click();
+$("file").onchange = () => { addFiles($("file").files); $("file").value = ""; };
+
+/* ======================= Start ======================= */
+(async () => {
+  if (!R) { $("empty").querySelector("p").textContent = "This browser can't run Ace Looks (it needs WebGL 2). Try Chrome."; $("pickBtn").disabled = true; return; }
+  try { LOOKS = (await (await fetch("looks.json")).json()).looks; }
+  catch { toast("Couldn't load the looks. Check your connection once, then it works offline.", "err"); return; }
+  const saved = store.get("look", null); state.look = LOOKS.find(l => l.id === saved) || LOOKS[0];
+  renderFams(); renderInfo();
+  // photos shared from the gallery (Android share menu)
+  if (location.search.includes("shared=1") && "caches" in window) {
+    try {
+      const c = await caches.open("ace-looks-shared"), keys = await c.keys(), files = [];
+      for (const k of keys) { const r = await c.match(k); const b = await r.blob(); files.push(new File([b], decodeURIComponent(k.url.split("/").pop()), { type: b.type })); await c.delete(k); }
+      history.replaceState(null, "", location.pathname);
+      if (files.length) addFiles(files);
+    } catch (e) { console.error(e); }
+  }
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+})();
+</script>
+</body>
+</html>

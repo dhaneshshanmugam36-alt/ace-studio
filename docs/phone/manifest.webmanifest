@@ -1,0 +1,21 @@
+{
+  "name": "Ace Looks",
+  "short_name": "Ace Looks",
+  "description": "22 film looks for your photos. Free, offline, private.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111316",
+  "theme_color": "#14171A",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "share_target": {
+    "action": "./share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": { "files": [{ "name": "photos", "accept": ["image/*", ".jpg", ".jpeg", ".png", ".webp"] }] }
+  }
+}
