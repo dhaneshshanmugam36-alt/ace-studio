@@ -34,7 +34,7 @@ Both are free and open source, and they share the same 49 film looks, so a photo
 
 <p align="center">
   <img src="docs/screenshots/phone-editor.png" width="200" alt="Editing a photo with Golden Hour">
-  <img src="docs/screenshots/phone-mono.png" width="200" alt="Classic Grain black and white">
+  <img src="docs/screenshots/phone-effects.png" width="200" alt="Effects: light leak, date stamp and Polaroid frame">
   <img src="docs/screenshots/phone-camera.png" width="200" alt="Film camera with a live look">
   <img src="docs/screenshots/phone-home.png" width="200" alt="Home screen">
 </p>
@@ -51,13 +51,18 @@ Updates arrive by themselves the next time you open it with internet.
 
 - **Film camera:** see the film look live while you shoot. Swipe to change looks, tap to focus, pinch to zoom.
   Daylight shots use the camera's full-resolution stills. In the dark, **Night mode** merges 8 frames to cut
-  noise, and **Smart HDR** brings out shadows. Every shot saves with the look *and* as a clean original.
+  noise, and **Smart HDR** brings out shadows. After each shot you see it first, then **Save**, **Edit** or
+  **Delete**. Saved shots keep the look *and* a clean original.
 - **Your photos:** choose photos from your gallery, use your phone's own camera app, or share photos to Ace Looks
   from the gallery.
 - **Tabs by maker:** Kodak, Fujifilm, Ricoh, Leica, CineStill and more, plus For you and Favourites.
 - **For you:** the 4 looks that suit each photo (people, landscape, sky, night, indoor) show first.
-- **Simple controls:** hold the photo to compare with the original, set the **strength**, and use **Adjust** for
-  light, contrast, warmth and grain. **Auto fix** and natural skin tones are on by default.
+- **Simple controls:** three tabs, **Looks**, **Adjust** (light, contrast, warmth) and **Effects**. Hold the photo
+  to compare with the original. **Auto fix** and natural skin tones are on by default.
+- **Effects:** light leaks (6 styles + shuffle), dust & scratches, halation, soft bloom, vignette, grain, an orange
+  date stamp, and frames (Polaroid, 35 mm film strip, white or black border). Live in the camera too.
+- **Preview before saving:** see exactly what will be saved, at its real size, before anything is downloaded.
+- **Recent:** your saved photos stay on the home screen, so you can reopen and edit them again.
 - **Save** one look, your favourites, the suggested looks, or **all 49**, at full resolution, with the photo's
   date, camera and location kept. Files are named like `IMG_1124 SN.jpg` (`SN` = Soft Negative).
 - **Private:** everything runs on your phone. Photos are never uploaded anywhere.
