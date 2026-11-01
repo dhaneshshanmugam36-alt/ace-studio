@@ -301,6 +301,7 @@ svg { flex: none; }
 <script src="engine.js"></script>
 <script>
 "use strict";
+const APP_VERSION = "2.0.6 · build 7";
 const $ = (id) => document.getElementById(id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem("acelooks." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
@@ -1012,6 +1013,7 @@ $("menuBtn").onclick = () => {
     <div class="opt"><div><b>Camera: also save the original</b><small>Keeps a copy without the look, so nothing is lost</small></div><input type="checkbox" id="mOrig"></div>
     <div class="opt"><div><b>Keep photo details</b><small>Date, camera and location from the original</small></div><input type="checkbox" id="mExif"></div>
     <div class="opt"><div><b>Theme</b></div><select id="mTheme"><option value="system">System</option><option value="dark">Dark</option><option value="light">Light</option></select></div>
+    <p class="legal" style="margin-top:8px">Version ${APP_VERSION}</p>
     <p class="legal">Tip: long-press any look to add it to your favourites. Saved photos keep their full size and get the look's code in the name, like <b>IMG_1124 SN.jpg</b>. Looks are Ace Studio's own colour styles, hand-tuned to resemble each film or camera mode. Ace Studio isn't affiliated with Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid or Lomography. Everything runs on your phone; photos are never uploaded.</p>`);
   const q = s.el.querySelector("#mQ"); q.value = String(settings.quality); q.onchange = () => { settings.quality = Number(q.value); store.set("quality", settings.quality); };
   const og = s.el.querySelector("#mOrig"); og.checked = settings.keepOriginal; og.onchange = () => { settings.keepOriginal = og.checked; store.set("keepOriginal", og.checked); };
@@ -1667,7 +1669,11 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && Cam
       if (files.length) addFiles(files);
     } catch (e) { console.error(e); }
   }
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  if ("serviceWorker" in navigator) {
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && !Cam.live && !state.busy) location.reload(); });
+  }
 })();
 </script>
 </body>

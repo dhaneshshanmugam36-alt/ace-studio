@@ -1,5 +1,5 @@
 // Ace Looks service worker: works offline, and receives photos shared from the gallery.
-const CACHE = "ace-looks-v6";
+const CACHE = "ace-looks-v7";
 const SHELL = ["./", "index.html", "engine.js", "engine-worker.js", "looks.json", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -25,7 +25,8 @@ self.addEventListener("fetch", (e) => {
   }
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
   // Network first (so updates arrive), falling back to the saved copy when offline.
-  e.respondWith(fetch(e.request).then((r) => {
+  // Always ask the server for the newest version when online (skip the browser's 10-minute cache).
+  e.respondWith(fetch(e.request.url, { cache: "no-cache", credentials: "same-origin" }).then((r) => {
     if (r.ok) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
     return r;
   }).catch(() => caches.match(e.request, { ignoreSearch: true }).then((r) => r || caches.match("index.html"))));
