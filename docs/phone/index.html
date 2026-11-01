@@ -359,7 +359,7 @@ const R = (() => {
   in vec2 uv; out vec4 o;
   uniform sampler2D img; uniform sampler3D lut; uniform sampler2D glowTex;
   uniform float N, amount, grain, grainPx, vignette, halation, colorGrain;
-  uniform vec2 full; uniform vec4 tile; uniform bool original, hasGlow, usePre;
+  uniform vec2 full; uniform vec4 tile; uniform bool original, hasGlow, usePre; uniform float crop;
   uniform vec3 mul; uniform float contrast;
   uniform sampler2D toneTex; uniform bool hasTone; uniform float toneAmt; uniform uint seed;
   uniform sampler2D underTex; uniform bool hasUnder; uniform float underK, underScale; uniform vec2 underOff;
@@ -397,7 +397,7 @@ const R = (() => {
   }
   void main(){
     vec2 px = tile.xy + uv * tile.zw;                 // position in the full photo, in pixels
-    vec3 src = texture(img, vec2(uv.x, 1.0 - uv.y)).rgb;
+    vec3 src = texture(img, 0.5 + (vec2(uv.x, 1.0 - uv.y) - 0.5) / crop).rgb;
     if (original) { o = vec4(src, 1); return; }
     if (hasFuse) {                       // Night: clean colour and tone from many frames + fine detail from the full photo
       vec2 tx = vec2(uv.x, 1.0 - uv.y), ts = fuseR / vec2(textureSize(img, 0));
@@ -439,7 +439,7 @@ const R = (() => {
   const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const U = {}; for (const n of ["img", "lut", "glowTex", "N", "amount", "grain", "grainPx", "vignette", "halation", "colorGrain", "full", "tile", "original", "hasGlow", "flipY", "usePre", "mul", "contrast", "toneTex", "hasTone", "toneAmt", "seed", "underTex", "hasUnder", "underK", "underScale", "underOff", "fuseTex", "hasFuse", "fuseScale", "fuseDetail", "fuseR", "fuseOff"]) U[n] = gl.getUniformLocation(prog, n);
+  const U = {}; for (const n of ["img", "lut", "glowTex", "N", "amount", "grain", "grainPx", "vignette", "halation", "colorGrain", "full", "tile", "original", "hasGlow", "flipY", "usePre", "mul", "contrast", "toneTex", "hasTone", "toneAmt", "seed", "underTex", "hasUnder", "underK", "underScale", "underOff", "fuseTex", "hasFuse", "fuseScale", "fuseDetail", "fuseR", "fuseOff", "crop"]) U[n] = gl.getUniformLocation(prog, n);
   gl.uniform1i(U.img, 0); gl.uniform1i(U.lut, 1); gl.uniform1i(U.glowTex, 2); gl.uniform1i(U.toneTex, 3); gl.uniform1i(U.underTex, 7); gl.uniform1i(U.fuseTex, 8);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
   gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
@@ -453,14 +453,14 @@ const R = (() => {
   const maxTex = Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE), 4096);
 
   let worker = null, wid = 0; const waiting = new Map(), pending = new Map();
-  try { worker = new Worker("engine-worker.js"); worker.onmessage = (e) => { const w = waiting.get(e.data.id); waiting.delete(e.data.id); if (w) w(e.data.data); }; } catch { worker = null; }
+  try { worker = new Worker("engine-worker.js"); worker.onmessage = (e) => { const w = waiting.get(e.data.id); waiting.delete(e.data.id); if (w) w(e.data.analysis || e.data.data); }; } catch { worker = null; }
   const hasLut = (look, n) => lutTexs.has(look.id + ":" + n);
   /** Make sure a look's table exists, building it in the background (no stutter). */
   function ensureLut(look, n) {
     const key = look.id + ":" + n;
     if (lutTexs.has(key)) return Promise.resolve();
     if (pending.has(key)) return pending.get(key);
-    const pr = (worker ? new Promise(res => { const id = ++wid; waiting.set(id, res); worker.postMessage({ id, look, n }); })
+    const pr = (worker ? new Promise(res => { const id = ++wid; waiting.set(id, res); worker.postMessage({ type: "lut", id, look, n }); })
                        : Promise.resolve(AceEngine.buildLut(look, n))).then(data => { pending.delete(key); lutTex(look, n, data); });
     pending.set(key, pr);
     return pr;
@@ -537,6 +537,7 @@ const R = (() => {
     if (look && n > 33 && !hasLut(look, n)) n = 33;     // big table still being built: use the quick one meanwhile
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_3D, lutTex(look || NONE_LOOK, n)); gl.activeTexture(gl.TEXTURE0);
     gl.uniform1f(U.N, n);
+    gl.uniform1f(U.crop, opts.crop || 1);
     gl.uniform1i(U.original, !!opts.original);
     gl.uniform1f(U.amount, look ? opts.amount : 0);
     const lk = look || {};
@@ -734,7 +735,16 @@ const R = (() => {
     bindQuad(prog);
     return out;
   }
-  return { renderTo, renderFull, glowFor, toneFor, drawLive, resetLive, mergeStart, mergeAdd, mergeEnd, ensureLut, hasLut, maxTex, canvas, floatOK };
+  /** Scene analysis in the background worker. */
+  const bitmapOK = typeof OffscreenCanvas !== "undefined";
+  function analyzeBitmap(bitmap) {
+    return new Promise(res => { const id = ++wid; waiting.set(id, res); worker.postMessage({ type: "analyzeBitmap", id, bitmap, codeToId: CODE2ID }, [bitmap]); });
+  }
+  function analyzeAsync(data, w, h) {
+    if (!worker) return Promise.resolve(AceEngine.analyze(data, w, h, CODE2ID));
+    return new Promise(res => { const id = ++wid; waiting.set(id, res); worker.postMessage({ type: "analyze", id, data, w, h, codeToId: CODE2ID }); });
+  }
+  return { renderTo, renderFull, glowFor, toneFor, drawLive, resetLive, mergeStart, mergeAdd, mergeEnd, ensureLut, hasLut, analyzeAsync, analyzeBitmap, canBitmap: () => !!worker && bitmapOK, maxTex, canvas, floatOK };
 })();
 
 /* ======================= Photos ======================= */
@@ -851,6 +861,7 @@ async function renderStrip() {
   // draw the little previews a few at a time so the screen stays responsive
   for (const [lk, cv] of items) {
     if (token !== stripToken) return;
+    await R.ensureLut(lk, 33); if (token !== stripToken) return;      // built in the background
     const tmp = document.createElement("canvas");
     R.renderTo(tmp, p.stripSrc, lk, { n: 33, amount: 1, glow: lk.halation ? glowOf(p) : null, grainScale: 0.6, ...preFor(p) });
     const ctx = cv.getContext("2d"), s = Math.min(tmp.width, tmp.height);
@@ -1070,7 +1081,7 @@ const Cam = {
   lensZoom: store.get("lensZoom2", {}), stream: null, track: null, video: document.createElement("video"),
   ic: null, caps: {}, photoCaps: null, facing: "environment", deviceId: null, backIds: [], mainId: null, mainZoom: null,
   flash: false, dark: false, clipped: 0, analysis: null, tone: null, snap: null, busy: false, live: false, frame: 0,
-  zoom: 1, measuring: false, thumbsAt: 0, nameTimer: 0,
+  zoom: 1, swZoom: 1, measuring: false, thumbsAt: 0, nameTimer: 0,
 };
 Cam.video.muted = true; Cam.video.playsInline = true; Cam.video.setAttribute("playsinline", "");
 const isNight = () => Cam.night === "on" || (Cam.night === "auto" && Cam.dark);
@@ -1124,7 +1135,7 @@ function camPick(l, scroll) {
   if (scroll) $("camStrip").querySelector(`[data-id="${l.id}"]`)?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   const bn = $("bigName"); bn.querySelector("b").textContent = `${l.code} · ${l.name}`; bn.querySelector("span").textContent = "Inspired by " + l.inspired;
   bn.classList.add("on"); clearTimeout(Cam.nameTimer); Cam.nameTimer = setTimeout(() => bn.classList.remove("on"), 1300);
-  R.ensureLut(l, 65);   // ready in the background for saving
+  R.ensureLut(l, 33).then(() => R.ensureLut(l, 65));   // built in the background: no hitch when switching
 }
 function updateModes() {
   const n = isNight(), h = hdrNow();
@@ -1135,21 +1146,25 @@ function updateModes() {
 }
 /** Little live previews of each look in the carousel, refreshed every few seconds. */
 function updateThumbs(force) {
-  if (!Cam.snap || (!force && performance.now() - Cam.thumbsAt < 2500)) return;
+  if (!Cam.snap || (!force && performance.now() - Cam.thumbsAt < 4000)) return;
   Cam.thumbsAt = performance.now(); Cam.wantThumbs = true;
 }
 function drawThumbs() {
-  const box = $("camStrip"), br = box.getBoundingClientRect();
-  const tmp = document.createElement("canvas");
+  if (!Cam.snap) return;
+  const box = $("camStrip"), br = box.getBoundingClientRect(), tmp = document.createElement("canvas");
+  let drawn = 0;
   for (const c of box.children) {
-    if (!c.dataset.id) continue;
+    if (!c.dataset.id || c.dataset.thumb === String(Cam.thumbsAt)) continue;
     const r = c.getBoundingClientRect(); if (r.right < br.left - 80 || r.left > br.right + 80) continue;
     const l = LOOKS.find(x => x.id === c.dataset.id); if (!l) continue;
+    if (!R.hasLut(l, 33)) { R.ensureLut(l, 33).then(() => { Cam.wantThumbs = true; }); continue; }   // built in the background
+    if (drawn >= 3) { Cam.wantThumbs = true; break; }                                                  // spread over frames
     R.renderTo(tmp, Cam.snap, l, { n: 33, amount: 1, grainScale: 0 });
     let cv = c.querySelector("canvas");
     if (!cv) { cv = document.createElement("canvas"); cv.width = cv.height = 108; c.querySelector("i.sw")?.replaceWith(cv); }
-    const s = Math.min(tmp.width, tmp.height);
-    cv.getContext("2d").drawImage(tmp, (tmp.width - s) / 2, (tmp.height - s) / 2, s, s, 0, 0, 108, 108);
+    const sq = Math.min(tmp.width, tmp.height);
+    cv.getContext("2d").drawImage(tmp, (tmp.width - sq) / 2, (tmp.height - sq) / 2, sq, sq, 0, 0, 108, 108);
+    c.dataset.thumb = String(Cam.thumbsAt); drawn++;
   }
 }
 function placeGrid() {
@@ -1195,7 +1210,7 @@ async function startStreamRaw() {
   const st = Cam.track.getSettings ? Cam.track.getSettings() : {};
   if (st.facingMode) Cam.facing = st.facingMode;
   $("finder").classList.toggle("mirror", Cam.facing === "user");
-  Cam.zoom = st.zoom || 1;
+  Cam.zoom = st.zoom || 1; Cam.swZoom = 1;
   Cam.ic = null; Cam.photoCaps = null;
   if ("ImageCapture" in window) { try { Cam.ic = new ImageCapture(Cam.track); Cam.photoCaps = await Cam.ic.getPhotoCapabilities(); } catch { Cam.photoCaps = null; } }
   const adv = {};
@@ -1228,32 +1243,48 @@ function onFrame() {
   const v = Cam.video; if (!v.videoWidth) return;
   Cam.frame++;
   if (Cam.rendering) return;                       // the full photo is being finished on the same canvas
+  if (state.look && !R.hasLut(state.look, 33)) { R.ensureLut(state.look, 33); }
   if (Cam.busy && Cam.frame % 2) return;          // lighter while a photo is being processed
   if (Cam.wantThumbs) { Cam.wantThumbs = false; drawThumbs(); }   // small previews first, then the live frame (same task: no flicker)
-  R.drawLive(v, state.look, { amount: state.amount, seed: Cam.frame & 1023, grainScale: 0.75, ...camPre() }, null, 1280);
+  R.drawLive(v, state.look, { amount: state.amount, seed: Cam.frame & 1023, grainScale: 0.75, crop: Cam.swZoom, ...camPre() }, null, 1280);
 }
 const tiny = document.createElement("canvas");
-/** Every 1.5 s, in spare time: auto fix, Smart HDR map, suggestions, night and HDR detection, carousel previews. */
+/** Every 1.5 s: auto fix, Smart HDR map, suggestions, night and HDR detection. Heavy maths runs in the background worker. */
 function analysisTick() {
   if (!Cam.live) return;
   Cam.atimer = setTimeout(analysisTick, 1500);
-  if (Cam.busy || !Cam.video.videoWidth) return;
-  (window.requestIdleCallback || ((f) => setTimeout(f, 0)))(() => {
-    if (!Cam.live || Cam.busy) return;
-    const v = Cam.video, k = 160 / Math.max(v.videoWidth, v.videoHeight);
-    tiny.width = Math.round(v.videoWidth * k); tiny.height = Math.round(v.videoHeight * k);
-    const tctx = tiny.getContext("2d", { willReadFrequently: true }); tctx.drawImage(v, 0, 0, tiny.width, tiny.height);
-    const prev = Cam.analysis ? Cam.analysis.suggest.join() : "";
-    Cam.analysis = analyzeImage(tiny);
-    const d = tctx.getImageData(0, 0, tiny.width, tiny.height).data; let c = 0;
-    for (let i = 0; i < d.length; i += 4) if (Math.max(d[i], d[i + 1], d[i + 2]) >= 250) c++;
-    Cam.clipped = c / (d.length / 4);
-    const snap = document.createElement("canvas"); snap.width = tiny.width; snap.height = tiny.height; snap.getContext("2d").drawImage(tiny, 0, 0);
-    Cam.snap = snap; Cam.tone = R.toneFor(snap);
-    Cam.dark = Cam.analysis.tags.includes("night");
-    if (Cam.analysis.suggest.join() !== prev && (Cam.tab === "All" || Cam.tab === "For you")) renderCarousel(); else updateThumbs(false);
-    updateModes();
-  });
+  if (Cam.busy || Cam.analysing || !Cam.video.videoWidth) return;
+  Cam.analysing = true;
+  const v = Cam.video, k = 128 / Math.max(v.videoWidth, v.videoHeight), w = Math.round(v.videoWidth * k), h = Math.round(v.videoHeight * k);
+  const done = (a, snap) => {
+    Cam.analysing = false; if (!Cam.live) return;
+    Cam.analysis = a; Cam.clipped = a.clipped || 0; Cam.snap = snap; Cam.dark = a.tags.includes("night");
+    Cam.tone = R.toneFor(snap);
+    markSuggested(); updateModes(); updateThumbs(false);
+  };
+  if (R.canBitmap()) {
+    // shrink the frame on the graphics chip, then read its pixels in the background worker
+    createImageBitmap(v, { resizeWidth: w, resizeHeight: h, resizeQuality: "low" })
+      .then(async snap => { const copy = await createImageBitmap(snap); return [await R.analyzeBitmap(copy), snap]; })
+      .then(([a, snap]) => done(a, snap), () => { Cam.analysing = false; });
+    return;
+  }
+  tiny.width = w; tiny.height = h;
+  const tctx = tiny.getContext("2d", { willReadFrequently: true }); tctx.drawImage(v, 0, 0, w, h);
+  const d = tctx.getImageData(0, 0, w, h).data;
+  let c = 0; for (let i = 0; i < d.length; i += 4) if (Math.max(d[i], d[i + 1], d[i + 2]) >= 250) c++;
+  const snap = document.createElement("canvas"); snap.width = w; snap.height = h; snap.getContext("2d").drawImage(tiny, 0, 0);
+  R.analyzeAsync(new Uint8ClampedArray(d), w, h).then(a => { a.clipped = c / (d.length / 4); done(a, snap); }, () => { Cam.analysing = false; });
+}
+/** Update the ✦ marks without reordering the dial (reordering while you browse is confusing and slow). */
+function markSuggested() {
+  const sug = new Set(Cam.analysis ? Cam.analysis.suggest : []);
+  for (const c of $("camStrip").children) {
+    if (!c.dataset.id) continue;
+    const has = c.querySelector(".sp"), want = sug.has(c.dataset.id);
+    if (want && !has) c.insertAdjacentHTML("beforeend", '<span class="sp">✦</span>'); else if (!want && has) has.remove();
+  }
+  if (Cam.tab === "For you" && $("camStrip").children.length !== (Cam.analysis?.suggest.length || 0)) renderCarousel();
 }
 
 /* ---------- zoom and lenses ---------- */
@@ -1271,18 +1302,14 @@ function renderZoomRow() {
   const main = stops.find(s => Math.abs(s.z - 1) < 0.2) || { z: 1, id: Cam.mainId || curId, lens: 1 };
   if (!stops.includes(main)) stops.push(main);
   const mz = (curId === main.id ? Cam.caps.zoom : Cam.mainZoom) || null;
-  if (mz) {
-    // zoom on the main camera: 2x/3x/5x where there's no separate lens (some phones switch to their zoom lens by themselves)
-    for (const z of [2, 3, 5, 10]) {
-      if (stops.some(s => Math.abs(s.z - z) / z < 0.2)) continue;
-      const base = stops.filter(s => s.lens === s.z && s.z <= z).sort((a, b) => b.z - a.z)[0] || main;   // longest real lens below this zoom
-      if (base === main ? mz.max >= z * 0.98 : z <= base.z * 4) stops.push({ z, id: base.id, lens: base.z });
-    }
-    if (mz.min < 0.95 && !stops.some(s => s.z < 0.95)) stops.push({ z: Math.max(mz.min, 0.5), id: main.id, lens: 1 });
+  for (const z of [2, 3, 5]) {
+    if (stops.some(s => Math.abs(s.z - z) / z < 0.2)) continue;
+    const base = stops.filter(s => s.lens === s.z && s.z <= z).sort((a, b) => b.z - a.z)[0] || main;   // longest real lens below this zoom
+    stops.push({ z, id: base.id, lens: base.z });                                                         // hardware zoom if Chrome allows it, else a crop
   }
-  if (stops.length < 2 && !(Cam.caps.zoom && Cam.caps.zoom.max > 1.5)) { zb.hidden = true; return; }
+  if (mz && mz.min < 0.95 && !stops.some(s => s.z < 0.95)) stops.push({ z: Math.max(mz.min, 0.5), id: main.id, lens: 1 });
   stops.sort((a, b) => a.z - b.z);
-  const curLens = (Cam.backIds.length > 1 ? Cam.lensZoom[curId] : 1) || 1, eff = curLens * (Cam.zoom || 1);
+  const curLens = (Cam.backIds.length > 1 ? Cam.lensZoom[curId] : 1) || 1, eff = curLens * (Cam.zoom || 1) * Cam.swZoom;
   let selI = 0, bd = 1e9; stops.forEach((s, i) => { const d = Math.abs(Math.log(s.z / eff)); if (d < bd) { bd = d; selI = i; } });
   stops.forEach((s, i) => {
     const b = document.createElement("button");
@@ -1299,10 +1326,16 @@ function renderZoomRow() {
   });
   zb.hidden = false;
 }
+/** Zoom on the current lens: the camera's own zoom when Chrome allows it, otherwise a crop of the picture. */
 function setZoom(v) {
-  const z = Cam.caps.zoom; if (!z || !Cam.track) return;
-  Cam.zoom = Math.min(z.max, Math.max(z.min, v));
-  Cam.track.applyConstraints({ advanced: [{ zoom: Cam.zoom }] }).catch(() => {});
+  const z = Cam.caps.zoom;
+  if (z && z.max > 1.05 && Cam.track) {
+    Cam.swZoom = 1;
+    Cam.zoom = Math.min(z.max, Math.max(z.min, v));
+    Cam.track.applyConstraints({ advanced: [{ zoom: Cam.zoom }] }).catch(() => {});
+  } else {
+    Cam.zoom = 1; Cam.swZoom = Math.min(8, Math.max(1, v));
+  }
 }
 /* Find out once which back camera is ultra-wide, main or zoom, by comparing what each one sees with the main camera. */
 async function measureLenses(force) {
@@ -1340,7 +1373,7 @@ async function measureLenses(force) {
 (() => {
   const f = $("finder"), pts = new Map();
   let start = null, pinch0 = 0, zoom0 = 1;
-  f.addEventListener("pointerdown", e => { pts.set(e.pointerId, e); if (pts.size === 1) start = { x: e.clientX, y: e.clientY }; else if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); zoom0 = Cam.zoom; start = null; } });
+  f.addEventListener("pointerdown", e => { pts.set(e.pointerId, e); if (pts.size === 1) start = { x: e.clientX, y: e.clientY }; else if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); zoom0 = (Cam.caps.zoom && Cam.caps.zoom.max > 1.05) ? Cam.zoom : Cam.swZoom; start = null; } });
   f.addEventListener("pointermove", e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, e);
     if (pts.size === 2 && pinch0) { const [a, b] = [...pts.values()]; setZoom(zoom0 * Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) / pinch0); } });
   const end = e => {
@@ -1362,6 +1395,7 @@ function focusAt(cx, cy) {
   let x = (cx - r.left) / r.width, y = (cy - r.top) / r.height;
   if (x < 0 || y < 0 || x > 1 || y > 1) return;
   if (Cam.facing === "user") x = 1 - x;
+  x = 0.5 + (x - 0.5) / Cam.swZoom; y = 0.5 + (y - 0.5) / Cam.swZoom;
   const ring = $("focusRing"); ring.style.left = (cx - fr.left) + "px"; ring.style.top = (cy - fr.top) + "px";
   ring.classList.remove("on"); void ring.offsetWidth; ring.classList.add("on"); setTimeout(() => ring.classList.remove("on"), 900);
   if (Cam.caps.pointsOfInterest || Cam.caps.focusMode) {
@@ -1541,6 +1575,13 @@ async function shoot() {
   try {
     blob = night ? await nightShot() : hdr ? await hdrShot() : await takeStill();
     if (!blob) blob = await canvasBlob(await multiFrame(3, "Hold still"), 0.96);
+    if (Cam.swZoom > 1.01) {                     // zoom without a zoom lens: keep the middle of the full photo
+      const bm = await createImageBitmap(blob, { imageOrientation: "from-image" });
+      const w = Math.round(bm.width / Cam.swZoom), h = Math.round(bm.height / Cam.swZoom);
+      const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+      cv.getContext("2d").drawImage(bm, (bm.width - w) / 2, (bm.height - h) / 2, w, h, 0, 0, w, h); bm.close?.();
+      blob = await canvasBlob(cv, 0.95);
+    }
     const name = `ACE_${stamp()}.jpg`;
     const file = new File([blob], name, { type: "image/jpeg", lastModified: Date.now() });
     const p = await loadPhoto(file, { camera: true, fused: night || hdr });
@@ -1581,12 +1622,31 @@ $("camMore").onclick = () => {
     <div class="opt"><div><b>Also save the original</b><small>A copy without the look, so nothing is lost</small></div><input type="checkbox" id="cOrig"></div>
     <div class="opt"><div><b>Smart HDR</b><small>Brings out dark areas and calms bright ones</small></div><input type="checkbox" id="cHdr"></div>
     <button class="menu-btn" id="cLens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg><span>Set up lenses again<small>If the 0.5× / 3× buttons are missing or wrong. Point at something detailed first.</small></span></button>
+    <button class="menu-btn" id="cInfo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.1"/></svg><span>Camera info<small>What this phone lets the app use (helpful for bug reports)</small></span></button>
     <button class="menu-btn" id="cNative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><span>Use my phone's camera app<small>Best for very dark scenes. The photo comes straight back here.</small></span></button>`);
   const o = s.el.querySelector("#cOrig"); o.checked = settings.keepOriginal; o.onchange = () => { settings.keepOriginal = o.checked; store.set("keepOriginal", o.checked); };
   const h = s.el.querySelector("#cHdr"); h.checked = settings.hdr; h.onchange = () => { settings.hdr = h.checked; store.set("hdr", h.checked); };
   s.el.querySelector("#cLens").onclick = () => { s.close(); measureLenses(true); };
+  s.el.querySelector("#cInfo").onclick = async () => { s.close(); await showCamInfo(); };
   s.el.querySelector("#cNative").onclick = () => { s.close(); closeCamera(); $("nativeCam").click(); };
 };
+async function showCamInfo() {
+  let devs = [];
+  try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput"); } catch {}
+  const st = Cam.track?.getSettings() || {}, c = Cam.caps || {}, pc = Cam.photoCaps || {};
+  const lines = [
+    `Browser: ${navigator.userAgent.replace(/.*Android/, "Android").slice(0, 80)}`,
+    `Cameras Chrome can see: ${devs.length}`,
+    ...devs.map((d, i) => `  ${i + 1}. ${d.label || "(no name)"}${d.deviceId === st.deviceId ? "  ← in use" : ""}${Cam.lensZoom[d.deviceId] ? `  · measured ${Cam.lensZoom[d.deviceId].toFixed(2)}×` : ""}`),
+    `Live view: ${Cam.video.videoWidth}×${Cam.video.videoHeight} @ ${Math.round(st.frameRate || 0)} fps`,
+    `Zoom: ${c.zoom ? `${c.zoom.min}–${c.zoom.max}×` : "not available (crop zoom used)"}`,
+    `Photo size: ${pc.imageWidth ? `${pc.imageWidth.max}×${pc.imageHeight.max}` : "unknown"}`,
+    `Exposure control: ${c.exposureCompensation ? `${c.exposureCompensation.min} to ${c.exposureCompensation.max}` : "no"} · Focus: ${(c.focusMode || []).join(", ") || "no"}`,
+    `Flash: ${(pc.fillLightMode || []).join(", ") || "no"} · Torch: ${c.torch ? "yes" : "no"}`,
+  ];
+  const sh = sheet(`<h3>Camera info</h3><p>Screenshot this and send it if a lens or feature is missing.</p><pre style="white-space:pre-wrap;font-size:12px;line-height:18px;background:var(--surface-2);padding:12px;border-radius:12px;margin:0"></pre>`);
+  sh.el.querySelector("pre").textContent = lines.join("\n");
+}
 $("nativeBtn").onclick = () => $("nativeCam").click();
 $("nativeCam").onchange = () => { addFiles($("nativeCam").files); $("nativeCam").value = ""; };
 document.addEventListener("visibilitychange", () => { if (document.hidden && Cam.live) closeCamera(); });
