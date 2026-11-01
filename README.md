@@ -4,7 +4,7 @@
 
 <p align="center">
   <b>Ace Studio</b>: a free Linux app for the Insta360 Ace Pro 2.<br>
-  <b>Ace Looks</b>: 32 film looks and a film camera for your phone. No app store, no account, no uploads.
+  <b>Ace Looks</b>: 49 film looks and a film camera for your phone. No app store, no account, no uploads.
 </p>
 
 <p align="center">
@@ -26,7 +26,7 @@
 | **Get it** | **[Open Ace Looks](https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/)** in Chrome, then *Install app* | `git clone` + `./install.sh` ([steps below](#-ace-studio-linux-desktop-app)) |
 | **Cost** | Free | Free |
 
-Both are free and open source, and they share the same 32 film looks, so a photo comes out the same on the phone and on the computer.
+Both are free and open source, and they share the same 49 film looks, so a photo comes out the same on the phone and on the computer.
 
 ---
 
@@ -54,10 +54,11 @@ Updates arrive by themselves the next time you open it with internet.
   noise, and **Smart HDR** brings out shadows. Every shot saves with the look *and* as a clean original.
 - **Your photos:** choose photos from your gallery, use your phone's own camera app, or share photos to Ace Looks
   from the gallery.
+- **Tabs by maker:** Kodak, Fujifilm, Ricoh, Leica, CineStill and more, plus For you and Favourites.
 - **For you:** the 4 looks that suit each photo (people, landscape, sky, night, indoor) show first.
 - **Simple controls:** hold the photo to compare with the original, set the **strength**, and use **Adjust** for
   light, contrast, warmth and grain. **Auto fix** and natural skin tones are on by default.
-- **Save** one look, your favourites, the suggested looks, or **all 32**, at full resolution, with the photo's
+- **Save** one look, your favourites, the suggested looks, or **all 49**, at full resolution, with the photo's
   date, camera and location kept. Files are named like `IMG_1124 SN.jpg` (`SN` = Soft Negative).
 - **Private:** everything runs on your phone. Photos are never uploaded anywhere.
 
@@ -113,7 +114,7 @@ file names · backup to a second drive · favourites, notes, tags and trips · d
 photo and video details · small share copies for WhatsApp · reminder before disconnecting · delete from the
 camera with a safety check
 
-**Film looks:** all 32 looks, For you suggestions, Auto fix, natural skin, favourites, apply one or all 32
+**Film looks:** all 49 looks, For you suggestions, Auto fix, natural skin, favourites, apply one or all 49
 
 **Comfort:** settings page, welcome guide, keyboard shortcuts (<kbd>?</kbd>), light/dark theme with Material 3
 colours, English and Bahasa Melayu, update notices
@@ -172,7 +173,7 @@ network while it's on the camera's.
 
 ---
 
-## 🎞️ The 32 film looks
+## 🎞️ The 49 film looks
 
 Each look is Ace Studio's own colour style, hand-tuned to resemble a classic film or camera mode. Every look is a
 proper 3D colour table processed in high precision, with film-style highlight roll-off, mid-tone grain, soft
@@ -180,22 +181,31 @@ vignettes, and a red glow around lights on the cinema looks. The two letters are
 
 | Look | Inspired by | | Look | Inspired by |
 |---|---|---|---|---|
-| Golden Portrait `GP` | Kodak Portra 400 | | Night Tungsten `NT` | CineStill 800T |
-| Sunny Gold `SG` | Kodak Gold 200 | | Clean Cinema `CC` | CineStill 50D |
-| Bright Landscape `BL` | Kodak Ektar 100 | | Cine Daylight `CD` | Kodak Vision3 250D |
+| Golden Portrait `GP` | Kodak Portra 400 | | Cinema Bleach `EB` | Fujifilm Eterna Bleach Bypass |
+| Sunny Gold `SG` | Kodak Gold 200 | | Night Cinema `NC` | Kodak Vision3 500T |
+| Bright Landscape `BL` | Kodak Ektar 100 | | Daylight Glow `DG` | CineStill 400D |
 | Pastel Portrait `PP` | Fujifilm Pro 400H | | Positive `PO` | Ricoh GR Positive Film |
 | Soft Negative `SN` | Fujifilm Classic Negative | | Negative Snap `NS` | Ricoh GR Negative Film |
 | Warm Memory `WM` | Fujifilm Nostalgic Neg | | Bleach Bypass `BB` | Ricoh GR Bleach Bypass |
-| Daylight Portrait `DP` | Kodak Portra 160 | | Rangefinder Natural `RN` | Leica standard colour |
-| Everyday Green `EG` | Fujifilm Superia 400 | | Rangefinder Chrome `RC` | Leica Looks Chrome |
-| Warm Everyday `WE` | Kodak Ultramax 400 | | Silver Mono `SM` | Leica Monochrom |
-| Golden Hour `GH` | Kodak ColorPlus 200 | | Fine Mono `FM` | Fujifilm Acros |
-| Summer Red `SR` | Agfa Vista 200 | | Classic Grain `CG` | Kodak Tri-X 400 |
-| Muted Chrome `MC` | Fujifilm Classic Chrome | | Hard Mono `HM` | Ricoh GR Hi-Contrast B&W |
-| Velvet Slide `VS` | Fujifilm Velvia 50 | | Street Mono `ST` | Ilford HP5 Plus |
-| Iconic Slide `IS` | Kodak Kodachrome 64 | | Instant Photo `IP` | Polaroid 600 |
-| Vivid Slide `VI` | Fujifilm Velvia 100 | | Purple Dream `PD` | LomoChrome Purple |
-| Cine Flat `CF` | Fujifilm Eterna | | Ember `EM` | Harman Phoenix 200 |
+| Daylight Portrait `DP` | Kodak Portra 160 | | Retro Snap `RT` | Ricoh GR Retro |
+| Everyday Green `EG` | Fujifilm Superia 400 | | Cross Process `XP` | Ricoh GR Cross Processing |
+| Warm Everyday `WE` | Kodak Ultramax 400 | | Rangefinder Natural `RN` | Leica standard colour |
+| Golden Hour `GH` | Kodak ColorPlus 200 | | Rangefinder Chrome `RC` | Leica Looks Chrome |
+| Summer Red `SR` | Agfa Vista 200 | | Rangefinder Classic `LC` | Leica Looks Classic |
+| Night Portrait `NP` | Kodak Portra 800 | | Rangefinder Modern `LM` | Leica Looks Contemporary |
+| Cool Everyday `CE` | Fujicolor C200 | | Silver Mono `SM` | Leica Monochrom |
+| Real Colour `RA` | Fujifilm Reala Ace | | Fine Mono `FM` | Fujifilm Acros |
+| Muted Chrome `MC` | Fujifilm Classic Chrome | | Classic Grain `CG` | Kodak Tri-X 400 |
+| Velvet Slide `VS` | Fujifilm Velvia 50 | | Hard Mono `HM` | Ricoh GR Hi-Contrast B&W |
+| Iconic Slide `IS` | Kodak Kodachrome 64 | | Street Mono `ST` | Ilford HP5 Plus |
+| Vivid Slide `VI` | Fujifilm Velvia 100 | | Selenium Mono `SE` | Leica Looks Selenium |
+| Clean Slide `CS` | Kodak Ektachrome E100 | | Smooth Mono `TM` | Kodak T-Max 100 |
+| True Slide `TS` | Fujifilm Provia 100F | | Night Mono `DM` | Ilford Delta 3200 |
+| Soft Slide `AS` | Fujifilm Astia 100F | | Instant Photo `IP` | Polaroid 600 |
+| Cine Flat `CF` | Fujifilm Eterna | | Purple Dream `PD` | LomoChrome Purple |
+| Night Tungsten `NT` | CineStill 800T | | Ember `EM` | Harman Phoenix 200 |
+| Clean Cinema `CC` | CineStill 50D | | Metro `MT` | Lomography Metropolis |
+| Cine Daylight `CD` | Kodak Vision3 250D | |  | |
 
 <sub>Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid, Agfa, Ilford, Harman and Lomography are trademarks of their owners.
 Ace Studio isn't affiliated with any of them; the names only say what each look is inspired by.</sub>

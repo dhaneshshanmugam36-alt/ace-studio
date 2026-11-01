@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ace Looks</title>
-<meta name="description" content="32 film looks for your photos. Free, offline, and your photos never leave your phone.">
+<meta name="description" content="49 film looks for your photos. Free, offline, and your photos never leave your phone.">
 <meta name="theme-color" content="#14171A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -148,52 +148,69 @@ svg { flex: none; }
 .prog i { display: block; height: 100%; width: 0; background: var(--primary); transition: width .2s; }
 .legal { color: var(--muted); font-size: 12px; line-height: 17px; margin-top: 16px; }
 
-/* camera */
-.cam { position: fixed; inset: 0; z-index: 15; background: #000; color: #fff; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
-.cam-top { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 8px; flex: none; }
-.cam-top .grp { display: flex; gap: 4px; }
-.cbtn { width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: #fff; position: relative; }
+/* camera: dark, full screen, like the phone's own camera */
+.cam { position: fixed; inset: 0; z-index: 15; background: #000; color: #fff; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); user-select: none; -webkit-user-select: none; }
+.cam-top { display: flex; align-items: center; justify-content: space-between; height: 52px; padding: 0 6px; flex: none; }
+.cam-top .grp { display: flex; gap: 2px; }
+.cbtn { width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: #fff; position: relative; transition: background-color .15s; }
+.cbtn:active { background: rgba(255,255,255,.12); }
 .cbtn svg { width: 24px; height: 24px; }
 .cbtn[aria-pressed="true"] { color: #F2B66D; }
-#camNight svg, #camHdr svg { width: 20px; height: 20px; transform: translateY(-5px); }
-.cbtn small { position: absolute; bottom: 3px; left: 0; right: 0; text-align: center; font-size: 9px; font-weight: 600; letter-spacing: .03em; }
-.finder { flex: 1; min-height: 0; position: relative; touch-action: none; overflow: hidden; }
-.finder canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.cbtn.mode svg { width: 20px; height: 20px; transform: translateY(-5px); }
+.cbtn small { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font-size: 9px; font-weight: 700; letter-spacing: .04em; }
+.finder { flex: 1; min-height: 0; position: relative; touch-action: none; overflow: hidden; display: grid; place-items: center; }
+.finder canvas { max-width: 100%; max-height: 100%; display: block; border-radius: 14px; }
 .finder.mirror canvas { transform: scaleX(-1); }
-.finder .gridl { position: absolute; inset: 0; pointer-events: none; display: none;
-  background: linear-gradient(to right, transparent 33.1%, rgba(255,255,255,.35) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.35) 66.7%, transparent 66.9%),
-              linear-gradient(to bottom, transparent 33.1%, rgba(255,255,255,.35) 33.3%, transparent 33.5%, transparent 66.5%, rgba(255,255,255,.35) 66.7%, transparent 66.9%); }
-.finder.grid .gridl { display: block; }
-.pill { position: absolute; left: 50%; transform: translateX(-50%); padding: 5px 12px; border-radius: 14px; background: rgba(0,0,0,.55); font-size: 13px; font-weight: 500; white-space: nowrap; pointer-events: none; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-.pill b { color: #F2B66D; margin-right: 6px; }
-#lookPill { top: 12px; } #nightPill { top: 44px; color: #F2B66D; }
-.focus { position: absolute; width: 72px; height: 72px; margin: -36px 0 0 -36px; border: 2px solid #F2B66D; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity .3s, transform .3s; transform: scale(1.3); }
+.gridl { position: absolute; pointer-events: none; display: none; }
+.finder.grid .gridl { display: block;
+  background: linear-gradient(to right, transparent calc(33.33% - .5px), rgba(255,255,255,.4) calc(33.33% - .5px), rgba(255,255,255,.4) calc(33.33% + .5px), transparent calc(33.33% + .5px), transparent calc(66.66% - .5px), rgba(255,255,255,.4) calc(66.66% - .5px), rgba(255,255,255,.4) calc(66.66% + .5px), transparent calc(66.66% + .5px)),
+              linear-gradient(to bottom, transparent calc(33.33% - .5px), rgba(255,255,255,.4) calc(33.33% - .5px), rgba(255,255,255,.4) calc(33.33% + .5px), transparent calc(33.33% + .5px), transparent calc(66.66% - .5px), rgba(255,255,255,.4) calc(66.66% - .5px), rgba(255,255,255,.4) calc(66.66% + .5px), transparent calc(66.66% + .5px)); }
+.badges2 { position: absolute; top: 10px; left: 12px; display: flex; gap: 6px; pointer-events: none; }
+.badge2 { height: 26px; padding: 0 10px; border-radius: 13px; background: rgba(0,0,0,.55); color: #F2B66D; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; letter-spacing: .03em; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.bigname { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; opacity: 0; transition: opacity .35s; text-shadow: 0 1px 12px rgba(0,0,0,.7); white-space: nowrap; }
+.bigname.on { opacity: 1; }
+.bigname b { display: block; font: 500 26px/32px var(--display); }
+.bigname span { font-size: 14px; color: #F2D2A8; }
+.focus { position: absolute; width: 76px; height: 76px; margin: -38px 0 0 -38px; border: 2px solid #F2B66D; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity .3s, transform .3s; transform: scale(1.3); }
 .focus.on { opacity: 1; transform: scale(1); }
 .hold { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
-.hold div { padding: 10px 18px; border-radius: 20px; background: rgba(0,0,0,.6); font-weight: 500; }
-.zooms { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; padding: 4px; border-radius: 22px; background: rgba(0,0,0,.45); }
-.zooms button { min-width: 38px; height: 34px; border-radius: 17px; color: #fff; font-size: 12px; font-weight: 600; }
-.zooms button[aria-pressed="true"] { background: rgba(255,255,255,.2); color: #F2B66D; }
-.cam-strip { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px 6px; flex: none; scrollbar-width: none; }
-.cam-strip::-webkit-scrollbar { display: none; }
-.cchip { flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 52px; color: #ccc; font-size: 11px; font-weight: 600; position: relative; }
-.cchip i { width: 40px; height: 40px; border-radius: 20px; display: block; border: 2px solid transparent; transition: border-radius .2s; }
+.hold > div { padding: 10px 18px; border-radius: 20px; background: rgba(0,0,0,.65); font-weight: 500; display: flex; gap: 10px; align-items: center; max-width: 90%; }
+.hold .spin { width: 18px; height: 18px; border-width: 3px; flex: none; }
+.zooms { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 24px; background: rgba(0,0,0,.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.zooms button { min-width: 40px; height: 36px; border-radius: 18px; color: #fff; font-size: 12px; font-weight: 700; transition: background-color .2s, color .2s, transform .2s; }
+.zooms button[aria-pressed="true"] { background: rgba(255,255,255,.18); color: #F2B66D; transform: scale(1.08); }
+.tabs { display: flex; gap: 2px; overflow-x: auto; padding: 6px 12px 0; flex: none; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; height: 36px; padding: 0 12px; font-size: 14px; font-weight: 500; color: inherit; opacity: .62; position: relative; white-space: nowrap; transition: opacity .2s, color .2s; }
+.tab[aria-selected="true"] { opacity: 1; color: var(--tabc, var(--primary)); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 2px; height: 3px; border-radius: 3px 3px 0 0; background: currentColor; }
+.cam .tabs { --tabc: #F2B66D; }
+.carousel { display: flex; gap: 12px; overflow-x: auto; padding: 10px calc(50% - 32px) 4px; flex: none; scrollbar-width: none; scroll-snap-type: x mandatory; }
+.carousel::-webkit-scrollbar { display: none; }
+.cchip { flex: none; width: 64px; scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #bbb; font-size: 11px; font-weight: 700; position: relative; padding: 0; }
+.cchip canvas, .cchip i.sw { width: 54px; height: 54px; border-radius: 27px; display: block; transition: transform .2s var(--ease), border-radius .2s; }
 .cchip[aria-pressed="true"] { color: #F2B66D; }
-.cchip[aria-pressed="true"] i { border-color: #F2B66D; border-radius: 12px; }
-.cchip .sp { position: absolute; top: -2px; right: 4px; color: #F2B66D; font-size: 12px; }
-.cam-bottom { display: flex; align-items: center; justify-content: space-between; padding: 8px 28px 18px; flex: none; }
-.last { width: 54px; height: 54px; border-radius: 14px; overflow: hidden; background: #222; padding: 0; }
+.cchip[aria-pressed="true"] canvas, .cchip[aria-pressed="true"] i.sw { transform: scale(1.12); box-shadow: 0 0 0 2.5px #F2B66D; border-radius: 18px; }
+.cchip .sp { position: absolute; top: -2px; right: 2px; color: #F2B66D; font-size: 12px; }
+.cam-bottom { display: flex; align-items: center; justify-content: space-between; padding: 10px 28px 16px; flex: none; }
+.last { width: 54px; height: 54px; border-radius: 14px; overflow: hidden; background: #222; padding: 0; border: 2px solid rgba(255,255,255,.25); }
 .last img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.shutter { width: 78px; height: 78px; border-radius: 50%; border: 4px solid #fff; padding: 5px; background: none; }
-.shutter i { display: block; width: 100%; height: 100%; border-radius: 50%; background: #fff; transition: transform .1s; }
-.shutter:active i { transform: scale(.88); }
+.shutter { width: 80px; height: 80px; border-radius: 50%; border: 4px solid #fff; padding: 5px; background: none; }
+.shutter i { display: block; width: 100%; height: 100%; border-radius: 50%; background: #fff; transition: transform .12s, background-color .2s; }
+.shutter:active i { transform: scale(.86); }
 .shutter.night i { background: #F2B66D; }
-.shutter:disabled { opacity: .5; }
+.shutter:disabled { opacity: .55; }
+.cam-hint { position: absolute; bottom: 64px; left: 50%; transform: translateX(-50%); padding: 8px 14px; border-radius: 16px; background: rgba(0,0,0,.6); font-size: 13px; white-space: nowrap; pointer-events: none; transition: opacity .4s; }
 .flash { position: fixed; inset: 0; background: #fff; z-index: 40; pointer-events: none; animation: flash .25s ease-out forwards; }
 @keyframes flash { from { opacity: .85; } to { opacity: 0; } }
 .homebtns { display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .big.tonal2 { background: var(--surface-3); color: var(--text); }
 .linkbtn { color: var(--muted); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 6px; }
+.stage .compare { position: absolute; top: 10px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: rgba(0,0,0,.5); color: #fff; display: grid; place-items: center; z-index: 2; }
+.stage .compare svg { width: 22px; height: 22px; }
+.stage .compare[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); }
+.fadecv { position: absolute; pointer-events: none; transition: opacity .22s ease-out; z-index: 1; }
+.panel .tabs { padding: 2px 8px 0; }
 .toast { position: fixed; left: 16px; right: 16px; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 30; padding: 14px 16px; border-radius: 12px; background: var(--text); color: var(--bg); box-shadow: 0 6px 20px rgba(0,0,0,.35); animation: up .25s var(--ease); display: flex; align-items: center; gap: 12px; }
 .toast button { margin-left: auto; color: var(--primary-soft); font-weight: 600; }
 :root[data-theme="light"] .toast button { color: #FFB869; }
@@ -216,7 +233,7 @@ svg { flex: none; }
   <div>
     <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 4v16M17 4v16M3 8h4M3 12h4M3 16h4M17 8h4M17 12h4M17 16h4"/></svg></div>
     <h2>Film looks for your photos</h2>
-    <p>32 looks inspired by Kodak, Fujifilm, Ricoh, Leica and more. Full resolution, and your photos never leave your phone.</p>
+    <p>49 looks inspired by Kodak, Fujifilm, Ricoh, Leica and more. Full resolution, and your photos never leave your phone.</p>
     <div class="homebtns">
     <button class="big" id="camBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.5-2h5L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg>Film camera</button>
     <button class="big tonal2" id="pickBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="m4 17 5-4.5 3.5 3 3-2.5L20 17"/></svg>Choose photos</button>
@@ -231,12 +248,13 @@ svg { flex: none; }
     <canvas id="view"></canvas>
     <span class="badge" id="badge" style="opacity:0">Original</span>
     <span class="hint" id="hint">Hold the photo to see the original</span>
+    <button class="compare" id="compareBtn" aria-label="Compare with original" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M12 4.5v15"/><path d="M12 4.5h6a2.5 2.5 0 0 1 2.5 2.5v10a2.5 2.5 0 0 1-2.5 2.5h-6z" fill="currentColor" opacity=".35"/></svg></button>
     <div class="busy" id="busy" hidden><span class="spin"></span></div>
   </div>
   <div class="photos" id="photos"></div>
   <div class="panel">
     <div class="info" id="info"></div>
-    <div class="fams" id="fams"></div>
+    <div class="tabs" id="fams" role="tablist"></div>
     <div class="strip" id="strip"></div>
     <div class="amount"><span>Strength</span><input type="range" id="amount" min="0" max="100" value="100" aria-label="Strength"><output id="amountOut">100%</output>
       <button class="adjbtn" id="adjBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg>Adjust<i class="dot" id="adjDot" hidden></i></button></div>
@@ -255,22 +273,23 @@ svg { flex: none; }
     <button class="cbtn" id="camClose" aria-label="Close camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <div class="grp">
       <button class="cbtn" id="camFlash" aria-label="Flash" aria-pressed="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 3 5 13.5h6L10 21l8-10.5h-6z"/></svg></button>
-      <button class="cbtn" id="camHdr" aria-label="HDR"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><small id="camHdrTxt">AUTO</small></button>
-      <button class="cbtn" id="camNight" aria-label="Night mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><small id="camNightTxt">AUTO</small></button>
+      <button class="cbtn mode" id="camHdr" aria-label="HDR" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><small id="camHdrTxt">AUTO</small></button>
+      <button class="cbtn mode" id="camNight" aria-label="Night mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><small id="camNightTxt">AUTO</small></button>
       <button class="cbtn" id="camGrid" aria-label="Grid" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.2 4.5v15M14.8 4.5v15M3.5 9.5h17M3.5 14.5h17"/></svg></button>
-      <button class="cbtn" id="camLens" aria-label="Switch lens" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg></button>
+      <button class="cbtn" id="camMore" aria-label="Camera settings"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5.5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="18.5" r="1.8"/></svg></button>
     </div>
   </div>
   <div class="finder" id="finder">
-    <div class="gridl"></div>
-    <span class="pill" id="lookPill"></span>
-    <span class="pill" id="nightPill" hidden>Night mode</span>
-    <span class="pill" id="hdrPill" hidden style="top:44px">HDR</span>
+    <div class="gridl" id="gridl"></div>
+    <div class="badges2"><span class="badge2" id="hdrPill" hidden>HDR</span><span class="badge2" id="nightPill" hidden>NIGHT</span></div>
+    <div class="bigname" id="bigName"><b></b><span></span></div>
     <span class="focus" id="focusRing"></span>
-    <div class="hold" id="hold" hidden><div id="holdTxt">Hold still…</div></div>
+    <div class="hold" id="hold" hidden><div><span class="spin"></span><span id="holdTxt">Hold still…</span></div></div>
     <div class="zooms" id="zooms" hidden></div>
+    <div class="cam-hint" id="camHint" hidden>Swipe to change look · Tap to focus · Pinch to zoom</div>
   </div>
-  <div class="cam-strip" id="camStrip"></div>
+  <div class="tabs" id="camTabs" role="tablist"></div>
+  <div class="carousel" id="camStrip"></div>
   <div class="cam-bottom">
     <button class="last" id="camLast" aria-label="Last photo"></button>
     <button class="shutter" id="shutter" aria-label="Take photo"><i></i></button>
@@ -293,7 +312,7 @@ applyThemeSetting();
 
 let LOOKS = [], CODE2ID = {};
 const NONE_LOOK = { id: "none", ops: [], skin: 0, grain: 0 };
-const state = { photos: [], cur: -1, look: null, amount: 1, fam: "All", busy: false,
+const state = { photos: [], cur: -1, look: null, amount: 1, fam: store.get("tab", "All"), busy: false,
                 adj: { light: 0, contrast: 0, warmth: 0, grain: 1 } };
 settings.autofix = store.get("autofix", true);
 settings.hdr = store.get("hdr", true);
@@ -344,12 +363,14 @@ const R = (() => {
   uniform vec3 mul; uniform float contrast;
   uniform sampler2D toneTex; uniform bool hasTone; uniform float toneAmt; uniform uint seed;
   uniform sampler2D underTex; uniform bool hasUnder; uniform float underK, underScale; uniform vec2 underOff;
+  uniform sampler2D fuseTex; uniform bool hasFuse; uniform float fuseScale, fuseDetail, fuseR; uniform vec2 fuseOff;
+  float Yl(vec3 c){ return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
   vec3 toLin(vec3 c){ return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
   vec3 toSrgb(vec3 x){ x = max(x, 0.0); return mix(x * 12.92, 1.055 * pow(x, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, x)); }
   vec3 pre(vec3 c, vec2 px){
     vec3 l = toLin(c);
     if (hasUnder) {                      // HDR: take blown highlights from a darker shot of the same moment
-      vec2 t = (vec2(px.x / full.x, 1.0 - px.y / full.y) - 0.5) / underScale + 0.5 + underOff;
+      vec2 t = (vec2(px.x / full.x, 1.0 - px.y / full.y) - 0.5) * underScale + 0.5 + underOff;
       vec3 lu = toLin(texture(underTex, t).rgb) * underK;
       float m = max(max(c.r, c.g), c.b);
       float w = smoothstep(0.78, 0.97, m) * step(0.0, t.x) * step(t.x, 1.0) * step(0.0, t.y) * step(t.y, 1.0);
@@ -378,6 +399,17 @@ const R = (() => {
     vec2 px = tile.xy + uv * tile.zw;                 // position in the full photo, in pixels
     vec3 src = texture(img, vec2(uv.x, 1.0 - uv.y)).rgb;
     if (original) { o = vec4(src, 1); return; }
+    if (hasFuse) {                       // Night: clean colour and tone from many frames + fine detail from the full photo
+      vec2 tx = vec2(uv.x, 1.0 - uv.y), ts = fuseR / vec2(textureSize(img, 0));
+      vec3 bl = (texture(img, tx + vec2(ts.x, 0)).rgb + texture(img, tx - vec2(ts.x, 0)).rgb + texture(img, tx + vec2(0, ts.y)).rgb + texture(img, tx - vec2(0, ts.y)).rgb
+               + texture(img, tx + ts).rgb + texture(img, tx - ts).rgb + texture(img, tx + vec2(ts.x, -ts.y)).rgb + texture(img, tx + vec2(-ts.x, ts.y)).rgb) * 0.125;
+      vec2 t = (vec2(px.x / full.x, 1.0 - px.y / full.y) - 0.5) * fuseScale + 0.5 + fuseOff;
+      if (t.x >= 0.0 && t.y >= 0.0 && t.x <= 1.0 && t.y <= 1.0) {
+        vec3 m = toLin(texture(fuseTex, t).rgb);
+        float r = clamp((Yl(toLin(src)) + 0.002) / (Yl(toLin(mix(bl, src, 0.25))) + 0.002), 0.45, 2.2);
+        src = clamp(toSrgb(m * pow(r, fuseDetail)), 0.0, 1.0);
+      }
+    }
     if (usePre) src = pre(src, px);
     vec3 g = texture(lut, src * ((N - 1.0) / N) + 0.5 / N).rgb;
     if (hasGlow) g += texture(glowTex, vec2(px.x / full.x, 1.0 - px.y / full.y)).rgb * halation;
@@ -407,23 +439,36 @@ const R = (() => {
   const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const U = {}; for (const n of ["img", "lut", "glowTex", "N", "amount", "grain", "grainPx", "vignette", "halation", "colorGrain", "full", "tile", "original", "hasGlow", "flipY", "usePre", "mul", "contrast", "toneTex", "hasTone", "toneAmt", "seed", "underTex", "hasUnder", "underK", "underScale", "underOff"]) U[n] = gl.getUniformLocation(prog, n);
-  gl.uniform1i(U.img, 0); gl.uniform1i(U.lut, 1); gl.uniform1i(U.glowTex, 2); gl.uniform1i(U.toneTex, 3); gl.uniform1i(U.underTex, 7);
+  const U = {}; for (const n of ["img", "lut", "glowTex", "N", "amount", "grain", "grainPx", "vignette", "halation", "colorGrain", "full", "tile", "original", "hasGlow", "flipY", "usePre", "mul", "contrast", "toneTex", "hasTone", "toneAmt", "seed", "underTex", "hasUnder", "underK", "underScale", "underOff", "fuseTex", "hasFuse", "fuseScale", "fuseDetail", "fuseR", "fuseOff"]) U[n] = gl.getUniformLocation(prog, n);
+  gl.uniform1i(U.img, 0); gl.uniform1i(U.lut, 1); gl.uniform1i(U.glowTex, 2); gl.uniform1i(U.toneTex, 3); gl.uniform1i(U.underTex, 7); gl.uniform1i(U.fuseTex, 8);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
   gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
 
-  const imgTex = gl.createTexture(), glowTex = gl.createTexture(), toneTex = gl.createTexture(), underTex = gl.createTexture(), lutTexs = new Map();
-  for (const t of [imgTex, glowTex, toneTex, underTex]) {
+  const imgTex = gl.createTexture(), glowTex = gl.createTexture(), toneTex = gl.createTexture(), underTex = gl.createTexture(), fuseTex = gl.createTexture(), lutTexs = new Map();
+  for (const t of [imgTex, glowTex, toneTex, underTex, fuseTex]) {
     gl.bindTexture(gl.TEXTURE_2D, t);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   }
   const maxTex = Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE), 4096);
 
-  function lutTex(look, n) {
+  let worker = null, wid = 0; const waiting = new Map(), pending = new Map();
+  try { worker = new Worker("engine-worker.js"); worker.onmessage = (e) => { const w = waiting.get(e.data.id); waiting.delete(e.data.id); if (w) w(e.data.data); }; } catch { worker = null; }
+  const hasLut = (look, n) => lutTexs.has(look.id + ":" + n);
+  /** Make sure a look's table exists, building it in the background (no stutter). */
+  function ensureLut(look, n) {
+    const key = look.id + ":" + n;
+    if (lutTexs.has(key)) return Promise.resolve();
+    if (pending.has(key)) return pending.get(key);
+    const pr = (worker ? new Promise(res => { const id = ++wid; waiting.set(id, res); worker.postMessage({ id, look, n }); })
+                       : Promise.resolve(AceEngine.buildLut(look, n))).then(data => { pending.delete(key); lutTex(look, n, data); });
+    pending.set(key, pr);
+    return pr;
+  }
+  function lutTex(look, n, ready) {
     const key = look.id + ":" + n;
     if (lutTexs.has(key)) return lutTexs.get(key);
-    const data = AceEngine.buildLut(look, n);
+    const data = ready || AceEngine.buildLut(look, n);
     const t = gl.createTexture();
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_3D, t);
     gl.texImage3D(gl.TEXTURE_3D, 0, gl.RGBA16F, n, n, n, 0, gl.RGBA, gl.FLOAT, data);
@@ -489,6 +534,7 @@ const R = (() => {
     return cv;
   }
   function setLook(look, n, full, opts) {
+    if (look && n > 33 && !hasLut(look, n)) n = 33;     // big table still being built: use the quick one meanwhile
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_3D, lutTex(look || NONE_LOOK, n)); gl.activeTexture(gl.TEXTURE0);
     gl.uniform1f(U.N, n);
     gl.uniform1i(U.original, !!opts.original);
@@ -496,6 +542,12 @@ const R = (() => {
     const lk = look || {};
     const m = opts.mul || [1, 1, 1], ct = opts.contrast || 0;
     const tone = opts.tone && opts.toneAmt > 0;
+    const fu = opts.fuse;
+    gl.uniform1i(U.hasFuse, !!fu);
+    if (fu) {
+      gl.uniform1f(U.fuseScale, fu.scale || 1); gl.uniform2f(U.fuseOff, fu.off[0], fu.off[1]); gl.uniform1f(U.fuseDetail, fu.detail ?? 0.85); gl.uniform1f(U.fuseR, fu.r || 2);
+      gl.activeTexture(gl.TEXTURE8); gl.bindTexture(gl.TEXTURE_2D, fuseTex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, fu.img); gl.activeTexture(gl.TEXTURE0);
+    }
     const un = opts.under;
     gl.uniform1i(U.hasUnder, !!un);
     if (un) {
@@ -526,6 +578,7 @@ const R = (() => {
     }
   }
   function drawTile(source, tile, flip) {
+    liveW = liveH = 0;
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, imgTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
     canvas.width = tile[2]; canvas.height = tile[3];
@@ -547,6 +600,7 @@ const R = (() => {
 
   /** Full-resolution render in tiles; returns a canvas the size of the photo. */
   async function renderFull(bitmap, look, opts) {
+    if (look) await ensureLut(look, 65);
     const W = bitmap.width, H = bitmap.height, T = maxTex;
     gl.useProgram(prog);
     setLook(look, 65, [W, H], opts);
@@ -562,19 +616,23 @@ const R = (() => {
     }
     return out;
   }
-  /** Draw a live camera frame with the look straight to the GL canvas (the viewfinder). */
-  function drawLive(video, look, opts) {
+  /** Draw a live camera frame with the look, then copy it to the visible viewfinder canvas. */
+  let liveW = 0, liveH = 0;
+  function drawLive(video, look, opts, dest, maxSide) {
     const w = video.videoWidth, h = video.videoHeight; if (!w) return;
-    const s = Math.min(1, 1440 / Math.max(w, h)), cw = Math.round(w * s), ch = Math.round(h * s);
+    const sc = Math.min(1, maxSide / Math.max(w, h)), cw = Math.round(w * sc), ch = Math.round(h * sc);
     gl.useProgram(prog);
     setLook(look, 33, [cw, ch], opts);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, imgTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+    if (w !== liveW || h !== liveH) { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video); liveW = w; liveH = h; }
+    else gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, video);
     if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
     gl.viewport(0, 0, cw, ch);
     gl.uniform4f(U.tile, 0, 0, cw, ch); gl.uniform1i(U.flipY, false);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    if (dest) { if (dest.width !== cw || dest.height !== ch) { dest.width = cw; dest.height = ch; } dest.getContext("2d", { alpha: false }).drawImage(canvas, 0, 0); }
   }
+  const resetLive = () => { liveW = liveH = 0; };
 
   /* ---- Night mode: merge several frames to cut noise, ignoring parts that moved ---- */
   const floatOK = !!gl.getExtension("EXT_color_buffer_float");
@@ -676,7 +734,7 @@ const R = (() => {
     bindQuad(prog);
     return out;
   }
-  return { renderTo, renderFull, glowFor, toneFor, drawLive, mergeStart, mergeAdd, mergeEnd, maxTex, canvas, floatOK };
+  return { renderTo, renderFull, glowFor, toneFor, drawLive, resetLive, mergeStart, mergeAdd, mergeEnd, ensureLut, hasLut, maxTex, canvas, floatOK };
 })();
 
 /* ======================= Photos ======================= */
@@ -743,6 +801,7 @@ function renderView() {
     rafPending = false;
     const p = cur(); if (!p) return;
     const lk = state.look;
+    if (lk && !R.hasLut(lk, 65)) R.ensureLut(lk, 65).then(() => { if (state.look === lk) renderView(); });
     // preview: grain sized for how the photo looks on screen
     const scale = p.preview.width / p.w;
     R.renderTo($("view"), p.preview, lk, { n: 65, amount: state.amount, glow: lk && lk.halation ? glowOf(p) : null,
@@ -761,12 +820,8 @@ function renderInfo() {
   box.querySelector(".insp").textContent = "Inspired by " + lk.inspired; box.querySelector(".style").textContent = lk.style;
 }
 function renderFams() {
-  const fams = ["All", "For you", "★ Favourites", ...new Set(LOOKS.map(l => l.family))], box = $("fams"); box.innerHTML = "";
-  for (const f of fams) {
-    const b = document.createElement("button"); b.className = "fam"; b.textContent = f; b.setAttribute("aria-pressed", f === state.fam);
-    b.onclick = () => { state.fam = f; renderFams(); renderStrip(); };
-    box.append(b);
-  }
+  if (!TABS.includes(state.fam)) state.fam = "All";
+  renderTabs($("fams"), state.fam, (t) => { state.fam = t; store.set("tab", t); renderFams(); renderStrip(); });
 }
 let stripToken = 0;
 async function renderStrip() {
@@ -805,17 +860,18 @@ async function renderStrip() {
   }
   const sel = box.querySelector('[aria-pressed="true"]'); sel?.scrollIntoView({ inline: "center", block: "nearest" });
 }
-function shownLooks() {
-  const p = cur(), sug = p ? p.analysis.suggest : [];
-  if (state.fam === "For you") return sug.map(id => LOOKS.find(l => l.id === id)).filter(Boolean);
-  if (state.fam.includes("Favourites")) return LOOKS.filter(isFav);
-  if (state.fam !== "All") return LOOKS.filter(l => l.family === state.fam);
-  // All: suggested first, then favourites, then everything else
-  const first = sug.map(id => LOOKS.find(l => l.id === id)).filter(Boolean);
-  const favl = LOOKS.filter(l => isFav(l) && !sug.includes(l.id));
-  return [...first, ...favl, ...LOOKS.filter(l => !sug.includes(l.id) && !isFav(l))];
+function shownLooks() { const p = cur(); return looksForTab(state.fam, p ? p.analysis.suggest : []); }
+function fadeView() {
+  const v = $("view"); if (!v.width) return;
+  let f = $("fadecv");
+  if (!f) { f = document.createElement("canvas"); f.id = "fadecv"; f.className = "fadecv"; $("stage").append(f); }
+  const r = v.getBoundingClientRect(), sr = $("stage").getBoundingClientRect();
+  f.width = v.width; f.height = v.height; f.getContext("2d").drawImage(v, 0, 0);
+  Object.assign(f.style, { left: (r.left - sr.left) + "px", top: (r.top - sr.top) + "px", width: r.width + "px", height: r.height + "px", transition: "none", opacity: 1 });
+  requestAnimationFrame(() => requestAnimationFrame(() => { f.style.transition = ""; f.style.opacity = 0; }));
 }
 function pickLook(lk) {
+  if (lk !== state.look) { fadeView(); haptic(); }
   state.look = lk; store.set("look", lk ? lk.id : null);
   const btns = [...$("strip").children];
   btns.forEach(b => b.setAttribute("aria-pressed", lk ? b.dataset.id === lk.id : !b.dataset.id));
@@ -825,6 +881,8 @@ function pickLook(lk) {
 }
 $("amount").oninput = () => { state.amount = $("amount").value / 100; $("amountOut").textContent = $("amount").value + "%"; renderView(); };
 
+$("compareBtn").addEventListener("click", (e) => { e.stopPropagation(); viewOriginal = !viewOriginal; $("compareBtn").setAttribute("aria-pressed", viewOriginal); haptic(); renderView(); });
+$("compareBtn").addEventListener("pointerdown", (e) => e.stopPropagation());
 // Hold to compare
 const stage = $("stage");
 const holdOn = (e) => { if (e.target.closest("button")) return; viewOriginal = true; $("hint").hidden = true; renderView(); };
@@ -984,61 +1042,131 @@ $("pickBtn").onclick = $("addBtn").onclick = () => $("file").click();
 $("file").onchange = () => { addFiles($("file").files); $("file").value = ""; };
 
 /* ======================= Film camera ======================= */
-const Cam = { hdr: store.get("hdrCam", "auto"), clipped: 0, lensZoom: store.get("lensZoom", {}),
-  stream: null, track: null, video: document.createElement("video"), ic: null, caps: {}, photoCaps: null,
-  facing: "environment", deviceId: null, backIds: [], flash: false, night: store.get("night", "auto"), dark: false,
-  raf: 0, frame: 0, analysis: null, tone: null, busy: false, lastAt: 0, zoom: 1, live: false };
-Cam.video.muted = true; Cam.video.playsInline = true; Cam.video.setAttribute("playsinline", "");
-
-function camLooks() {
-  const sug = Cam.analysis ? Cam.analysis.suggest : [];
-  const first = sug.map(id => LOOKS.find(l => l.id === id)).filter(Boolean);
+const TABS = ["All", "For you", "★ Favourites", "Kodak", "Fujifilm", "Ricoh", "Leica", "CineStill", "More"];
+/** Looks shown in a tab. "All" puts the suggested ones first, then favourites. */
+function looksForTab(tab, sug) {
+  const byId = (id) => LOOKS.find(l => l.id === id);
+  if (tab === "For you") return sug.map(byId).filter(Boolean);
+  if (tab.includes("Favourites")) return LOOKS.filter(isFav);
+  if (tab !== "All") return LOOKS.filter(l => l.maker === tab);
+  const first = sug.map(byId).filter(Boolean);
   return [...first, ...LOOKS.filter(l => isFav(l) && !sug.includes(l.id)), ...LOOKS.filter(l => !sug.includes(l.id) && !isFav(l))];
 }
+function renderTabs(box, current, onPick) {
+  box.innerHTML = "";
+  for (const t of TABS) {
+    if (t.includes("Favourites") && !favs.size) continue;
+    const b = document.createElement("button"); b.className = "tab"; b.setAttribute("role", "tab");
+    b.textContent = t; b.setAttribute("aria-selected", t === current);
+    b.onclick = () => { haptic(); onPick(t); };
+    box.append(b);
+  }
+  box.querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: "center", block: "nearest" });
+}
+const haptic = (ms = 8) => { try { navigator.vibrate?.(ms); } catch {} };
+
+const Cam = {
+  hdr: store.get("hdrCam", "auto"), night: store.get("night", "auto"), tab: store.get("camTab", "All"),
+  lensZoom: store.get("lensZoom2", {}), stream: null, track: null, video: document.createElement("video"),
+  ic: null, caps: {}, photoCaps: null, facing: "environment", deviceId: null, backIds: [], mainId: null, mainZoom: null,
+  flash: false, dark: false, clipped: 0, analysis: null, tone: null, snap: null, busy: false, live: false, frame: 0,
+  zoom: 1, measuring: false, thumbsAt: 0, nameTimer: 0,
+};
+Cam.video.muted = true; Cam.video.playsInline = true; Cam.video.setAttribute("playsinline", "");
+const isNight = () => Cam.night === "on" || (Cam.night === "auto" && Cam.dark);
+const camList = () => looksForTab(Cam.tab, Cam.analysis ? Cam.analysis.suggest : []);
+
 function camPre() {
   const a = state.adj, m0 = settings.autofix && Cam.analysis ? Cam.analysis.mul : [1, 1, 1], ev = Math.pow(2, a.light);
   return { mul: [m0[0] * ev * (1 + 0.12 * a.warmth), m0[1] * ev, m0[2] * ev * (1 - 0.12 * a.warmth)], contrast: a.contrast,
-           grainMul: a.grain, tone: settings.hdr ? Cam.tone : null, toneAmt: settings.hdr ? 0.55 : 0 };
-}
-function renderCamUI() {
-  const lk = state.look;
-  $("lookPill").innerHTML = lk ? `<b>${lk.code}</b>${lk.name}` : "No look";
-  const box = $("camStrip"); box.innerHTML = "";
-  const sug = new Set(Cam.analysis ? Cam.analysis.suggest : []);
-  for (const l of camLooks()) {
-    const b = document.createElement("button"); b.className = "cchip"; b.setAttribute("aria-pressed", state.look === l); b.dataset.id = l.id;
-    b.innerHTML = `<i style="background:linear-gradient(135deg,${l.swatch[0]},${l.swatch[1]})"></i>${l.code}${sug.has(l.id) ? '<span class="sp">✦</span>' : ""}`;
-    b.onclick = () => camPick(l);
-    box.append(b);
-  }
-  box.querySelector('[aria-pressed="true"]')?.scrollIntoView({ inline: "center", block: "nearest" });
-  $("camNightTxt").textContent = Cam.night.toUpperCase();
-  $("camNight").setAttribute("aria-pressed", Cam.night === "on" || (Cam.night === "auto" && Cam.dark));
-  const nightNow = Cam.night === "on" || (Cam.night === "auto" && Cam.dark);
-  $("nightPill").hidden = !nightNow; $("shutter").classList.toggle("night", nightNow);
-  updateHdrUI();
-}
-const canHdr = () => !!(Cam.caps.exposureCompensation && Cam.caps.exposureCompensation.min <= -1 && Cam.ic && Cam.photoCaps);
-const hdrNow = () => canHdr() && !(Cam.night === "on" || (Cam.night === "auto" && Cam.dark)) && (Cam.hdr === "on" || (Cam.hdr === "auto" && Cam.clipped > 0.015));
-function updateHdrUI() {
-  $("camHdr").hidden = !canHdr();
-  $("camHdrTxt").textContent = Cam.hdr.toUpperCase();
-  const on = hdrNow(); $("camHdr").setAttribute("aria-pressed", on); $("hdrPill").hidden = !on || !$("nightPill").hidden;
-}
-function camPick(l) {
-  state.look = l; state.userPicked = true;
-  $("lookPill").innerHTML = `<b>${l.code}</b>${l.name}`;
-  [...$("camStrip").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.id === l.id));
-  $("camStrip").querySelector('[aria-pressed="true"]')?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+           grainMul: a.grain, tone: settings.hdr ? Cam.tone : null, toneAmt: settings.hdr ? 0.5 : 0 };
 }
 
+/* ---------- screen ---------- */
+function renderCamUI() {
+  renderTabs($("camTabs"), Cam.tab, (t) => { Cam.tab = t; store.set("camTab", t); renderCamUI(); });
+  renderCarousel();
+  updateModes();
+}
+function renderCarousel() {
+  const box = $("camStrip"), list = camList(), sug = new Set(Cam.analysis ? Cam.analysis.suggest : []);
+  box.innerHTML = "";
+  if (!list.length) { box.innerHTML = `<div style="color:#aaa;font-size:13px;padding:18px 0;white-space:nowrap">Long-press a look in the editor to add favourites</div>`; return; }
+  for (const l of list) {
+    const b = document.createElement("button"); b.className = "cchip"; b.dataset.id = l.id;
+    b.setAttribute("aria-pressed", state.look === l);
+    b.innerHTML = `<i class="sw" style="background:linear-gradient(135deg,${l.swatch[0]},${l.swatch[1]})"></i>${l.code}${sug.has(l.id) ? '<span class="sp">✦</span>' : ""}`;
+    b.onclick = () => camPick(l, true);
+    box.append(b);
+  }
+  const sel = box.querySelector('[aria-pressed="true"]');
+  if (sel) sel.scrollIntoView({ inline: "center", block: "nearest" });
+  updateThumbs(true);
+}
+// selecting by scrolling the carousel (stops on the look in the middle), like a camera filter dial
+(() => {
+  const box = $("camStrip"); let t = 0, ignore = false;
+  box.addEventListener("scroll", () => {
+    if (ignore) return;
+    clearTimeout(t);
+    t = setTimeout(() => {
+      const mid = box.getBoundingClientRect().left + box.clientWidth / 2;
+      let best = null, bd = 1e9;
+      for (const c of box.children) { if (!c.dataset.id) continue; const r = c.getBoundingClientRect(); const d = Math.abs(r.left + r.width / 2 - mid); if (d < bd) { bd = d; best = c; } }
+      if (best && (!state.look || best.dataset.id !== state.look.id)) { ignore = true; camPick(LOOKS.find(l => l.id === best.dataset.id), false); setTimeout(() => ignore = false, 300); }
+    }, 110);
+  }, { passive: true });
+})();
+function camPick(l, scroll) {
+  if (!l) return;
+  state.look = l; state.userPicked = true; haptic();
+  for (const c of $("camStrip").children) c.setAttribute("aria-pressed", c.dataset.id === l.id);
+  if (scroll) $("camStrip").querySelector(`[data-id="${l.id}"]`)?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  const bn = $("bigName"); bn.querySelector("b").textContent = `${l.code} · ${l.name}`; bn.querySelector("span").textContent = "Inspired by " + l.inspired;
+  bn.classList.add("on"); clearTimeout(Cam.nameTimer); Cam.nameTimer = setTimeout(() => bn.classList.remove("on"), 1300);
+  R.ensureLut(l, 65);   // ready in the background for saving
+}
+function updateModes() {
+  const n = isNight(), h = hdrNow();
+  $("camNightTxt").textContent = Cam.night.toUpperCase(); $("camNight").setAttribute("aria-pressed", n);
+  $("camHdr").hidden = !canHdr(); $("camHdrTxt").textContent = Cam.hdr.toUpperCase(); $("camHdr").setAttribute("aria-pressed", h);
+  $("nightPill").hidden = !n; $("hdrPill").hidden = !h;
+  $("shutter").classList.toggle("night", n);
+}
+/** Little live previews of each look in the carousel, refreshed every few seconds. */
+function updateThumbs(force) {
+  if (!Cam.snap || (!force && performance.now() - Cam.thumbsAt < 2500)) return;
+  Cam.thumbsAt = performance.now(); Cam.wantThumbs = true;
+}
+function drawThumbs() {
+  const box = $("camStrip"), br = box.getBoundingClientRect();
+  const tmp = document.createElement("canvas");
+  for (const c of box.children) {
+    if (!c.dataset.id) continue;
+    const r = c.getBoundingClientRect(); if (r.right < br.left - 80 || r.left > br.right + 80) continue;
+    const l = LOOKS.find(x => x.id === c.dataset.id); if (!l) continue;
+    R.renderTo(tmp, Cam.snap, l, { n: 33, amount: 1, grainScale: 0 });
+    let cv = c.querySelector("canvas");
+    if (!cv) { cv = document.createElement("canvas"); cv.width = cv.height = 108; c.querySelector("i.sw")?.replaceWith(cv); }
+    const s = Math.min(tmp.width, tmp.height);
+    cv.getContext("2d").drawImage(tmp, (tmp.width - s) / 2, (tmp.height - s) / 2, s, s, 0, 0, 108, 108);
+  }
+}
+function placeGrid() {
+  const f = $("finder").getBoundingClientRect(), v = R.canvas.getBoundingClientRect(), g = $("gridl");
+  Object.assign(g.style, { left: (v.left - f.left) + "px", top: (v.top - f.top) + "px", width: v.width + "px", height: v.height + "px" });
+}
+new ResizeObserver(placeGrid).observe($("finder"));
+
+/* ---------- open / close / stream ---------- */
 async function openCamera() {
   if (!navigator.mediaDevices?.getUserMedia) { toast("This browser can't use the camera. Try Chrome.", "err"); return; }
   $("cam").hidden = false;
   const c = R.canvas; c.hidden = false; $("finder").prepend(c);
   try { await startStream(); } catch (e) { closeCamera(); camError(e); return; }
-  Cam.live = true; loop();
+  Cam.live = true; scheduleFrame(); analysisTick();
   renderCamUI();
+  if (!store.get("camHintSeen", false)) { const h = $("camHint"); h.hidden = false; h.style.opacity = 1; setTimeout(() => { h.style.opacity = 0; setTimeout(() => h.hidden = true, 500); }, 3500); store.set("camHintSeen", true); }
 }
 function camError(e) {
   console.error(e);
@@ -1047,121 +1175,205 @@ function camError(e) {
         n === "NotReadableError" ? "Another app is using the camera. Close it and try again." : "The camera couldn't start: " + (e.message || n), "err");
 }
 function closeCamera() {
-  Cam.live = false; cancelAnimationFrame(Cam.raf);
+  Cam.live = false; clearTimeout(Cam.atimer); cancelAnimationFrame(Cam.raf);
+  try { if (Cam.rvfc) Cam.video.cancelVideoFrameCallback(Cam.rvfc); } catch {}
   Cam.stream?.getTracks().forEach(t => t.stop()); Cam.stream = null; Cam.track = null;
   $("cam").hidden = true; R.canvas.hidden = true; document.body.append(R.canvas);
   if (state.cur >= 0) { renderStrip(); renderView(); }
 }
-async function startStream() { await startStreamRaw(); renderLenses(); }
+async function startStream() { await startStreamRaw(); renderZoomRow(); }
 async function startStreamRaw() {
   Cam.stream?.getTracks().forEach(t => t.stop());
-  const video = { width: { ideal: 4032 }, height: { ideal: 3024 }, aspectRatio: { ideal: 4 / 3 }, frameRate: { ideal: 30 } };
+  // A moderate preview size keeps the live view smooth; photos are still taken at full resolution.
+  const video = { width: { ideal: 1920 }, height: { ideal: 1440 }, aspectRatio: { ideal: 4 / 3 }, frameRate: { ideal: 30, max: 30 } };
   if (Cam.deviceId) video.deviceId = { exact: Cam.deviceId }; else video.facingMode = { ideal: Cam.facing };
   Cam.stream = await navigator.mediaDevices.getUserMedia({ video, audio: false });
   Cam.track = Cam.stream.getVideoTracks()[0];
   Cam.video.srcObject = Cam.stream; await Cam.video.play();
+  R.resetLive();
   Cam.caps = Cam.track.getCapabilities ? Cam.track.getCapabilities() : {};
   const st = Cam.track.getSettings ? Cam.track.getSettings() : {};
   if (st.facingMode) Cam.facing = st.facingMode;
   $("finder").classList.toggle("mirror", Cam.facing === "user");
+  Cam.zoom = st.zoom || 1;
   Cam.ic = null; Cam.photoCaps = null;
-  if ("ImageCapture" in window) {
-    try { Cam.ic = new ImageCapture(Cam.track); Cam.photoCaps = await Cam.ic.getPhotoCapabilities(); } catch { Cam.photoCaps = null; }
-  }
-  // focus continuously, best quality settings where the phone allows
+  if ("ImageCapture" in window) { try { Cam.ic = new ImageCapture(Cam.track); Cam.photoCaps = await Cam.ic.getPhotoCapabilities(); } catch { Cam.photoCaps = null; } }
   const adv = {};
   if (Cam.caps.focusMode?.includes("continuous")) adv.focusMode = "continuous";
   if (Cam.caps.exposureMode?.includes("continuous")) adv.exposureMode = "continuous";
   if (Cam.caps.whiteBalanceMode?.includes("continuous")) adv.whiteBalanceMode = "continuous";
+  if (Cam.caps.exposureCompensation) adv.exposureCompensation = 0;
   if (Object.keys(adv).length) Cam.track.applyConstraints({ advanced: [adv] }).catch(() => {});
-  // flash / torch
-  const canFlash = Cam.photoCaps?.fillLightMode?.includes("flash") || Cam.caps.torch;
-  $("camFlash").hidden = !canFlash; Cam.flash = false; $("camFlash").setAttribute("aria-pressed", false);
-  // zoom buttons
-  const z = Cam.caps.zoom, zb = $("zooms"); zb.innerHTML = "";
-  if (z && z.max > z.min && !(Cam.facing !== "user" && Cam.backIds.length > 1)) {
-    const stops = [z.min, 1, 2, 3, 5, 10].filter((v, i, a) => v >= z.min && v <= z.max && a.indexOf(v) === i).sort((a, b) => a - b);
-    Cam.zoom = st.zoom || 1;
-    for (const v of stops) { const b = document.createElement("button"); b.textContent = (v < 1 ? v.toFixed(1) : Math.round(v)) + "×"; b.dataset.z = v; b.onclick = () => setZoom(v); zb.append(b); }
-    zb.hidden = stops.length < 2; markZoom();
-  } else zb.hidden = true;
-  // other back lenses (ultra-wide, tele) show up as separate cameras on many phones
+  $("camFlash").hidden = !(Cam.photoCaps?.fillLightMode?.includes("flash") || Cam.caps.torch); Cam.flash = false; $("camFlash").setAttribute("aria-pressed", false);
   try {
     const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput");
     Cam.backIds = devs.filter(d => /back|rear|environment/i.test(d.label)).map(d => d.deviceId);
   } catch { Cam.backIds = []; }
-  $("camLens").hidden = true;
-  Cam.analysis = null; Cam.tone = null; Cam.lastAt = 0;
-}
-function markZoom() { [...$("zooms").children].forEach(b => b.setAttribute("aria-pressed", Math.abs(Number(b.dataset.z) - Cam.zoom) < 0.05)); }
-function setZoom(v) {
-  const z = Cam.caps.zoom; if (!z) return;
-  Cam.zoom = Math.min(z.max, Math.max(z.min, v));
-  Cam.track.applyConstraints({ advanced: [{ zoom: Cam.zoom }] }).catch(() => {}); markZoom();
-}
-
-const tiny = document.createElement("canvas");
-function loop() {
-  if (!Cam.live) return;
-  Cam.raf = requestAnimationFrame(loop);
-  const v = Cam.video; if (!v.videoWidth || Cam.busy) return;
-  Cam.frame++;
-  const now = performance.now();
-  if (now - Cam.lastAt > 1200) {           // look at the scene: auto fix, Smart HDR map, suggestions, night
-    Cam.lastAt = now;
-    const k = 200 / Math.max(v.videoWidth, v.videoHeight);
-    tiny.width = Math.round(v.videoWidth * k); tiny.height = Math.round(v.videoHeight * k);
-    tiny.getContext("2d", { willReadFrequently: true }).drawImage(v, 0, 0, tiny.width, tiny.height);
-    const prevSug = Cam.analysis ? Cam.analysis.suggest.join() : "";
-    Cam.analysis = analyzeImage(tiny);
-    { const d = tiny.getContext("2d").getImageData(0, 0, tiny.width, tiny.height).data; let c = 0;
-      for (let i = 0; i < d.length; i += 4) if (Math.max(d[i], d[i + 1], d[i + 2]) >= 250) c++;
-      Cam.clipped = c / (d.length / 4); Cam.lastFrame = Cam.lastFrame || document.createElement("canvas");
-      Cam.lastFrame.width = tiny.width; Cam.lastFrame.height = tiny.height; Cam.lastFrame.getContext("2d").drawImage(tiny, 0, 0); }
-    const snap = document.createElement("canvas"); snap.width = tiny.width; snap.height = tiny.height; snap.getContext("2d").drawImage(tiny, 0, 0);
-    Cam.tone = R.toneFor(snap);
-    Cam.dark = Cam.analysis.tags.includes("night");
-    if (Cam.analysis.suggest.join() !== prevSug || !$("camStrip").children.length) renderCamUI(); else { const n = Cam.night === "on" || (Cam.night === "auto" && Cam.dark); $("nightPill").hidden = !n; $("shutter").classList.toggle("night", n); $("camNight").setAttribute("aria-pressed", n); updateHdrUI(); }
+  if (Cam.facing !== "user") {
+    if (!Cam.mainId || !Cam.backIds.includes(Cam.mainId)) Cam.mainId = st.deviceId || Cam.backIds[0];
+    if (st.deviceId === Cam.mainId) Cam.mainZoom = Cam.caps.zoom || null;
   }
-  R.drawLive(v, state.look, { amount: state.amount, seed: Cam.frame & 1023, grainScale: 0.75, ...camPre() });
+  setTimeout(placeGrid, 50);
 }
 
-// gestures: tap = focus, swipe = change look, pinch = zoom
+/* ---------- live view ---------- */
+function scheduleFrame() {
+  if (!Cam.live) return;
+  if (Cam.video.requestVideoFrameCallback) Cam.rvfc = Cam.video.requestVideoFrameCallback(onFrame);
+  else Cam.raf = requestAnimationFrame(onFrame);
+}
+function onFrame() {
+  if (!Cam.live) return;
+  scheduleFrame();
+  const v = Cam.video; if (!v.videoWidth) return;
+  Cam.frame++;
+  if (Cam.rendering) return;                       // the full photo is being finished on the same canvas
+  if (Cam.busy && Cam.frame % 2) return;          // lighter while a photo is being processed
+  if (Cam.wantThumbs) { Cam.wantThumbs = false; drawThumbs(); }   // small previews first, then the live frame (same task: no flicker)
+  R.drawLive(v, state.look, { amount: state.amount, seed: Cam.frame & 1023, grainScale: 0.75, ...camPre() }, null, 1280);
+}
+const tiny = document.createElement("canvas");
+/** Every 1.5 s, in spare time: auto fix, Smart HDR map, suggestions, night and HDR detection, carousel previews. */
+function analysisTick() {
+  if (!Cam.live) return;
+  Cam.atimer = setTimeout(analysisTick, 1500);
+  if (Cam.busy || !Cam.video.videoWidth) return;
+  (window.requestIdleCallback || ((f) => setTimeout(f, 0)))(() => {
+    if (!Cam.live || Cam.busy) return;
+    const v = Cam.video, k = 160 / Math.max(v.videoWidth, v.videoHeight);
+    tiny.width = Math.round(v.videoWidth * k); tiny.height = Math.round(v.videoHeight * k);
+    const tctx = tiny.getContext("2d", { willReadFrequently: true }); tctx.drawImage(v, 0, 0, tiny.width, tiny.height);
+    const prev = Cam.analysis ? Cam.analysis.suggest.join() : "";
+    Cam.analysis = analyzeImage(tiny);
+    const d = tctx.getImageData(0, 0, tiny.width, tiny.height).data; let c = 0;
+    for (let i = 0; i < d.length; i += 4) if (Math.max(d[i], d[i + 1], d[i + 2]) >= 250) c++;
+    Cam.clipped = c / (d.length / 4);
+    const snap = document.createElement("canvas"); snap.width = tiny.width; snap.height = tiny.height; snap.getContext("2d").drawImage(tiny, 0, 0);
+    Cam.snap = snap; Cam.tone = R.toneFor(snap);
+    Cam.dark = Cam.analysis.tags.includes("night");
+    if (Cam.analysis.suggest.join() !== prev && (Cam.tab === "All" || Cam.tab === "For you")) renderCarousel(); else updateThumbs(false);
+    updateModes();
+  });
+}
+
+/* ---------- zoom and lenses ---------- */
+function renderZoomRow() {
+  const zb = $("zooms"); zb.innerHTML = "";
+  if (Cam.facing === "user" || !Cam.track) { zb.hidden = true; return; }
+  const curId = Cam.track.getSettings().deviceId;
+  if (Cam.backIds.length > 1 && Cam.backIds.some(id => Cam.lensZoom[id] === undefined)) { zb.hidden = true; if (!Cam.measuring) measureLenses(); return; }
+  const stops = [];
+  for (const id of (Cam.backIds.length > 1 ? Cam.backIds : [curId])) {
+    const z = Cam.backIds.length > 1 ? Cam.lensZoom[id] : 1;
+    if (!z || stops.some(s => Math.abs(s.z - z) / z < 0.18)) continue;
+    stops.push({ z, id, lens: z });
+  }
+  const main = stops.find(s => Math.abs(s.z - 1) < 0.2) || { z: 1, id: Cam.mainId || curId, lens: 1 };
+  if (!stops.includes(main)) stops.push(main);
+  const mz = (curId === main.id ? Cam.caps.zoom : Cam.mainZoom) || null;
+  if (mz) {
+    // zoom on the main camera: 2x/3x/5x where there's no separate lens (some phones switch to their zoom lens by themselves)
+    for (const z of [2, 3, 5, 10]) {
+      if (stops.some(s => Math.abs(s.z - z) / z < 0.2)) continue;
+      const base = stops.filter(s => s.lens === s.z && s.z <= z).sort((a, b) => b.z - a.z)[0] || main;   // longest real lens below this zoom
+      if (base === main ? mz.max >= z * 0.98 : z <= base.z * 4) stops.push({ z, id: base.id, lens: base.z });
+    }
+    if (mz.min < 0.95 && !stops.some(s => s.z < 0.95)) stops.push({ z: Math.max(mz.min, 0.5), id: main.id, lens: 1 });
+  }
+  if (stops.length < 2 && !(Cam.caps.zoom && Cam.caps.zoom.max > 1.5)) { zb.hidden = true; return; }
+  stops.sort((a, b) => a.z - b.z);
+  const curLens = (Cam.backIds.length > 1 ? Cam.lensZoom[curId] : 1) || 1, eff = curLens * (Cam.zoom || 1);
+  let selI = 0, bd = 1e9; stops.forEach((s, i) => { const d = Math.abs(Math.log(s.z / eff)); if (d < bd) { bd = d; selI = i; } });
+  stops.forEach((s, i) => {
+    const b = document.createElement("button");
+    const nice = Math.abs(s.z - Math.round(s.z)) / s.z < 0.12 ? Math.round(s.z) : Math.round(s.z * 10) / 10;
+    b.textContent = (s.z < 0.95 ? s.z.toFixed(1).replace(/^0/, "") : nice) + (i === selI ? "×" : "");
+    b.setAttribute("aria-pressed", i === selI);
+    b.onclick = async () => {
+      haptic();
+      const now = Cam.track.getSettings().deviceId;
+      if (s.id !== now) { Cam.deviceId = s.id; try { await startStream(); } catch (e) { camError(e); return; } }
+      setZoom(s.z / s.lens); renderZoomRow();
+    };
+    zb.append(b);
+  });
+  zb.hidden = false;
+}
+function setZoom(v) {
+  const z = Cam.caps.zoom; if (!z || !Cam.track) return;
+  Cam.zoom = Math.min(z.max, Math.max(z.min, v));
+  Cam.track.applyConstraints({ advanced: [{ zoom: Cam.zoom }] }).catch(() => {});
+}
+/* Find out once which back camera is ultra-wide, main or zoom, by comparing what each one sees with the main camera. */
+async function measureLenses(force) {
+  if (Cam.measuring) return;
+  Cam.measuring = true;
+  if (force) Cam.lensZoom = {};
+  const main = Cam.mainId || Cam.track.getSettings().deviceId;
+  const hold = (t) => { $("hold").hidden = false; $("holdTxt").textContent = t; };
+  try {
+    hold("Setting up lenses · point at something detailed");
+    if (Cam.track.getSettings().deviceId !== main) { Cam.deviceId = main; await startStreamRaw(); }
+    await new Promise(r => setTimeout(r, 900));
+    const ref = document.createElement("canvas"); await nextFrame(); grabInto(ref);
+    const R0 = normLuma(ref, 160);
+    Cam.lensZoom[main] = 1;
+    for (const id of Cam.backIds) {
+      if (Cam.lensZoom[id] !== undefined) continue;
+      try {
+        Cam.deviceId = id; await startStreamRaw();
+        await new Promise(r => setTimeout(r, 1000));
+        const cv = document.createElement("canvas"); await nextFrame(); grabInto(cv);
+        const m = matchZoom(R0, normLuma(cv, 160), [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6], 4);
+        Cam.lensZoom[id] = Math.abs(m.z - 1) < 0.12 ? 1 : m.z;
+      } catch (e) { console.warn("lens", e); Cam.lensZoom[id] = 1; }
+    }
+    store.set("lensZoom2", Cam.lensZoom);
+  } catch (e) { console.warn("lens check", e); }
+  Cam.deviceId = main;
+  try { await startStreamRaw(); } catch {}
+  $("hold").hidden = true; Cam.measuring = false;
+  renderZoomRow();
+}
+
+/* ---------- gestures: tap = focus, swipe = change look, pinch = zoom ---------- */
 (() => {
   const f = $("finder"), pts = new Map();
   let start = null, pinch0 = 0, zoom0 = 1;
-  f.addEventListener("pointerdown", e => { pts.set(e.pointerId, e); if (pts.size === 1) start = { x: e.clientX, y: e.clientY, t: Date.now() }; else if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); zoom0 = Cam.zoom; start = null; } });
+  f.addEventListener("pointerdown", e => { pts.set(e.pointerId, e); if (pts.size === 1) start = { x: e.clientX, y: e.clientY }; else if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); zoom0 = Cam.zoom; start = null; } });
   f.addEventListener("pointermove", e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, e);
     if (pts.size === 2 && pinch0) { const [a, b] = [...pts.values()]; setZoom(zoom0 * Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) / pinch0); } });
   const end = e => {
-    pts.delete(e.pointerId); if (pts.size) return; pinch0 = 0;
+    pts.delete(e.pointerId); if (pts.size) return;
+    if (pinch0) { pinch0 = 0; renderZoomRow(); }
     if (!start) return;
     const dx = e.clientX - start.x, dy = e.clientY - start.y;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-      const list = camLooks(), i = Math.max(0, list.indexOf(state.look));
-      camPick(list[(i + (dx < 0 ? 1 : -1) + list.length) % list.length]);
+      const list = camList(); if (!list.length) return;
+      const i = Math.max(0, list.indexOf(state.look));
+      camPick(list[(i + (dx < 0 ? 1 : -1) + list.length) % list.length], true);
     } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) focusAt(e.clientX, e.clientY);
     start = null;
   };
   f.addEventListener("pointerup", end); f.addEventListener("pointercancel", e => { pts.delete(e.pointerId); start = null; });
 })();
 function focusAt(cx, cy) {
-  const r = $("finder").getBoundingClientRect(), v = Cam.video;
-  const s = Math.min(r.width / v.videoWidth, r.height / v.videoHeight), w = v.videoWidth * s, h = v.videoHeight * s;
-  let x = (cx - r.left - (r.width - w) / 2) / w, y = (cy - r.top - (r.height - h) / 2) / h;
+  const r = R.canvas.getBoundingClientRect(), fr = $("finder").getBoundingClientRect();
+  let x = (cx - r.left) / r.width, y = (cy - r.top) / r.height;
   if (x < 0 || y < 0 || x > 1 || y > 1) return;
   if (Cam.facing === "user") x = 1 - x;
-  const ring = $("focusRing"); ring.style.left = (cx - r.left) + "px"; ring.style.top = (cy - r.top) + "px";
-  ring.classList.add("on"); setTimeout(() => ring.classList.remove("on"), 900);
+  const ring = $("focusRing"); ring.style.left = (cx - fr.left) + "px"; ring.style.top = (cy - fr.top) + "px";
+  ring.classList.remove("on"); void ring.offsetWidth; ring.classList.add("on"); setTimeout(() => ring.classList.remove("on"), 900);
   if (Cam.caps.pointsOfInterest || Cam.caps.focusMode) {
     const adv = { pointsOfInterest: [{ x, y }] };
     if (Cam.caps.focusMode?.includes("single-shot")) adv.focusMode = "single-shot";
     Cam.track.applyConstraints({ advanced: [adv] }).catch(() => {});
-    setTimeout(() => { if (Cam.caps.focusMode?.includes("continuous")) Cam.track?.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(() => {}); }, 4000);
+    clearTimeout(Cam.focusT);
+    Cam.focusT = setTimeout(() => { if (Cam.caps.focusMode?.includes("continuous")) Cam.track?.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(() => {}); }, 5000);
   }
 }
 
-/* --- capture --- */
+/* ---------- capture helpers ---------- */
 const nextFrame = () => new Promise(r => Cam.video.requestVideoFrameCallback ? Cam.video.requestVideoFrameCallback(() => r()) : requestAnimationFrame(() => r()));
 function grabInto(cv) { const v = Cam.video; cv.width = v.videoWidth; cv.height = v.videoHeight; cv.getContext("2d", { willReadFrequently: true }).drawImage(v, 0, 0); return cv; }
 function lumaSmall(src, w) {
@@ -1171,7 +1383,42 @@ function lumaSmall(src, w) {
   for (let i = 0; i < L.length; i++) L[i] = d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114;
   return { L, w, h };
 }
-/** How far a frame moved compared with the first one (hand shake), in small-image pixels. */
+/** Luminance with the brightness and contrast evened out, so different exposures and lenses can be compared. */
+function normLuma(src, w) {
+  const s = lumaSmall(src, w); let m = 0, v = 0;
+  for (const x of s.L) m += x; m /= s.L.length || 1;
+  for (const x of s.L) v += (x - m) * (x - m); v = Math.sqrt(v / (s.L.length || 1)) || 1;
+  for (let i = 0; i < s.L.length; i++) s.L[i] = (s.L[i] - m) / v;
+  return s;
+}
+/** How much `cur` is zoomed (z) and shifted (dx, dy as fractions) compared with `ref`: cur(0.5 + e·z + d) ≈ ref(0.5 + e).
+    Uses correlation, so different brightness or lenses don't confuse it. */
+function matchZoom(ref, cur, zs, shiftR) {
+  let best = { z: 1, dx: 0, dy: 0, e: -Infinity };
+  for (const z of zs) for (let sy = -shiftR; sy <= shiftR; sy++) for (let sx = -shiftR; sx <= shiftR; sx++) {
+    const dxf = sx * 2 / cur.w, dyf = sy * 2 / cur.h;
+    let n = 0, sa = 0, sb = 0, saa = 0, sbb = 0, sab = 0;
+    const add = (a, b) => { n++; sa += a; sb += b; saa += a * a; sbb += b * b; sab += a * b; };
+    if (z >= 1) {
+      for (let y = 1; y < cur.h - 1; y += 2) for (let x = 1; x < cur.w - 1; x += 2) {
+        const X = Math.floor((((x + 0.5) / cur.w - 0.5 - dxf) / z + 0.5) * ref.w), Y = Math.floor((((y + 0.5) / cur.h - 0.5 - dyf) / z + 0.5) * ref.h);
+        if (X < 0 || Y < 0 || X >= ref.w || Y >= ref.h) continue;
+        add(cur.L[y * cur.w + x], ref.L[Y * ref.w + X]);
+      }
+    } else {
+      for (let y = 1; y < ref.h - 1; y += 2) for (let x = 1; x < ref.w - 1; x += 2) {
+        const X = Math.floor((((x + 0.5) / ref.w - 0.5) * z + 0.5 + dxf) * cur.w), Y = Math.floor((((y + 0.5) / ref.h - 0.5) * z + 0.5 + dyf) * cur.h);
+        if (X < 0 || Y < 0 || X >= cur.w || Y >= cur.h) continue;
+        add(ref.L[y * ref.w + x], cur.L[Y * cur.w + X]);
+      }
+    }
+    if (n < 300) continue;
+    const va = saa - sa * sa / n, vb = sbb - sb * sb / n;
+    const ncc = (sab - sa * sb / n) / Math.sqrt(Math.max(va * vb, 1e-9));
+    if (ncc > best.e) best = { z, dx: dxf, dy: dyf, e: ncc };
+  }
+  return best;
+}
 function shift(a, b, cx, cy, r, step) {
   let best = [cx, cy], bestE = Infinity;
   const m = Math.ceil(r + Math.abs(cx) + Math.abs(cy)) + 2;
@@ -1189,6 +1436,7 @@ function align(refS, refM, cur) {
   const f = cur.width / refM.w;
   return [mx * f, my * f];
 }
+/** Merge several live frames (lined up to cancel hand shake) to cut noise. */
 async function multiFrame(n, label, keepOverlay) {
   $("hold").hidden = false; $("holdTxt").textContent = label;
   const ref = document.createElement("canvas"), cur = document.createElement("canvas");
@@ -1206,20 +1454,16 @@ async function multiFrame(n, label, keepOverlay) {
 }
 const canvasBlob = (cv, q) => new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("Couldn't save the photo")), "image/jpeg", q));
 const stamp = () => { const d = new Date(), z = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}${z(d.getMonth() + 1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}`; };
-
-/* Exposure control (HDR and Night): set exposure compensation, then wait until the picture settles. */
 async function setEV(v) {
-  const r = Cam.caps.exposureCompensation; if (!r) return false;
-  const ev = Math.min(r.max, Math.max(r.min, v));
-  try { await Cam.track.applyConstraints({ advanced: [{ exposureCompensation: ev }] }); } catch { return false; }
-  return true;
+  const r = Cam.caps.exposureCompensation; if (!r || !Cam.track) return false;
+  try { await Cam.track.applyConstraints({ advanced: [{ exposureCompensation: Math.min(r.max, Math.max(r.min, v)) }] }); return true; } catch { return false; }
 }
 function meanLuma(cv) {
   const k = 64 / Math.max(cv.width, cv.height), w = Math.max(1, Math.round(cv.width * k)), h = Math.max(1, Math.round(cv.height * k));
   const t = document.createElement("canvas"); t.width = w; t.height = h; const ctx = t.getContext("2d", { willReadFrequently: true }); ctx.drawImage(cv, 0, 0, w, h);
   const d = ctx.getImageData(0, 0, w, h).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2]; return s / (d.length / 4) / 765;
 }
-async function settle(target, dir) {   // wait (max ~0.9 s) until brightness moves the right way and stops changing
+async function settle(target, dir) {
   const cv = document.createElement("canvas"); let prev = null;
   for (let i = 0; i < 27; i++) {
     await nextFrame(); grabInto(cv); const m = meanLuma(cv);
@@ -1227,167 +1471,122 @@ async function settle(target, dir) {   // wait (max ~0.9 s) until brightness mov
     prev = m;
   }
 }
-/* Normalised small luminance, so shots at different brightness can be compared. */
-function normLuma(src, w) {
-  const s = lumaSmall(src, w); let m = 0; for (const v of s.L) m += v; m /= s.L.length || 1;
-  for (let i = 0; i < s.L.length; i++) s.L[i] = s.L[i] / Math.max(m, 1);
-  return s;
+const canHdr = () => !!(Cam.caps.exposureCompensation && Cam.caps.exposureCompensation.min <= -1 && Cam.ic && Cam.photoCaps);
+const hdrNow = () => canHdr() && !isNight() && (Cam.hdr === "on" || (Cam.hdr === "auto" && Cam.clipped > 0.015));
+/** A full-resolution photo from the camera sensor. */
+async function takeStill() {
+  if (!Cam.ic || !Cam.photoCaps) return null;
+  const o = {};
+  if (Cam.photoCaps.imageWidth?.max) { o.imageWidth = Cam.photoCaps.imageWidth.max; o.imageHeight = Cam.photoCaps.imageHeight.max; }
+  if (Cam.photoCaps.fillLightMode?.length) o.fillLightMode = Cam.flash && Cam.photoCaps.fillLightMode.includes("flash") ? "flash" : (Cam.photoCaps.fillLightMode.includes("off") ? "off" : undefined);
+  if (!o.fillLightMode) delete o.fillLightMode;
+  try { return await Cam.ic.takePhoto(o); } catch { try { return await Cam.ic.takePhoto(); } catch { return null; } }
 }
-/** Find how much `cur` is zoomed and shifted compared with `ref` (both normalised luminance). */
-function matchScale(ref, cur, scales) {
-  let best = { s: 1, dx: 0, dy: 0, e: Infinity };
-  const cxr = ref.w / 2, cyr = ref.h / 2, cxc = cur.w / 2, cyc = cur.h / 2, k = cur.w / ref.w;
-  for (const s of scales) for (let dy = -4; dy <= 4; dy += 2) for (let dx = -4; dx <= 4; dx += 2) {
-    let e = 0, n = 0;
-    for (let y = 2; y < ref.h - 2; y += 2) for (let x = 2; x < ref.w - 2; x += 2) {
-      const X = Math.round(cxc + ((x - cxr) * k) / s + dx), Y = Math.round(cyc + ((y - cyr) * k) / s + dy);
-      if (X < 0 || Y < 0 || X >= cur.w || Y >= cur.h) continue;
-      e += Math.abs(ref.L[y * ref.w + x] - cur.L[Y * cur.w + X]); n++;
-    }
-    if (n < (ref.w * ref.h) / 4 * 0.12) continue;
-    e /= n; if (e < best.e) best = { s, dx, dy, e };
-  }
-  return best;
+const sameShape = (a, b) => Math.abs(a.width / a.height - b.width / b.height) < 0.02;
+async function smallOf(src, w = 480) { return createImageBitmap(src, { resizeWidth: w, resizeHeight: Math.max(1, Math.round(w * src.height / src.width)) }); }
+
+/** HDR: a darker shot for the bright parts + the normal full-resolution photo, blended. */
+async function hdrShot() {
+  $("hold").hidden = false; $("holdTxt").textContent = "HDR · hold still";
+  const base = document.createElement("canvas"); await nextFrame(); grabInto(base);
+  const m0 = meanLuma(base);
+  let dark = null;
+  if (await setEV(-2)) { await settle(m0 * 0.6, -1); dark = await multiFrame(2, "HDR · hold still", true); }
+  await setEV(0); if (dark) await settle(m0 * 0.9, 0);
+  const blob = await takeStill();
+  if (!blob || !dark) return blob;
+  const bmp = await createImageBitmap(blob, { imageOrientation: "from-image" });
+  if (!sameShape(bmp, dark)) { bmp.close?.(); return blob; }
+  $("holdTxt").textContent = "HDR · blending";
+  const A = lumaSmall(bmp, 200), B = lumaSmall(dark, 200), ratios = [];
+  for (let i = 0; i < Math.min(A.L.length, B.L.length); i += 3) { const a = A.L[i], b = B.L[i]; if (a > 40 && a < 220 && b > 12) ratios.push(Math.pow(a / 255, 2.2) / Math.pow(b / 255, 2.2)); }
+  ratios.sort((x, y) => x - y);
+  const k = ratios.length > 50 ? ratios[ratios.length >> 1] : 0;
+  if (k < 1.4) { bmp.close?.(); return blob; }                 // exposure didn't change: nothing to blend
+  const m = matchZoom(normLuma(bmp, 160), normLuma(dark, 160), [0.94, 0.97, 1, 1.03, 1.06], 3);
+  const under = { img: dark, k: Math.min(8, k), scale: m.z, off: [m.dx, m.dy] };
+  const out = await fullRender(bmp, null, { amount: 0, mul: [1, 1, 1], contrast: 0, under, tone: R.toneFor(await smallOf(bmp)), toneAmt: settings.hdr ? 0.45 : 0.3 });
+  const res = await canvasBlob(out, 0.95); out.width = out.height = 0; bmp.close?.();
+  return res;
+}
+/** Night: many frames merged for clean colour, plus the full-resolution photo for fine detail. */
+async function nightShot() {
+  const base = document.createElement("canvas"); await nextFrame(); grabInto(base);
+  const n = meanLuma(base) < 0.08 ? 12 : 8;
+  const raised = await setEV(1); if (raised) await settle(0, 0);
+  const merged = await multiFrame(n, "Night · hold still", true);
+  $("holdTxt").textContent = "Night · taking photo";
+  const blob = await takeStill();
+  if (raised) setEV(0);
+  if (!blob) return canvasBlob(merged, 0.96);
+  const bmp = await createImageBitmap(blob, { imageOrientation: "from-image" });
+  if (!sameShape(bmp, merged) || bmp.width < merged.width) { bmp.close?.(); return canvasBlob(merged, 0.96); }
+  $("holdTxt").textContent = "Night · finishing";
+  const m = matchZoom(normLuma(bmp, 160), normLuma(merged, 160), [0.94, 0.97, 1, 1.03, 1.06], 3);
+  const out = await fullRender(bmp, null, { amount: 0, mul: [1, 1, 1], contrast: 0,
+    fuse: { img: merged, scale: m.z, off: [m.dx, m.dy], detail: 0.8, r: Math.max(1.5, bmp.width / merged.width) },
+    tone: R.toneFor(await smallOf(merged)), toneAmt: settings.hdr ? 0.35 : 0 });
+  const res = await canvasBlob(out, 0.95); out.width = out.height = 0; bmp.close?.();
+  return res;
 }
 
+const fullRender = async (...a) => { Cam.rendering = true; try { return await R.renderFull(...a); } finally { Cam.rendering = false; } };
 async function shoot() {
-  if (Cam.busy || !Cam.track) return;
+  if (Cam.busy || !Cam.track || Cam.measuring) return;
   Cam.busy = true; $("shutter").disabled = true;
   const fl = document.createElement("div"); fl.className = "flash"; document.body.append(fl); setTimeout(() => fl.remove(), 300);
-  navigator.vibrate?.(15);
-  const night = Cam.night === "on" || (Cam.night === "auto" && Cam.dark);
-  const hdr = !night && hdrNow();
-  let blob = null, under = null;
+  haptic(15);
+  const night = isNight(), hdr = !night && hdrNow();
+  let blob = null;
   try {
-    if (hdr) {
-      // 1) a darker shot for the bright parts, 2) the normal full-resolution photo
-      $("hold").hidden = false; $("holdTxt").textContent = "HDR · hold still";
-      const base = document.createElement("canvas"); await nextFrame(); grabInto(base);
-      const m0 = meanLuma(base);
-      if (await setEV(-2)) {
-        await settle(m0 * 0.6, -1);
-        const dark = await multiFrame(2, "HDR · hold still", true);
-        await setEV(0); await settle(m0 * 0.9, 0);
-        under = { img: dark };
-      }
-    }
-    if (!night && Cam.ic && Cam.photoCaps) {
-      const o = {};
-      if (Cam.photoCaps.imageWidth?.max) { o.imageWidth = Cam.photoCaps.imageWidth.max; o.imageHeight = Cam.photoCaps.imageHeight.max; }
-      if (Cam.flash && Cam.photoCaps.fillLightMode?.includes("flash")) o.fillLightMode = "flash";
-      try { blob = await Cam.ic.takePhoto(o); } catch { blob = await Cam.ic.takePhoto(); }
-    }
-    let fused = false;
-    if (blob && under && under.img) {
-      // line the darker frames up with the full photo and measure how much darker they are
-      $("holdTxt").textContent = "HDR · blending";
-      const bmp = await createImageBitmap(blob, { imageOrientation: "from-image" });
-      const A = lumaSmall(bmp, 200), B = lumaSmall(under.img, 200);
-      const ratios = [];
-      for (let i = 0; i < A.L.length; i += 3) { const a = A.L[i], b = B.L[i] || 0; if (a > 40 && a < 220 && b > 12) ratios.push(Math.pow(a / 255, 2.2) / Math.pow(b / 255, 2.2)); }
-      ratios.sort((x, y) => x - y);
-      const k = ratios.length > 50 ? ratios[ratios.length >> 1] : 3.5;
-      if (k < 1.4) { under = null; bmp.close?.(); }      // the camera ignored the exposure change: nothing to blend
-      else {
-      const mt = matchScale(normLuma(bmp, 160), normLuma(under.img, 160), [0.94, 0.97, 1, 1.03, 1.06, 1.1]);
-      under.k = Math.min(8, Math.max(1.5, k)); under.scale = mt.s; under.off = [mt.dx / 160, mt.dy / Math.round(160 * under.img.height / under.img.width)];
-      const p0 = { small: await createImageBitmap(bmp, { resizeWidth: 480, resizeHeight: Math.round(480 * bmp.height / bmp.width) }) };
-      const out = await R.renderFull(bmp, null, { amount: 0, mul: [1, 1, 1], contrast: 0, under, tone: R.toneFor(p0.small), toneAmt: settings.hdr ? 0.45 : 0.3 });
-      blob = await canvasBlob(out, 0.95); out.width = out.height = 0; bmp.close?.(); fused = true;
-      }
-    }
-    if (!blob) {
-      // Night: more frames the darker it is, a little brighter exposure, then merge to cut noise
-      const veryDark = Cam.analysis && Cam.analysis.tags.includes("night") && Cam.dark;
-      const n = night ? (veryDark ? 12 : 8) : 3;
-      const raised = night && (await setEV(1));
-      if (raised) await settle(0, 0);
-      const merged = await multiFrame(n, night ? "Night mode · hold still" : "Hold still");
-      if (raised) setEV(0);
-      blob = await canvasBlob(merged, 0.96); fused = night;
-    }
+    blob = night ? await nightShot() : hdr ? await hdrShot() : await takeStill();
+    if (!blob) blob = await canvasBlob(await multiFrame(3, "Hold still"), 0.96);
     const name = `ACE_${stamp()}.jpg`;
     const file = new File([blob], name, { type: "image/jpeg", lastModified: Date.now() });
-    const p = await loadPhoto(file, { camera: true, fused });
+    const p = await loadPhoto(file, { camera: true, fused: night || hdr });
     state.photos.push(p);
     $("camLast").innerHTML = `<img alt="" src="${p.thumbUrl}">`;
     const lk = state.look;
     if (lk) {
       $("hold").hidden = false; $("holdTxt").textContent = "Saving…";
-      const outB = await makeJpeg(p, lk);
-      download(outB, outName(p, lk));
+      Cam.rendering = true;
+      try { download(await makeJpeg(p, lk), outName(p, lk)); } finally { Cam.rendering = false; }
     }
     if (!lk || settings.keepOriginal) download(blob, name);
-    toast((hdr && fused ? "HDR · " : night ? "Night · " : "") + (lk ? `Saved with ${lk.name}` + (settings.keepOriginal ? " + original" : "") : "Saved"));
+    toast((hdr ? "HDR · " : night ? "Night · " : "") + (lk ? `Saved with ${lk.name}` + (settings.keepOriginal ? " + original" : "") : "Saved"));
   } catch (e) { console.error(e); setEV(0); toast("Couldn't take the photo: " + (e.message || e.name), "err"); }
-  finally {
-    $("hold").hidden = true; Cam.busy = false; $("shutter").disabled = false;
-  }
+  finally { $("hold").hidden = true; Cam.busy = false; $("shutter").disabled = false; }
 }
+
+/* ---------- buttons ---------- */
 $("shutter").onclick = shoot;
 $("camBtn").onclick = $("camBtn2").onclick = openCamera;
 $("camClose").onclick = closeCamera;
-$("camGrid").onclick = () => { const on = !$("finder").classList.contains("grid"); $("finder").classList.toggle("grid", on); $("camGrid").setAttribute("aria-pressed", on); };
-$("camHdr").onclick = () => { Cam.hdr = { auto: "on", on: "off", off: "auto" }[Cam.hdr]; store.set("hdrCam", Cam.hdr); updateHdrUI(); toast("HDR: " + Cam.hdr); };
-$("camNight").onclick = () => { Cam.night = { auto: "on", on: "off", off: "auto" }[Cam.night]; store.set("night", Cam.night); renderCamUI(); toast("Night mode: " + Cam.night); };
+$("camGrid").onclick = () => { const on = !$("finder").classList.contains("grid"); $("finder").classList.toggle("grid", on); $("camGrid").setAttribute("aria-pressed", on); placeGrid(); };
+const cycle = { auto: "on", on: "off", off: "auto" };
+$("camHdr").onclick = () => { Cam.hdr = cycle[Cam.hdr]; store.set("hdrCam", Cam.hdr); updateModes(); haptic(); };
+$("camNight").onclick = () => { Cam.night = cycle[Cam.night]; store.set("night", Cam.night); updateModes(); haptic(); };
 $("camFlash").onclick = () => {
-  Cam.flash = !Cam.flash; $("camFlash").setAttribute("aria-pressed", Cam.flash);
+  Cam.flash = !Cam.flash; $("camFlash").setAttribute("aria-pressed", Cam.flash); haptic();
   if (!Cam.photoCaps?.fillLightMode?.includes("flash") && Cam.caps.torch) Cam.track.applyConstraints({ advanced: [{ torch: Cam.flash }] }).catch(() => {});
 };
 $("camFlip").onclick = async () => {
-  Cam.facing = Cam.facing === "user" ? "environment" : "user"; Cam.deviceId = null;
-  try { await startStream(); renderCamUI(); } catch (e) { camError(e); }
-};
-function renderLenses() {
-  const zb = $("zooms");
-  if (Cam.facing === "user" || Cam.backIds.length < 2) return;     // single lens: zoom buttons stay as they are
-  const cur = Cam.track.getSettings().deviceId;
-  const known = Cam.backIds.map(id => [id, Cam.lensZoom[id]]);
-  if (known.some(([, z]) => z === undefined)) { zb.hidden = true; if (!Cam.measuring) measureLenses(); return; }
-  // one button per distinct lens, sorted wide to tele
-  const uniq = []; for (const [id, z] of known.sort((a, b) => a[1] - b[1])) if (!uniq.some(u => Math.abs(u[1] - z) / z < 0.15)) uniq.push([id, z]);
-  if (uniq.length < 2) return;
-  zb.innerHTML = "";
-  for (const [id, z] of uniq) {
-    const b = document.createElement("button"); b.textContent = (z < 0.95 ? z.toFixed(1) : Math.round(z)) + "×";
-    b.setAttribute("aria-pressed", id === cur);
-    b.onclick = async () => { if (id === Cam.track.getSettings().deviceId) return; Cam.deviceId = id; try { await startStream(); renderCamUI(); } catch (e) { camError(e); } };
-    zb.append(b);
-  }
-  zb.hidden = false;
-}
-/* Work out each back lens's zoom (ultra-wide, main, tele) once, by comparing what it sees with the main lens. */
-async function measureLenses() {
-  Cam.measuring = true;
-  const main = Cam.track.getSettings().deviceId;
-  try {
-    $("hold").hidden = false; $("holdTxt").textContent = "Setting up lenses…";
-    await new Promise(r => setTimeout(r, 600));
-    const ref = document.createElement("canvas"); await nextFrame(); grabInto(ref);
-    const R0 = normLuma(ref, 200);
-    Cam.lensZoom[main] = 1;
-    for (const id of Cam.backIds) {
-      if (Cam.lensZoom[id] !== undefined) continue;
-      Cam.deviceId = id; await startStreamRaw();
-      await new Promise(r => setTimeout(r, 700));
-      const cv = document.createElement("canvas"); await nextFrame(); grabInto(cv);
-      const m = matchScale(R0, normLuma(cv, 200), [0.4, 0.45, 0.5, 0.55, 0.6, 0.7, 0.8, 1, 1.25, 1.6, 2, 2.5, 3, 3.5, 4, 5]);
-      Cam.lensZoom[id] = 1 / m.s;     // wider lens -> below 1 (0.5x), tele -> above 1 (3x)
-    }
-    store.set("lensZoom", Cam.lensZoom);
-  } catch (e) { console.warn("lens check", e); }
-  Cam.deviceId = main;
-  try { await startStreamRaw(); } catch {}
-  $("hold").hidden = true; Cam.measuring = false;
-  renderLenses(); renderCamUI();
-}
-$("camLens").onclick = async () => {
-  if (Cam.backIds.length < 2) return;
-  const cur = Cam.track.getSettings().deviceId, i = Cam.backIds.indexOf(cur);
-  Cam.deviceId = Cam.backIds[(i + 1) % Cam.backIds.length];
-  try { await startStream(); renderCamUI(); toast("Lens " + (Cam.backIds.indexOf(Cam.deviceId) + 1) + " of " + Cam.backIds.length); } catch (e) { camError(e); }
+  haptic();
+  Cam.facing = Cam.facing === "user" ? "environment" : "user"; Cam.deviceId = Cam.facing === "user" ? null : Cam.mainId;
+  try { await startStream(); } catch (e) { camError(e); }
 };
 $("camLast").onclick = () => { if (!state.photos.length) return; closeCamera(); selectPhoto(state.photos.length - 1); };
+$("camMore").onclick = () => {
+  const s = sheet(`<h3>Camera</h3>
+    <div class="opt"><div><b>Also save the original</b><small>A copy without the look, so nothing is lost</small></div><input type="checkbox" id="cOrig"></div>
+    <div class="opt"><div><b>Smart HDR</b><small>Brings out dark areas and calms bright ones</small></div><input type="checkbox" id="cHdr"></div>
+    <button class="menu-btn" id="cLens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg><span>Set up lenses again<small>If the 0.5× / 3× buttons are missing or wrong. Point at something detailed first.</small></span></button>
+    <button class="menu-btn" id="cNative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><span>Use my phone's camera app<small>Best for very dark scenes. The photo comes straight back here.</small></span></button>`);
+  const o = s.el.querySelector("#cOrig"); o.checked = settings.keepOriginal; o.onchange = () => { settings.keepOriginal = o.checked; store.set("keepOriginal", o.checked); };
+  const h = s.el.querySelector("#cHdr"); h.checked = settings.hdr; h.onchange = () => { settings.hdr = h.checked; store.set("hdr", h.checked); };
+  s.el.querySelector("#cLens").onclick = () => { s.close(); measureLenses(true); };
+  s.el.querySelector("#cNative").onclick = () => { s.close(); closeCamera(); $("nativeCam").click(); };
+};
 $("nativeBtn").onclick = () => $("nativeCam").click();
 $("nativeCam").onchange = () => { addFiles($("nativeCam").files); $("nativeCam").value = ""; };
 document.addEventListener("visibilitychange", () => { if (document.hidden && Cam.live) closeCamera(); });

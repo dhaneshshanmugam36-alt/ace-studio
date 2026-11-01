@@ -32,7 +32,7 @@ import numpy as np
 
 LUT_SIZE = 65
 LUT_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "ace-studio" / "luts"
-LUT_VERSION = "6"
+LUT_VERSION = "7"
 
 
 # --------------------------------------------------------------------------
@@ -216,6 +216,8 @@ def run_ops(c, ops):
             c = film(c, *args)
         elif name == "fade":
             c = fade(c, *args)
+        elif name == "chan":
+            c = chan(c, *[[tuple(p) for p in a] if a else None for a in args])
         else:
             raise ValueError(f"Unknown look step: {name}")
     return c

@@ -49,6 +49,7 @@
   const OPS = {
     wb: (warm = 0, tint = 0) => (c) => { c[0] *= 1 + warm; c[1] *= 1 - tint; c[2] *= 1 - warm; },
     sat: (s) => (c) => { const L = luma(c); for (let i = 0; i < 3; i++) c[i] = L + (c[i] - L) * s; },
+    chan: (r, g, b) => { const f = [r, g, b].map(p => p ? pchip(p) : null); return (c) => { for (let i = 0; i < 3; i++) if (f[i]) c[i] = f[i](c[i]); }; },
     fade: (black = 0, white = 1) => (c) => { for (let i = 0; i < 3; i++) c[i] = black + c[i] * (white - black); },
     tone: (pts) => { const f = pchip(pts); return (c) => { for (let i = 0; i < 3; i++) c[i] = f(c[i]); }; },
     split: (sh, hl, bal = 0.5) => (c) => {

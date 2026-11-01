@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "looks": [
   {
    "id": "golden-portrait",
@@ -97,7 +97,8 @@
      0.28
     ]
    ],
-   "skin": 0.25
+   "skin": 0.25,
+   "maker": "Kodak"
   },
   {
    "id": "sunny-gold",
@@ -195,7 +196,8 @@
      0.28
     ]
    ],
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "Kodak"
   },
   {
    "id": "bright-landscape",
@@ -284,7 +286,8 @@
      0.18
     ]
    ],
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "Kodak"
   },
   {
    "id": "pastel-portrait",
@@ -382,7 +385,8 @@
      0.28
     ]
    ],
-   "skin": 0.25
+   "skin": 0.25,
+   "maker": "Fujifilm"
   },
   {
    "id": "soft-negative",
@@ -475,7 +479,8 @@
      0.35
     ]
    ],
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "Fujifilm"
   },
   {
    "id": "warm-memory",
@@ -578,7 +583,8 @@
      0.28
     ]
    ],
-   "skin": 0.25
+   "skin": 0.25,
+   "maker": "Fujifilm"
   },
   {
    "id": "daylight-portrait",
@@ -662,7 +668,8 @@
    "vignette": 0,
    "halation": 0,
    "mono": false,
-   "skin": 0.25
+   "skin": 0.25,
+   "maker": "Kodak"
   },
   {
    "id": "everyday-green",
@@ -760,7 +767,8 @@
    "vignette": 0,
    "halation": 0,
    "mono": false,
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "Fujifilm"
   },
   {
    "id": "warm-everyday",
@@ -849,7 +857,8 @@
    "vignette": 0,
    "halation": 0,
    "mono": false,
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "Kodak"
   },
   {
    "id": "golden-hour",
@@ -952,7 +961,8 @@
    "grain_size": 1.0,
    "halation": 0,
    "mono": false,
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "Kodak"
   },
   {
    "id": "summer-red",
@@ -1036,7 +1046,277 @@
    "vignette": 0,
    "halation": 0,
    "mono": false,
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "More"
+  },
+  {
+   "id": "night-portrait",
+   "code": "NP",
+   "name": "Night Portrait",
+   "family": "Colour negative",
+   "inspired": "Kodak Portra 800",
+   "style": "Warm, rich portrait film for evenings and indoor light, with gentle grain.",
+   "grain": 6,
+   "skin": 0.25,
+   "swatch": [
+    "#D99A6C",
+    "#5A4038"
+   ],
+   "ops": [
+    [
+     "wb",
+     0.04,
+     0.005
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       5,
+       0.95,
+       1.0
+      ],
+      "30": [
+       2,
+       0.98,
+       1.03
+      ],
+      "120": [
+       -12,
+       0.85,
+       1.0
+      ],
+      "220": [
+       -8,
+       0.92,
+       1.0
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.03
+      ],
+      [
+       0.2,
+       0.18
+      ],
+      [
+       0.5,
+       0.52
+      ],
+      [
+       0.8,
+       0.82
+      ],
+      [
+       1,
+       0.96
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.0
+    ],
+    [
+     "film",
+     0.28
+    ]
+   ],
+   "grain_size": 1.0,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "maker": "Kodak"
+  },
+  {
+   "id": "cool-everyday",
+   "code": "CE",
+   "name": "Cool Everyday",
+   "family": "Colour negative",
+   "inspired": "Fujicolor C200",
+   "style": "Cool, slightly green budget film with soft contrast and nostalgic grain.",
+   "grain": 5,
+   "swatch": [
+    "#7FA89A",
+    "#D7C9A3"
+   ],
+   "ops": [
+    [
+     "wb",
+     -0.02,
+     -0.008
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       -2,
+       0.95,
+       1.0
+      ],
+      "55": [
+       4,
+       0.95,
+       1.0
+      ],
+      "120": [
+       -6,
+       1.05,
+       1.0
+      ],
+      "220": [
+       -6,
+       1.0,
+       1.0
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.03
+      ],
+      [
+       0.2,
+       0.19
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.8,
+       0.81
+      ],
+      [
+       1,
+       0.96
+      ]
+     ]
+    ],
+    [
+     "split",
+     [
+      -0.004,
+      0.008,
+      0.012
+     ],
+     [
+      0.004,
+      0.004,
+      0.0
+     ],
+     0.5
+    ],
+    [
+     "sat",
+     0.95
+    ],
+    [
+     "film",
+     0.28
+    ]
+   ],
+   "grain_size": 1.0,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "skin": 0.45,
+   "maker": "Fujifilm"
+  },
+  {
+   "id": "real-colour",
+   "code": "RA",
+   "name": "Real Colour",
+   "family": "Colour negative",
+   "inspired": "Fujifilm Reala Ace",
+   "style": "Accurate, natural colour with a clean, slightly cool finish.",
+   "grain": 2.5,
+   "swatch": [
+    "#8FB3C9",
+    "#C9A98F"
+   ],
+   "ops": [
+    [
+     "wb",
+     -0.005,
+     0.0
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       0,
+       1.0,
+       1.0
+      ],
+      "30": [
+       0,
+       0.97,
+       1.02
+      ],
+      "120": [
+       -4,
+       0.97,
+       1.0
+      ],
+      "220": [
+       -2,
+       1.03,
+       0.98
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.01
+      ],
+      [
+       0.2,
+       0.18
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.8,
+       0.83
+      ],
+      [
+       1,
+       0.98
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.0
+    ],
+    [
+     "film",
+     0.25
+    ]
+   ],
+   "grain_size": 1.0,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "skin": 0.45,
+   "maker": "Fujifilm"
   },
   {
    "id": "muted-chrome",
@@ -1134,7 +1414,8 @@
      0.35
     ]
    ],
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "Fujifilm"
   },
   {
    "id": "velvet-slide",
@@ -1223,7 +1504,8 @@
      0.15
     ]
    ],
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "Fujifilm"
   },
   {
    "id": "iconic-slide",
@@ -1312,7 +1594,8 @@
      0.28
     ]
    ],
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "Kodak"
   },
   {
    "id": "vivid-slide",
@@ -1391,7 +1674,253 @@
    "vignette": 0,
    "halation": 0,
    "mono": false,
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "Fujifilm"
+  },
+  {
+   "id": "clean-slide",
+   "code": "CS",
+   "name": "Clean Slide",
+   "family": "Slide & chrome",
+   "inspired": "Kodak Ektachrome E100",
+   "style": "Clean, cool and crisp slide film with bright blues and fine grain.",
+   "grain": 1.5,
+   "skin": 0.75,
+   "swatch": [
+    "#3B7DD8",
+    "#E9E4D8"
+   ],
+   "ops": [
+    [
+     "wb",
+     -0.015,
+     0.0
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       0,
+       1.08,
+       1.0
+      ],
+      "120": [
+       2,
+       1.08,
+       0.98
+      ],
+      "200": [
+       -4,
+       1.15,
+       0.97
+      ],
+      "220": [
+       -2,
+       1.15,
+       0.95
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.2,
+       0.16
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.8,
+       0.85
+      ],
+      [
+       1,
+       1
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.1
+    ],
+    [
+     "film",
+     0.18
+    ]
+   ],
+   "grain_size": 1.0,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "maker": "Kodak"
+  },
+  {
+   "id": "true-slide",
+   "code": "TS",
+   "name": "True Slide",
+   "family": "Slide & chrome",
+   "inspired": "Fujifilm Provia 100F",
+   "style": "The standard slide film: natural but rich colour, clean contrast, true-to-life.",
+   "grain": 1.5,
+   "skin": 0.6,
+   "swatch": [
+    "#4F8F5B",
+    "#3B6AA8"
+   ],
+   "ops": [
+    [
+     "hue",
+     {
+      "0": [
+       0,
+       1.05,
+       1.0
+      ],
+      "55": [
+       -2,
+       1.05,
+       1.0
+      ],
+      "120": [
+       -2,
+       1.1,
+       0.98
+      ],
+      "220": [
+       -2,
+       1.1,
+       0.96
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.2,
+       0.165
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.8,
+       0.84
+      ],
+      [
+       1,
+       0.99
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.06
+    ],
+    [
+     "film",
+     0.2
+    ]
+   ],
+   "grain_size": 1.0,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "maker": "Fujifilm"
+  },
+  {
+   "id": "soft-slide",
+   "code": "AS",
+   "name": "Soft Slide",
+   "family": "Slide & chrome",
+   "inspired": "Fujifilm Astia 100F",
+   "style": "Soft slide film for people: gentle contrast, smooth skin, light and clean.",
+   "grain": 1.5,
+   "skin": 0.25,
+   "swatch": [
+    "#E8C2A8",
+    "#8EA9C2"
+   ],
+   "ops": [
+    [
+     "hue",
+     {
+      "0": [
+       2,
+       0.92,
+       1.02
+      ],
+      "30": [
+       2,
+       0.95,
+       1.03
+      ],
+      "120": [
+       0,
+       1.0,
+       1.0
+      ],
+      "220": [
+       -4,
+       1.05,
+       1.0
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.02
+      ],
+      [
+       0.2,
+       0.2
+      ],
+      [
+       0.5,
+       0.52
+      ],
+      [
+       0.8,
+       0.81
+      ],
+      [
+       1,
+       0.97
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.0
+    ],
+    [
+     "film",
+     0.25
+    ]
+   ],
+   "grain_size": 1.0,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "maker": "Fujifilm"
   },
   {
    "id": "cine-flat",
@@ -1479,7 +2008,8 @@
      0.35
     ]
    ],
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "Fujifilm"
   },
   {
    "id": "night-tungsten",
@@ -1577,7 +2107,8 @@
      0.28
     ]
    ],
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "CineStill"
   },
   {
    "id": "clean-cinema",
@@ -1675,7 +2206,8 @@
    "grain_size": 1.0,
    "vignette": 0,
    "mono": false,
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "CineStill"
   },
   {
    "id": "cine-daylight",
@@ -1768,7 +2300,256 @@
    ],
    "grain_size": 1.0,
    "mono": false,
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "Kodak"
+  },
+  {
+   "id": "cinema-bleach",
+   "code": "EB",
+   "name": "Cinema Bleach",
+   "family": "Cinema",
+   "inspired": "Fujifilm Eterna Bleach Bypass",
+   "style": "Movie bleach bypass: low colour, strong contrast, a cool steely finish.",
+   "grain": 3.5,
+   "vignette": 0.3,
+   "skin": 0.3,
+   "swatch": [
+    "#7C8A90",
+    "#2C3438"
+   ],
+   "ops": [
+    [
+     "bleach",
+     0.45
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.2,
+       0.12
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.8,
+       0.88
+      ],
+      [
+       1,
+       0.97
+      ]
+     ]
+    ],
+    [
+     "split",
+     [
+      -0.01,
+      0.004,
+      0.012
+     ],
+     [
+      0.008,
+      0.004,
+      -0.004
+     ],
+     0.5
+    ]
+   ],
+   "grain_size": 1.0,
+   "halation": 0,
+   "mono": false,
+   "maker": "Fujifilm"
+  },
+  {
+   "id": "night-cinema",
+   "code": "NC",
+   "name": "Night Cinema",
+   "family": "Cinema",
+   "inspired": "Kodak Vision3 500T",
+   "style": "Night movie film: cool tungsten balance, teal shadows, soft glow around lights.",
+   "grain": 5,
+   "vignette": 0.2,
+   "halation": 0.5,
+   "skin": 0.6,
+   "swatch": [
+    "#2C5A6E",
+    "#E08A4A"
+   ],
+   "ops": [
+    [
+     "wb",
+     -0.05,
+     0.0
+    ],
+    [
+     "hue",
+     {
+      "30": [
+       -4,
+       1.05,
+       1.02
+      ],
+      "120": [
+       12,
+       0.8,
+       0.98
+      ],
+      "185": [
+       -6,
+       1.1,
+       1.0
+      ],
+      "220": [
+       -6,
+       1.05,
+       1.0
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.04
+      ],
+      [
+       0.2,
+       0.19
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.8,
+       0.8
+      ],
+      [
+       1,
+       0.95
+      ]
+     ]
+    ],
+    [
+     "split",
+     [
+      -0.012,
+      0.01,
+      0.025
+     ],
+     [
+      0.02,
+      0.006,
+      -0.012
+     ],
+     0.42
+    ],
+    [
+     "sat",
+     0.95
+    ],
+    [
+     "film",
+     0.32
+    ]
+   ],
+   "grain_size": 1.0,
+   "mono": false,
+   "maker": "Kodak"
+  },
+  {
+   "id": "daylight-glow",
+   "code": "DG",
+   "name": "Daylight Glow",
+   "family": "Cinema",
+   "inspired": "CineStill 400D",
+   "style": "Warm daylight cinema film: punchy colour with a soft glow on bright edges.",
+   "grain": 4,
+   "halation": 0.35,
+   "skin": 0.6,
+   "swatch": [
+    "#F0A848",
+    "#3E7FA8"
+   ],
+   "ops": [
+    [
+     "wb",
+     0.02,
+     0.0
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       0,
+       1.1,
+       1.0
+      ],
+      "30": [
+       0,
+       1.08,
+       1.02
+      ],
+      "120": [
+       -6,
+       0.95,
+       1.0
+      ],
+      "220": [
+       -4,
+       1.05,
+       0.97
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.015
+      ],
+      [
+       0.2,
+       0.17
+      ],
+      [
+       0.5,
+       0.51
+      ],
+      [
+       0.8,
+       0.84
+      ],
+      [
+       1,
+       0.98
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.05
+    ],
+    [
+     "film",
+     0.25
+    ]
+   ],
+   "grain_size": 1.0,
+   "vignette": 0,
+   "mono": false,
+   "maker": "CineStill"
   },
   {
    "id": "positive",
@@ -1857,7 +2638,8 @@
      0.2
     ]
    ],
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "Ricoh"
   },
   {
    "id": "negative-snap",
@@ -1955,7 +2737,8 @@
      0.28
     ]
    ],
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "Ricoh"
   },
   {
    "id": "bleach-bypass",
@@ -2004,7 +2787,226 @@
      ]
     ]
    ],
-   "skin": 0.3
+   "skin": 0.3,
+   "maker": "Ricoh"
+  },
+  {
+   "id": "retro-snap",
+   "code": "RT",
+   "name": "Retro Snap",
+   "family": "Compact camera",
+   "inspired": "Ricoh GR Retro",
+   "style": "Faded, warm and soft, like an old print found in a drawer.",
+   "grain": 5,
+   "vignette": 0.4,
+   "swatch": [
+    "#C9A47C",
+    "#6C7A70"
+   ],
+   "ops": [
+    [
+     "wb",
+     0.03,
+     -0.005
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       4,
+       0.85,
+       1.0
+      ],
+      "55": [
+       -6,
+       0.85,
+       1.0
+      ],
+      "120": [
+       -12,
+       0.75,
+       0.98
+      ],
+      "220": [
+       -10,
+       0.8,
+       1.0
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.07
+      ],
+      [
+       0.2,
+       0.23
+      ],
+      [
+       0.5,
+       0.52
+      ],
+      [
+       0.8,
+       0.78
+      ],
+      [
+       1,
+       0.92
+      ]
+     ]
+    ],
+    [
+     "split",
+     [
+      0.01,
+      0.006,
+      -0.006
+     ],
+     [
+      0.02,
+      0.014,
+      -0.016
+     ],
+     0.5
+    ],
+    [
+     "sat",
+     0.82
+    ],
+    [
+     "film",
+     0.3
+    ]
+   ],
+   "grain_size": 1.0,
+   "halation": 0,
+   "mono": false,
+   "skin": 0.45,
+   "maker": "Ricoh"
+  },
+  {
+   "id": "cross-process",
+   "code": "XP",
+   "name": "Cross Process",
+   "family": "Compact camera",
+   "inspired": "Ricoh GR Cross Processing",
+   "style": "Slide film developed the wrong way on purpose: yellow-green highlights, blue shadows, bold.",
+   "grain": 4,
+   "vignette": 0.35,
+   "skin": 0.5,
+   "swatch": [
+    "#D8E05A",
+    "#2E4F8A"
+   ],
+   "ops": [
+    [
+     "chan",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.25,
+       0.18
+      ],
+      [
+       0.5,
+       0.52
+      ],
+      [
+       0.75,
+       0.85
+      ],
+      [
+       1,
+       1
+      ]
+     ],
+     [
+      [
+       0,
+       0.02
+      ],
+      [
+       0.25,
+       0.24
+      ],
+      [
+       0.5,
+       0.55
+      ],
+      [
+       0.75,
+       0.82
+      ],
+      [
+       1,
+       0.98
+      ]
+     ],
+     [
+      [
+       0,
+       0.12
+      ],
+      [
+       0.25,
+       0.24
+      ],
+      [
+       0.5,
+       0.42
+      ],
+      [
+       0.75,
+       0.62
+      ],
+      [
+       1,
+       0.78
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.15
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.2,
+       0.17
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.8,
+       0.84
+      ],
+      [
+       1,
+       1
+      ]
+     ]
+    ]
+   ],
+   "grain_size": 1.0,
+   "halation": 0,
+   "mono": false,
+   "maker": "Ricoh"
   },
   {
    "id": "rangefinder",
@@ -2088,7 +3090,8 @@
      0.28
     ]
    ],
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "Leica"
   },
   {
    "id": "leica-chrome",
@@ -2172,7 +3175,178 @@
      0.28
     ]
    ],
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "Leica"
+  },
+  {
+   "id": "rangefinder-classic",
+   "code": "LC",
+   "name": "Rangefinder Classic",
+   "family": "Rangefinder",
+   "inspired": "Leica Looks Classic",
+   "style": "Warm, soft and vintage, with gentle colour and a light vignette.",
+   "grain": 2.5,
+   "vignette": 0.35,
+   "swatch": [
+    "#B58E64",
+    "#3D4A4F"
+   ],
+   "ops": [
+    [
+     "wb",
+     0.03,
+     0.0
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       4,
+       0.95,
+       0.98
+      ],
+      "30": [
+       2,
+       0.95,
+       1.02
+      ],
+      "120": [
+       -8,
+       0.85,
+       0.97
+      ],
+      "220": [
+       -6,
+       0.9,
+       0.96
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.025
+      ],
+      [
+       0.15,
+       0.13
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.85,
+       0.87
+      ],
+      [
+       1,
+       0.96
+      ]
+     ]
+    ],
+    [
+     "sat",
+     0.92
+    ],
+    [
+     "film",
+     0.28
+    ]
+   ],
+   "grain_size": 1.0,
+   "halation": 0,
+   "mono": false,
+   "skin": 0.45,
+   "maker": "Leica"
+  },
+  {
+   "id": "rangefinder-modern",
+   "code": "LM",
+   "name": "Rangefinder Modern",
+   "family": "Rangefinder",
+   "inspired": "Leica Looks Contemporary",
+   "style": "Punchy and crisp, with rich colour and deep blues.",
+   "grain": 1.5,
+   "vignette": 0.25,
+   "skin": 0.6,
+   "swatch": [
+    "#C03A2B",
+    "#1F4F8F"
+   ],
+   "ops": [
+    [
+     "wb",
+     -0.01,
+     0.0
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       0,
+       1.12,
+       0.98
+      ],
+      "30": [
+       0,
+       1.05,
+       1.0
+      ],
+      "120": [
+       2,
+       1.08,
+       0.96
+      ],
+      "220": [
+       -2,
+       1.15,
+       0.92
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.15,
+       0.09
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.85,
+       0.9
+      ],
+      [
+       1,
+       1
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.1
+    ],
+    [
+     "film",
+     0.2
+    ]
+   ],
+   "grain_size": 1.0,
+   "halation": 0,
+   "mono": false,
+   "maker": "Leica"
   },
   {
    "id": "silver-mono",
@@ -2223,7 +3397,8 @@
      ]
     ]
    ],
-   "skin": 0
+   "skin": 0,
+   "maker": "Leica"
   },
   {
    "id": "fine-mono",
@@ -2274,7 +3449,8 @@
      ]
     ]
    ],
-   "skin": 0
+   "skin": 0,
+   "maker": "Fujifilm"
   },
   {
    "id": "classic-grain",
@@ -2325,7 +3501,8 @@
      ]
     ]
    ],
-   "skin": 0
+   "skin": 0,
+   "maker": "Kodak"
   },
   {
    "id": "hard-mono",
@@ -2376,7 +3553,8 @@
      ]
     ]
    ],
-   "skin": 0
+   "skin": 0,
+   "maker": "Ricoh"
   },
   {
    "id": "street-mono",
@@ -2427,7 +3605,178 @@
     ]
    ],
    "halation": 0,
-   "skin": 0
+   "skin": 0,
+   "maker": "More"
+  },
+  {
+   "id": "selenium-mono",
+   "code": "SE",
+   "name": "Selenium Mono",
+   "family": "Black & white",
+   "inspired": "Leica Looks Selenium",
+   "style": "Black and white with cool, slightly purple selenium-toned shadows.",
+   "grain": 3,
+   "vignette": 0.3,
+   "mono": true,
+   "skin": 0,
+   "swatch": [
+    "#2E2A36",
+    "#C8C4CC"
+   ],
+   "ops": [
+    [
+     "mono",
+     0.33,
+     0.52,
+     0.15
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.15,
+       0.1
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.85,
+       0.89
+      ],
+      [
+       1,
+       0.985
+      ]
+     ]
+    ],
+    [
+     "split",
+     [
+      0.012,
+      -0.004,
+      0.016
+     ],
+     [
+      0.004,
+      0.0,
+      0.002
+     ],
+     0.45
+    ]
+   ],
+   "grain_size": 1.0,
+   "halation": 0,
+   "maker": "Leica"
+  },
+  {
+   "id": "smooth-mono",
+   "code": "TM",
+   "name": "Smooth Mono",
+   "family": "Black & white",
+   "inspired": "Kodak T-Max 100",
+   "style": "Very clean black and white: smooth tones, sharp detail, almost no grain.",
+   "grain": 1.5,
+   "mono": true,
+   "skin": 0,
+   "swatch": [
+    "#333333",
+    "#E2E2E2"
+   ],
+   "ops": [
+    [
+     "mono",
+     0.3,
+     0.59,
+     0.11
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.15,
+       0.11
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.85,
+       0.9
+      ],
+      [
+       1,
+       1
+      ]
+     ]
+    ]
+   ],
+   "grain_size": 1.0,
+   "vignette": 0,
+   "halation": 0,
+   "maker": "Kodak"
+  },
+  {
+   "id": "night-mono",
+   "code": "DM",
+   "name": "Night Mono",
+   "family": "Black & white",
+   "inspired": "Ilford Delta 3200",
+   "style": "Fast night black and white: big moody grain, soft shadows.",
+   "grain": 9,
+   "grain_size": 1.6,
+   "vignette": 0.3,
+   "mono": true,
+   "skin": 0,
+   "swatch": [
+    "#1A1A1A",
+    "#9A9A9A"
+   ],
+   "ops": [
+    [
+     "mono",
+     0.35,
+     0.55,
+     0.1
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.03
+      ],
+      [
+       0.15,
+       0.11
+      ],
+      [
+       0.5,
+       0.52
+      ],
+      [
+       0.85,
+       0.88
+      ],
+      [
+       1,
+       0.97
+      ]
+     ]
+    ]
+   ],
+   "halation": 0,
+   "maker": "More"
   },
   {
    "id": "instant-photo",
@@ -2520,7 +3869,8 @@
      0.28
     ]
    ],
-   "skin": 0.45
+   "skin": 0.45,
+   "maker": "More"
   },
   {
    "id": "purple-dream",
@@ -2599,7 +3949,8 @@
      0.15
     ]
    ],
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "More"
   },
   {
    "id": "ember",
@@ -2702,7 +4053,107 @@
     ]
    ],
    "mono": false,
-   "skin": 0.75
+   "skin": 0.75,
+   "maker": "More"
+  },
+  {
+   "id": "metro",
+   "code": "MT",
+   "name": "Metro",
+   "family": "Instant & creative",
+   "inspired": "Lomography Metropolis",
+   "style": "Urban look: muted greens and yellows, punchy contrast, cool and gritty.",
+   "grain": 5,
+   "vignette": 0.3,
+   "skin": 0.5,
+   "swatch": [
+    "#6E7A80",
+    "#B0503C"
+   ],
+   "ops": [
+    [
+     "hue",
+     {
+      "0": [
+       0,
+       1.0,
+       0.95
+      ],
+      "30": [
+       -4,
+       0.75,
+       1.0
+      ],
+      "55": [
+       -8,
+       0.55,
+       1.0
+      ],
+      "120": [
+       -6,
+       0.45,
+       0.95
+      ],
+      "220": [
+       -4,
+       0.7,
+       0.95
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.2,
+       0.13
+      ],
+      [
+       0.5,
+       0.5
+      ],
+      [
+       0.8,
+       0.87
+      ],
+      [
+       1,
+       0.98
+      ]
+     ]
+    ],
+    [
+     "split",
+     [
+      -0.006,
+      0.004,
+      0.012
+     ],
+     [
+      0.01,
+      0.006,
+      -0.004
+     ],
+     0.5
+    ],
+    [
+     "sat",
+     0.85
+    ],
+    [
+     "film",
+     0.3
+    ]
+   ],
+   "grain_size": 1.0,
+   "halation": 0,
+   "mono": false,
+   "maker": "More"
   }
  ]
 }
