@@ -2,31 +2,66 @@
 
 <h1 align="center">Ace Studio + Ace Looks</h1>
 
-<p align="center">
-  <b>Ace Studio</b>: a free Linux app for the Insta360 Ace Pro 2.<br>
-  <b>Ace Looks</b>: 54 film looks and a film camera for your phone. No app store, no account, no uploads.
-</p>
+<p align="center">Two free apps in one project. Pick the one for your device.</p>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 📱 Ace Looks
+**For your phone** (Android + Chrome)
+
+54 film looks, effects and a film camera for your photos.
+Works with **any photo**. No Insta360 camera needed.
+
+<a href="https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/"><img alt="Open Ace Looks" src="https://img.shields.io/badge/Open%20Ace%20Looks-on%20your%20phone-F2B66D?style=for-the-badge"></a>
+
+1. Open the link above **on your phone** in Chrome
+2. Tap **⋮** → **Install app**
+3. Done. No app store, no account, no download
+
+[More about Ace Looks ↓](#-ace-looks-phone-app)
+
+</td>
+<td width="50%" valign="top">
+
+### 💻 Ace Studio
+**For your Linux computer**
+
+Live view, recording and copying files for the
+**Insta360 Ace Pro 2**, plus the same film looks.
+
+<a href="#install"><img alt="Install Ace Studio" src="https://img.shields.io/badge/Install%20Ace%20Studio-on%20Linux-4E74FF?style=for-the-badge"></a>
+
+```bash
+git clone https://github.com/dhaneshshanmugam36-alt/ace-studio.git
+cd ace-studio && ./install.sh
+```
+
+[More about Ace Studio ↓](#-ace-studio-linux-desktop-app)
+
+</td>
+</tr>
+</table>
 
 <p align="center">
   <a href="https://github.com/dhaneshshanmugam36-alt/ace-studio/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/dhaneshshanmugam36-alt/ace-studio?label=release"></a>
   <a href="LICENSE"><img alt="Licence GPL-3.0" src="https://img.shields.io/badge/licence-GPL--3.0-blue"></a>
-  <img alt="Linux" src="https://img.shields.io/badge/desktop-Linux-informational">
-  <a href="https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/"><img alt="Phone app" src="https://img.shields.io/badge/phone-open%20Ace%20Looks-F2B66D"></a>
+  <img alt="Free" src="https://img.shields.io/badge/price-free-success">
 </p>
 
----
+### Quick links
 
-## Which one do I need?
+| I want to… | Go here |
+|---|---|
+| Use the **phone app** | **[dhaneshshanmugam36-alt.github.io/ace-studio/phone](https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/)** (open it on your phone) |
+| Install the **Linux app** | [Install steps](#install) |
+| See what changed | [Releases](https://github.com/dhaneshshanmugam36-alt/ace-studio/releases) · [Changelog](CHANGELOG.md) |
+| Report a problem or ask for a feature | [Issues](https://github.com/dhaneshshanmugam36-alt/ace-studio/issues/new/choose) |
 
-| | 📱 **Ace Looks** | 💻 **Ace Studio** |
-|---|---|---|
-| **For** | Anyone with an Android phone | Insta360 Ace Pro 2 owners on Linux |
-| **Does** | Film looks on your photos, film camera with live looks | Live view, record, copy clips over Wi-Fi or USB, film looks |
-| **Needs a camera?** | No, works with any photo | Yes, an Insta360 Ace Pro 2 |
-| **Get it** | **[Open Ace Looks](https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/)** in Chrome, then *Install app* | `git clone` + `./install.sh` ([steps below](#-ace-studio-linux-desktop-app)) |
-| **Cost** | Free | Free |
-
-Both are free and open source, and they share the same 54 film looks, so a photo comes out the same on the phone and on the computer.
+> **Good to know:** Ace Looks is **not** on the Play Store or App Store. The link above is the only official way to get it.
+> It's made for Android phones with Chrome; on iPhone or a computer it opens, but the camera may not work fully.
+> Ace Studio is for Linux only. Both are free and open source: no sign-up, no ads, no payment.
 
 ---
 
