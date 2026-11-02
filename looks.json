@@ -4154,6 +4154,446 @@
    "halation": 0,
    "mono": false,
    "maker": "More"
+  },
+  {
+   "id": "cool-digicam",
+   "code": "CB",
+   "name": "Cool Digicam",
+   "family": "CCD digicam",
+   "inspired": "Canon IXUS CCD (2000s)",
+   "style": "The early-2000s pocket camera: cool, crisp and clean, with cyan skies and bright, hard highlights.",
+   "grain": 2,
+   "grain_size": 0.8,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "swatch": [
+    "#5FB4E6",
+    "#E9EEF2"
+   ],
+   "ops": [
+    [
+     "wb",
+     -0.035,
+     -0.005
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       0,
+       1.12,
+       1.0
+      ],
+      "35": [
+       -2,
+       1.05,
+       1.03
+      ],
+      "120": [
+       6,
+       1.1,
+       0.98
+      ],
+      "200": [
+       -8,
+       1.25,
+       1.02
+      ],
+      "230": [
+       -6,
+       1.15,
+       1.0
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.18,
+       0.15
+      ],
+      [
+       0.5,
+       0.53
+      ],
+      [
+       0.78,
+       0.86
+      ],
+      [
+       0.92,
+       0.98
+      ],
+      [
+       1,
+       1
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.12
+    ]
+   ],
+   "skin": 0.6,
+   "maker": "CCD"
+  },
+  {
+   "id": "pocket-pop",
+   "code": "CP",
+   "name": "Pocket Pop",
+   "family": "CCD digicam",
+   "inspired": "Nikon Coolpix CCD (2000s)",
+   "style": "Vivid holiday snaps: rich reds, lively greens and blue skies, with punchy digital contrast.",
+   "grain": 2,
+   "grain_size": 0.8,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "swatch": [
+    "#E2412F",
+    "#3FA34D"
+   ],
+   "ops": [
+    [
+     "wb",
+     0.015,
+     0.0
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       2,
+       1.22,
+       1.0
+      ],
+      "30": [
+       0,
+       1.1,
+       1.03
+      ],
+      "60": [
+       -4,
+       1.15,
+       1.03
+      ],
+      "120": [
+       -6,
+       1.22,
+       0.98
+      ],
+      "215": [
+       -4,
+       1.2,
+       0.98
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.2,
+       0.16
+      ],
+      [
+       0.5,
+       0.52
+      ],
+      [
+       0.8,
+       0.87
+      ],
+      [
+       0.93,
+       0.98
+      ],
+      [
+       1,
+       1
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.18
+    ]
+   ],
+   "skin": 0.7,
+   "maker": "CCD"
+  },
+  {
+   "id": "soft-pixel",
+   "code": "FP",
+   "name": "Soft Pixel",
+   "family": "CCD digicam",
+   "inspired": "Fujifilm FinePix CCD (2000s)",
+   "style": "Gentle and slightly magenta, with teal-green leaves and soft, airy shadows. Lovely on people.",
+   "grain": 2,
+   "grain_size": 0.8,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "swatch": [
+    "#E7A6B5",
+    "#5FAFA0"
+   ],
+   "ops": [
+    [
+     "wb",
+     0.005,
+     0.012
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       -3,
+       1.05,
+       1.02
+      ],
+      "30": [
+       -2,
+       0.98,
+       1.03
+      ],
+      "100": [
+       10,
+       0.95,
+       1.0
+      ],
+      "140": [
+       8,
+       1.05,
+       0.98
+      ],
+      "210": [
+       -4,
+       1.05,
+       1.0
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0.02
+      ],
+      [
+       0.2,
+       0.2
+      ],
+      [
+       0.5,
+       0.53
+      ],
+      [
+       0.8,
+       0.84
+      ],
+      [
+       1,
+       0.99
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.05
+    ]
+   ],
+   "skin": 0.8,
+   "maker": "CCD"
+  },
+  {
+   "id": "crisp-contrast",
+   "code": "CY",
+   "name": "Crisp Contrast",
+   "family": "CCD digicam",
+   "inspired": "Sony Cyber-shot CCD (2000s)",
+   "style": "Sharp, high-contrast and saturated, with deep blacks, cool greenish shadows and bright whites.",
+   "grain": 2.5,
+   "grain_size": 0.8,
+   "vignette": 0,
+   "halation": 0,
+   "mono": false,
+   "swatch": [
+    "#1E2A2E",
+    "#3D8CC9"
+   ],
+   "ops": [
+    [
+     "wb",
+     -0.015,
+     -0.01
+    ],
+    [
+     "split",
+     [
+      -0.012,
+      0.006,
+      0.008
+     ],
+     [
+      0.004,
+      0.004,
+      -0.004
+     ],
+     0.45
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       0,
+       1.15,
+       0.98
+      ],
+      "120": [
+       4,
+       1.12,
+       0.96
+      ],
+      "210": [
+       -6,
+       1.18,
+       0.97
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.16,
+       0.1
+      ],
+      [
+       0.5,
+       0.52
+      ],
+      [
+       0.8,
+       0.89
+      ],
+      [
+       0.92,
+       0.98
+      ],
+      [
+       1,
+       1
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.14
+    ]
+   ],
+   "skin": 0.65,
+   "maker": "CCD"
+  },
+  {
+   "id": "party-flash",
+   "code": "DF",
+   "name": "Party Flash",
+   "family": "CCD digicam",
+   "inspired": "2000s compact camera with flash",
+   "style": "Night-out snapshots: cool flash-lit colour, deep dark backgrounds and bright, slightly blown highlights.",
+   "grain": 3,
+   "grain_size": 0.8,
+   "vignette": 0.35,
+   "halation": 0,
+   "mono": false,
+   "swatch": [
+    "#0E1018",
+    "#C9D6F0"
+   ],
+   "ops": [
+    [
+     "wb",
+     -0.04,
+     0.005
+    ],
+    [
+     "hue",
+     {
+      "0": [
+       0,
+       1.15,
+       1.0
+      ],
+      "30": [
+       -2,
+       1.0,
+       1.05
+      ],
+      "230": [
+       -4,
+       1.1,
+       0.95
+      ]
+     },
+     28
+    ],
+    [
+     "tone",
+     [
+      [
+       0,
+       0
+      ],
+      [
+       0.15,
+       0.07
+      ],
+      [
+       0.4,
+       0.38
+      ],
+      [
+       0.7,
+       0.8
+      ],
+      [
+       0.88,
+       0.97
+      ],
+      [
+       1,
+       1
+      ]
+     ]
+    ],
+    [
+     "sat",
+     1.1
+    ]
+   ],
+   "skin": 0.7,
+   "maker": "CCD"
   }
  ]
 }

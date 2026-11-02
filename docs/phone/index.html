@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ace Looks</title>
-<meta name="description" content="49 film looks for your photos. Free, offline, and your photos never leave your phone.">
+<meta name="description" content="54 film looks for your photos. Free, offline, and your photos never leave your phone.">
 <meta name="theme-color" content="#14171A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -322,7 +322,7 @@ svg { flex: none; }
   <div class="hero">
     <div class="art"><img src="icon.svg" alt=""></div>
     <h2>Film looks for your photos</h2>
-    <p>49 looks inspired by Kodak, Fujifilm, Ricoh, Leica and more. Full resolution, and your photos never leave your phone.</p>
+    <p>54 looks inspired by Kodak, Fujifilm, Ricoh, Leica, 2000s CCD cameras and more. Full resolution, and your photos never leave your phone.</p>
     <div class="homebtns">
     <button class="big" id="camBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.5-2h5L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg>Film camera</button>
     <button class="big tonal2" id="pickBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="m4 17 5-4.5 3.5 3 3-2.5L20 17"/></svg>Choose photos</button>
@@ -420,7 +420,7 @@ svg { flex: none; }
 <script src="engine.js"></script>
 <script>
 "use strict";
-const APP_VERSION = "2.1 · build 8";
+const APP_VERSION = "2.1 · build 9";
 const $ = (id) => document.getElementById(id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem("acelooks." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
@@ -459,7 +459,7 @@ function preFor(p) {
   const ev = Math.pow(2, a.light);
   m = [m[0] * ev * (1 + 0.12 * a.warmth), m[1] * ev, m[2] * ev * (1 - 0.12 * a.warmth)];
   return { mul: m, contrast: a.contrast, grainMul: state.fx.grain,
-           tone: settings.hdr && p.small ? toneOf(p) : null, toneAmt: settings.hdr ? (p.fused ? 0.2 : p.camera ? 0.55 : 0.35) : 0 };
+           tone: settings.hdr && p.small ? toneOf(p) : null, toneAmt: settings.hdr ? (p.fused ? 0.2 : (p.zoom || 1) > 1.4 ? 0.22 : p.camera ? 0.5 : 0.35) : 0 };
 }
 function toneOf(p) { if (!p.tone) p.tone = R.toneFor(p.small); return p.tone; }
 const adjusted = () => !!(state.adj.light || state.adj.contrast || state.adj.warmth);
@@ -589,9 +589,14 @@ const R = (() => {
     if (hasUnder) {                      // HDR: take blown highlights from a darker shot of the same moment
       vec2 t = (vec2(px.x / full.x, 1.0 - px.y / full.y) - 0.5) * underScale + 0.5 + underOff;
       vec3 lu = toLin(texture(underTex, t).rgb) * underK;
+      // squeeze everything up to the brightest recovered light into the top of the range, keeping its colour
+      float yu = Yl(lu), a = 0.4, s = 0.57;
+      float yc = yu <= a ? yu : a + (0.97 - a) * (1.0 - exp(-(yu - a) / s)) / (1.0 - exp(-(max(underK, 1.2) - a) / s));
+      yc = min(yc, 0.97);
+      vec3 rec = lu * (yc / max(yu, 1e-4));
       float m = max(max(c.r, c.g), c.b);
-      float w = smoothstep(0.78, 0.97, m) * step(0.0, t.x) * step(t.x, 1.0) * step(0.0, t.y) * step(t.y, 1.0);
-      l = mix(l, max(l, lu), w);
+      float w = smoothstep(0.7, 0.96, m) * step(0.0, t.x) * step(t.x, 1.0) * step(0.0, t.y) * step(t.y, 1.0);
+      l = mix(l, rec, w);
     }
     l *= mul;
     if (hasTone) {                       // Smart HDR: lift dark areas, calm bright ones (local, like a phone camera)
@@ -1556,7 +1561,7 @@ $("menuBtn").onclick = () => {
     <div class="opt"><div><b>Keep photo details</b><small>Date, camera and location from the original</small></div><input type="checkbox" id="mExif"></div>
     <div class="opt"><div><b>Theme</b></div><select id="mTheme"><option value="system">System</option><option value="dark">Dark</option><option value="light">Light</option></select></div>
     <p class="legal" style="margin-top:8px">Version ${APP_VERSION}</p>
-    <p class="legal">Tip: long-press any look to add it to your favourites. Saved photos keep their full size and get the look's code in the name, like <b>IMG_1124 SN.jpg</b>. Looks are Ace Studio's own colour styles, hand-tuned to resemble each film or camera mode. Ace Studio isn't affiliated with Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid or Lomography. Everything runs on your phone; photos are never uploaded.</p>`);
+    <p class="legal">Tip: long-press any look to add it to your favourites. Saved photos keep their full size and get the look's code in the name, like <b>IMG_1124 SN.jpg</b>. Looks are Ace Studio's own colour styles, hand-tuned to resemble each film or camera mode. Ace Studio isn't affiliated with Kodak, Fujifilm, Ricoh, Leica, CineStill, Canon, Nikon, Sony, Polaroid or Lomography. Everything runs on your phone; photos are never uploaded.</p>`);
   const q = s.el.querySelector("#mQ"); q.value = String(settings.quality); q.onchange = () => { settings.quality = Number(q.value); store.set("quality", settings.quality); };
   const og = s.el.querySelector("#mOrig"); og.checked = settings.keepOriginal; og.onchange = () => { settings.keepOriginal = og.checked; store.set("keepOriginal", og.checked); };
   const mi = s.el.querySelector("#mInst"); mi.checked = settings.instantSave; mi.onchange = () => { settings.instantSave = mi.checked; store.set("instantSave", mi.checked); };
@@ -1674,7 +1679,7 @@ $("pickBtn").onclick = $("addBtn").onclick = () => $("file").click();
 $("file").onchange = () => { addFiles($("file").files); $("file").value = ""; };
 
 /* ======================= Film camera ======================= */
-const TABS = ["All", "For you", "★ Favourites", "Kodak", "Fujifilm", "Ricoh", "Leica", "CineStill", "More"];
+const TABS = ["All", "For you", "★ Favourites", "Kodak", "Fujifilm", "Ricoh", "Leica", "CineStill", "CCD", "More"];
 /** Looks shown in a tab. "All" puts the suggested ones first, then favourites. */
 function looksForTab(tab, sug) {
   const byId = (id) => LOOKS.find(l => l.id === id);
@@ -1977,9 +1982,8 @@ function renderZoomRow() {
   const main = stops.find(s => Math.abs(s.z - 1) < 0.2) || { z: 1, id: Cam.mainId || curId, lens: 1 };
   if (!stops.includes(main)) stops.push(main);
   const mz = (curId === main.id ? Cam.caps.zoom : Cam.mainZoom) || null;
-  for (const z of [2, 3, 5, 10]) {
+  for (const z of [2, 3]) {
     if (stops.some(s => Math.abs(s.z - z) / z < 0.2)) continue;
-    if (z === 10 && !(mz && mz.max >= 9.5)) continue;        // 10× only with real camera zoom, never as a blurry crop
     const base = stops.filter(s => s.lens === s.z && s.z <= z).sort((a, b) => b.z - a.z)[0] || main;   // longest real lens below this zoom
     stops.push({ z, id: base.id, lens: base.z });                                                         // hardware zoom if Chrome allows it, else a crop
   }
@@ -2007,10 +2011,10 @@ function setZoom(v) {
   const z = Cam.caps.zoom;
   if (z && z.max > 1.05 && Cam.track) {
     Cam.swZoom = 1;
-    Cam.zoom = Math.min(z.max, Math.max(z.min, v));
+    Cam.zoom = Math.min(z.max, 3, Math.max(z.min, v));      // past 3× a phone without a zoom lens only makes mush
     Cam.track.applyConstraints({ advanced: [{ zoom: Cam.zoom }] }).catch(() => {});
   } else {
-    Cam.zoom = 1; Cam.swZoom = Math.min(8, Math.max(1, v));
+    Cam.zoom = 1; Cam.swZoom = Math.min(3, Math.max(1, v));
   }
 }
 /* Find out once which back camera is ultra-wide, main or zoom, by comparing what each one sees with the main camera. */
@@ -2182,7 +2186,7 @@ async function settle(target, dir) {
   }
 }
 const canHdr = () => !!(Cam.caps.exposureCompensation && Cam.caps.exposureCompensation.min <= -1 && Cam.ic && Cam.photoCaps);
-const hdrNow = () => canHdr() && !isNight() && (Cam.hdr === "on" || (Cam.hdr === "auto" && Cam.clipped > 0.015));
+const hdrNow = () => canHdr() && !isNight() && (Cam.hdr === "on" || (Cam.hdr === "auto" && Cam.clipped > 0.006));
 /** A full-resolution photo from the camera sensor. */
 async function takeStill() {
   if (!Cam.ic || !Cam.photoCaps) return null;
@@ -2261,7 +2265,7 @@ async function shoot() {
     }
     const name = `ACE_${stamp()}.jpg`;
     const file = new File([blob], name, { type: "image/jpeg", lastModified: Date.now() });
-    const p = await loadPhoto(file, { camera: true, fused: night || hdr, mode: hdr ? "HDR" : night ? "Night" : "" });
+    const p = await loadPhoto(file, { camera: true, fused: night || hdr, mode: hdr ? "HDR" : night ? "Night" : "", zoom: (Cam.zoom || 1) * (Cam.swZoom || 1) });
     state.photos.push(p);
     $("camLast").innerHTML = `<img alt="" src="${p.thumbUrl}">`;
     const last = $("camLast"); last.classList.remove("pop"); void last.offsetWidth; last.classList.add("pop");

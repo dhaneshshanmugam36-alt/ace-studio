@@ -4,7 +4,7 @@
 
 <p align="center">
   <b>Ace Studio</b>: a free Linux app for the Insta360 Ace Pro 2.<br>
-  <b>Ace Looks</b>: 49 film looks and a film camera for your phone. No app store, no account, no uploads.
+  <b>Ace Looks</b>: 54 film looks and a film camera for your phone. No app store, no account, no uploads.
 </p>
 
 <p align="center">
@@ -26,7 +26,7 @@
 | **Get it** | **[Open Ace Looks](https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/)** in Chrome, then *Install app* | `git clone` + `./install.sh` ([steps below](#-ace-studio-linux-desktop-app)) |
 | **Cost** | Free | Free |
 
-Both are free and open source, and they share the same 49 film looks, so a photo comes out the same on the phone and on the computer.
+Both are free and open source, and they share the same 54 film looks, so a photo comes out the same on the phone and on the computer.
 
 ---
 
@@ -49,13 +49,13 @@ Updates arrive by themselves the next time you open it with internet.
 
 ### What it does
 
-- **Film camera:** see the film look live while you shoot. Swipe to change looks, tap to focus, pinch to zoom.
+- **Film camera:** see the film look live while you shoot. Swipe to change looks, tap to focus, pinch to zoom (up to 3×).
   Daylight shots use the camera's full-resolution stills. In the dark, **Night mode** merges 8 frames to cut
   noise, and **Smart HDR** brings out shadows. After each shot you see it first, then **Save**, **Edit** or
   **Delete**. Saved shots keep the look *and* a clean original.
 - **Your photos:** choose photos from your gallery, use your phone's own camera app, or share photos to Ace Looks
   from the gallery.
-- **Tabs by maker:** Kodak, Fujifilm, Ricoh, Leica, CineStill and more, plus For you and Favourites.
+- **Tabs by maker:** Kodak, Fujifilm, Ricoh, Leica, CineStill, CCD digicams and more, plus For you and Favourites.
 - **For you:** the 4 looks that suit each photo (people, landscape, sky, night, indoor) show first.
 - **Simple controls:** three tabs, **Looks**, **Adjust** (light, contrast, warmth) and **Effects**. Hold the photo
   to compare with the original. **Auto fix** and natural skin tones are on by default.
@@ -63,7 +63,7 @@ Updates arrive by themselves the next time you open it with internet.
   date stamp, and frames (Polaroid, 35 mm film strip, white or black border). Live in the camera too.
 - **Preview before saving:** see exactly what will be saved, at its real size, before anything is downloaded.
 - **Recent:** your saved photos stay on the home screen, so you can reopen and edit them again.
-- **Save** one look, your favourites, the suggested looks, or **all 49**, at full resolution, with the photo's
+- **Save** one look, your favourites, the suggested looks, or **all 54**, at full resolution, with the photo's
   date, camera and location kept. Files are named like `IMG_1124 SN.jpg` (`SN` = Soft Negative).
 - **Private:** everything runs on your phone. Photos are never uploaded anywhere.
 
@@ -119,7 +119,7 @@ file names · backup to a second drive · favourites, notes, tags and trips · d
 photo and video details · small share copies for WhatsApp · reminder before disconnecting · delete from the
 camera with a safety check
 
-**Film looks:** all 49 looks, For you suggestions, Auto fix, natural skin, favourites, apply one or all 49
+**Film looks:** all 54 looks, For you suggestions, Auto fix, natural skin, favourites, apply one or all 54
 
 **Comfort:** settings page, welcome guide, keyboard shortcuts (<kbd>?</kbd>), light/dark theme with Material 3
 colours, English and Bahasa Melayu, update notices
@@ -178,7 +178,7 @@ network while it's on the camera's.
 
 ---
 
-## 🎞️ The 49 film looks
+## 🎞️ The 54 film looks
 
 Each look is Ace Studio's own colour style, hand-tuned to resemble a classic film or camera mode. Every look is a
 proper 3D colour table processed in high precision, with film-style highlight roll-off, mid-tone grain, soft
@@ -210,9 +210,11 @@ vignettes, and a red glow around lights on the cinema looks. The two letters are
 | Cine Flat `CF` | Fujifilm Eterna | | Purple Dream `PD` | LomoChrome Purple |
 | Night Tungsten `NT` | CineStill 800T | | Ember `EM` | Harman Phoenix 200 |
 | Clean Cinema `CC` | CineStill 50D | | Metro `MT` | Lomography Metropolis |
-| Cine Daylight `CD` | Kodak Vision3 250D | |  | |
+| Cine Daylight `CD` | Kodak Vision3 250D | | Cool Digicam `CB` | Canon IXUS CCD (2000s) |
+| Pocket Pop `CP` | Nikon Coolpix CCD (2000s) | | Soft Pixel `FP` | Fujifilm FinePix CCD (2000s) |
+| Crisp Contrast `CY` | Sony Cyber-shot CCD (2000s) | | Party Flash `DF` | 2000s compact camera with flash |
 
-<sub>Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid, Agfa, Ilford, Harman and Lomography are trademarks of their owners.
+<sub>Kodak, Fujifilm, Ricoh, Leica, CineStill, Polaroid, Agfa, Ilford, Harman, Lomography, Canon, Nikon and Sony are trademarks of their owners.
 Ace Studio isn't affiliated with any of them; the names only say what each look is inspired by.</sub>
 
 ---
@@ -250,7 +252,7 @@ Only when you choose Delete, and it always asks first. It never changes the came
   Those live inside Insta360's own apps.
 - The film looks are Ace Studio's own hand-tuned colour styles. They're inspired by the films and
   camera modes named above, not copies of anyone's processing. Kodak, Fujifilm, Ricoh, Leica,
-  CineStill, Polaroid and Lomography are trademarks of their owners; Ace Studio isn't affiliated
+  CineStill, Polaroid, Lomography, Canon, Nikon and Sony are trademarks of their owners; Ace Studio isn't affiliated
   with any of them.
 - Ace Studio only deletes files from the camera when you ask it to, and always asks first.
   It never changes the camera's firmware.

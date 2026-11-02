@@ -1,7 +1,7 @@
 {
   "name": "Ace Looks",
   "short_name": "Ace Looks",
-  "description": "49 film looks for your photos. Free, offline, private.",
+  "description": "54 film looks for your photos. Free, offline, private.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
