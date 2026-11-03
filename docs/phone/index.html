@@ -60,7 +60,7 @@ svg { flex: none; }
 /* editor */
 .editor { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .stage { flex: 1; min-height: 0; position: relative; display: grid; place-items: center; padding: 4px 12px; touch-action: none; user-select: none; -webkit-user-select: none; }
-.stage canvas { position: absolute; left: 12px; top: 4px; width: calc(100% - 24px); height: calc(100% - 8px); object-fit: contain; display: block; }
+.stage canvas { position: absolute; left: 6px; top: 4px; width: calc(100% - 12px); height: calc(100% - 8px); object-fit: contain; display: block; }
 .badge { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); padding: 4px 12px; border-radius: 12px; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; font-weight: 500; pointer-events: none; transition: opacity .2s; }
 .hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); padding: 4px 12px; border-radius: 12px; background: rgba(0,0,0,.5); color: #ddd; font-size: 12px; pointer-events: none; white-space: nowrap; }
 .busy { position: absolute; inset: 0; display: grid; place-items: center; }
@@ -291,16 +291,27 @@ svg { flex: none; }
 @keyframes rvIn { from { opacity: 0; transform: translateY(24px) scale(.98); } }
 .review.out { animation: rvOut .22s ease-in forwards; }
 @keyframes rvOut { to { opacity: 0; transform: translateY(30px) scale(.97); } }
-.rv-top { display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 6px; flex: none; }
+.rv-top { position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); z-index: 2; display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 6px;
+  background: linear-gradient(rgba(11,11,12,.85), rgba(11,11,12,0)); }
 .rv-title { flex: 1; min-width: 0; text-align: center; }
 .rv-title b { display: block; font: 500 17px/22px var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rv-title small { display: block; color: #B4B8BE; font-size: 12px; line-height: 16px; }
 .rv-stage { flex: 1; min-height: 0; position: relative; touch-action: none; }
-.rv-stage canvas { position: absolute; left: 12px; top: 4px; width: calc(100% - 24px); height: calc(100% - 8px); object-fit: contain; display: block; }
-.rv-hint { text-align: center; color: #9A9EA4; font-size: 12px; padding: 6px 0 0; flex: none; }
-.rv-looks { padding-top: 8px; }
-.rv-looks .cchip canvas, .rv-looks .cchip i.sw { width: 48px; height: 48px; }
-.rv-acts { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 10px; padding: 12px 16px 16px; flex: none; }
+.rv-stage canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+.rv-hint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); padding: 6px 12px; border-radius: 14px; background: rgba(0,0,0,.6); color: #ddd; font-size: 12px; white-space: nowrap; pointer-events: none; transition: opacity .5s; z-index: 2; }
+.rv-looks { padding: 6px calc(50% - 26px) 0; gap: 8px; }
+.rv-looks .cchip { width: 52px; font-size: 10px; gap: 4px; }
+.rv-looks .cchip canvas, .rv-looks .cchip i.sw { width: 42px; height: 42px; }
+.rv-acts { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; padding: 8px 12px 12px; flex: none; }
+.rv-acts .btn { height: 46px; }
+.cchip i.none-sw { display: grid; place-items: center; background: #2A2C30; color: #B4B8BE; }
+.cchip i.none-sw svg { width: 22px; height: 22px; }
+/* editor: full-screen photo */
+.stage .fullbtn { position: absolute; top: 58px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: rgba(0,0,0,.5); color: #fff; display: grid; place-items: center; z-index: 2; }
+.stage .fullbtn svg { width: 20px; height: 20px; }
+body.fullview .bar, body.fullview .editor .panel, body.fullview .editor .photos, body.fullview .stage .hint { display: none !important; }
+body.fullview .stage { padding: 0; background: #000; }
+body.fullview .stage canvas { left: 0; top: 0; width: 100%; height: 100%; }
 .rv-acts .btn.tonal { background: #2A2C30; color: #fff; }
 .rv-acts .btn.fill { background: #F2B66D; color: #3A2400; }
 .rv-acts .btn.danger { background: #3A1F1D; color: #FFB4AB; }
@@ -341,6 +352,7 @@ svg { flex: none; }
     <canvas id="view"></canvas>
     <span class="badge" id="badge" style="opacity:0">Original</span>
     <span class="hint" id="hint">Hold the photo to see the original</span>
+    <button class="fullbtn" id="fullBtn" aria-label="Full screen" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     <button class="compare" id="compareBtn" aria-label="Compare with original" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M12 4.5v15"/><path d="M12 4.5h6a2.5 2.5 0 0 1 2.5 2.5v10a2.5 2.5 0 0 1-2.5 2.5h-6z" fill="currentColor" opacity=".35"/></svg></button>
     <div class="busy" id="busy" hidden><span class="spin"></span></div>
   </div>
@@ -410,8 +422,8 @@ svg { flex: none; }
     <div class="rv-title"><b id="rvName"></b><small id="rvSub"></small></div>
     <button class="cbtn" id="rvFx" aria-label="Effects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><i class="dot" id="rvFxDot" hidden></i></button>
   </div>
-  <div class="rv-stage" id="rvStage"><canvas id="rvView"></canvas><span class="badge" id="rvBadge" style="opacity:0">Original</span><div class="busy" id="rvBusy" hidden><span class="spin"></span></div></div>
-  <div class="rv-hint" id="rvHint">Swipe for another look · Hold to see the original</div>
+  <div class="rv-stage" id="rvStage"><canvas id="rvView"></canvas><span class="badge" id="rvBadge" style="opacity:0;top:64px">Original</span><div class="busy" id="rvBusy" hidden><span class="spin"></span></div>
+    <div class="rv-hint" id="rvHint">Swipe for another look · Hold to see the original</div></div>
   <div class="carousel rv-looks" id="rvLooks"></div>
   <div class="rv-acts" id="rvActs"></div>
 </section>
@@ -420,7 +432,7 @@ svg { flex: none; }
 <script src="engine.js"></script>
 <script>
 "use strict";
-const APP_VERSION = "2.1 · build 9";
+const APP_VERSION = "2.1 · build 10";
 const $ = (id) => document.getElementById(id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem("acelooks." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
@@ -439,11 +451,15 @@ settings.hdr = store.get("hdr", true);
 settings.keepOriginal = store.get("keepOriginal", true);
 settings.instantSave = store.get("instantSave", false);
 /* Effects: all off by default. "Save as default" keeps your own starting point. */
-const FX_OFF = { leak: 0, leakStyle: 0, leakSeed: 1, dust: 0, halation: 0, bloom: 0, vignette: 0, grain: 1, date: false, frame: "none" };
-state.fx = { ...FX_OFF, ...store.get("fxDefault", {}) };
+const FX_OFF = { v: 2, leak: 0, leakStyle: 0, leakSeed: 1, dust: 0, halation: 0, bloom: 0, vignette: 0, grain: null, date: false, frame: "none" };
+/** Effects saved by an older version used a different grain scale: start that one on Auto. */
+function normFx(o) { o = { ...FX_OFF, ...(o || {}) }; if (o.v !== 2) { o.grain = null; o.v = 2; } if (o.grain !== null && !(o.grain >= 0)) o.grain = null; return o; }
+state.fx = normFx(store.get("fxDefault", {}));
+/** Grain for a look: Auto = the look's own grain (none for the original photo), or the amount you set. */
+const grainOf = (lk, fx = state.fx) => fx.grain === null ? { v: lk ? lk.grain || 0 : 0, follow: true } : { v: fx.grain, follow: false };
 const LEAKS = ["Edge", "Corner", "Streak", "Rainbow", "Warm haze", "Red flare"];
 const FRAMES = [["none", "None"], ["polaroid", "Polaroid"], ["strip", "35 mm"], ["white", "White"], ["black", "Black"]];
-const fxActive = (fx = state.fx) => fx.leak > 0 || fx.dust > 0 || fx.halation > 0 || fx.bloom > 0 || fx.vignette > 0 || fx.grain !== 1 || fx.date || fx.frame !== "none";
+const fxActive = (fx = state.fx) => fx.leak > 0 || fx.dust > 0 || fx.halation > 0 || fx.bloom > 0 || fx.vignette > 0 || fx.grain !== null || fx.date || fx.frame !== "none";
 let favs = new Set(store.get("favs", []));
 const isFav = (lk) => favs.has(lk.id);
 function toggleFav(lk) {
@@ -453,13 +469,13 @@ function toggleFav(lk) {
   renderStrip(); renderInfo();
 }
 /** Exposure/white balance for a photo: Auto fix (if on) plus the Adjust sliders. */
-function preFor(p) {
-  const a = state.adj;
-  let m = settings.autofix && p.analysis ? p.analysis.mul.slice() : [1, 1, 1];
+function preFor(p, lk = state.look) {
+  const a = state.adj, auto = !!lk;       // "None" means the photo as it is: no Auto fix or Smart HDR
+  let m = settings.autofix && auto && p.analysis ? p.analysis.mul.slice() : [1, 1, 1];
   const ev = Math.pow(2, a.light);
   m = [m[0] * ev * (1 + 0.12 * a.warmth), m[1] * ev, m[2] * ev * (1 - 0.12 * a.warmth)];
-  return { mul: m, contrast: a.contrast, grainMul: state.fx.grain,
-           tone: settings.hdr && p.small ? toneOf(p) : null, toneAmt: settings.hdr ? (p.fused ? 0.2 : (p.zoom || 1) > 1.4 ? 0.22 : p.camera ? 0.5 : 0.35) : 0 };
+  return { mul: m, contrast: a.contrast, grain: grainOf(lk),
+           tone: settings.hdr && auto && p.small ? toneOf(p) : null, toneAmt: settings.hdr && auto ? (p.fused ? 0.2 : (p.zoom || 1) > 1.4 ? 0.22 : p.camera ? 0.5 : 0.35) : 0 };
 }
 function toneOf(p) { if (!p.tone) p.tone = R.toneFor(p.small); return p.tone; }
 const adjusted = () => !!(state.adj.light || state.adj.contrast || state.adj.warmth);
@@ -730,7 +746,7 @@ const R = (() => {
       vec3 nc = vec3(vnoise(q * 1.7, 4u), vnoise(q * 1.7, 5u), vnoise(q * 1.7, 6u)) - 0.5;
       vec3 noise = vec3(n) + nc * colorGrain;
       vec3 w = 2.0 * min(c, 1.0 - c) + 0.08;             // strongest in the mid-tones, like film
-      c += noise * w * grain * amount;
+      c += noise * w * grain;
     }
     if (dust > 0.0) { float dv = dustAt(px); c = mix(c, vec3(0.96, 0.95, 0.92), clamp(dv, 0.0, 1.0) * 0.9); c *= 1.0 - clamp(-dv, 0.0, 1.0) * 0.75; }
     c += (rnd(ivec2(px), 9u) - 0.5) / 255.0;            // dither: no banding in skies
@@ -749,8 +765,8 @@ const R = (() => {
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
   gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
 
-  const imgTex = gl.createTexture(), glowTex = gl.createTexture(), toneTex = gl.createTexture(), underTex = gl.createTexture(), fuseTex = gl.createTexture(), bloomTex = gl.createTexture(), lutTexs = new Map();
-  for (const t of [imgTex, glowTex, toneTex, underTex, fuseTex, bloomTex]) {
+  const imgTex = gl.createTexture(), glowTex = gl.createTexture(), toneTex = gl.createTexture(), underTex = gl.createTexture(), fuseTex = gl.createTexture(), bloomTex = gl.createTexture(), liveTex = gl.createTexture(), lutTexs = new Map();
+  for (const t of [imgTex, glowTex, toneTex, underTex, fuseTex, bloomTex, liveTex]) {
     gl.bindTexture(gl.TEXTURE_2D, t);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -885,7 +901,8 @@ const R = (() => {
       gl.activeTexture(gl.TEXTURE0); lastTone = opts.tone;
     }
     gl.uniform3f(U.mul, m[0], m[1], m[2]); gl.uniform1f(U.contrast, ct);
-    gl.uniform1f(U.grain, (lk.grain || 0) * 0.0042 * (opts.grainScale ?? 1) * (opts.grainMul ?? 1));
+    const gr = opts.grain || { v: lk.grain || 0, follow: true };
+    gl.uniform1f(U.grain, gr.v * 0.0042 * (opts.grainScale ?? 1) * (gr.follow ? (look ? opts.amount : 0) : 1));
     gl.uniform1f(U.grainPx, Math.max(1.0, full[0] / 2600) * (lk.grain_size || 1) * (opts.grainPxScale ?? 1));
     gl.uniform1f(U.colorGrain, lk.mono ? 0 : 0.25);
     gl.uniform1f(U.vignette, lk.vignette || 0);
@@ -911,15 +928,41 @@ const R = (() => {
       gl.activeTexture(gl.TEXTURE0); lastBloom = bl;
     }
   }
-  function drawTile(source, tile, flip) {
-    liveW = liveH = 0;
+  /* Photos and thumbnails are drawn off screen, so the live viewfinder's surface is never resized (resizing it stalls the phone). */
+  const outFb = gl.createFramebuffer(), outTex = gl.createTexture();
+  let outW = 0, outH = 0, pix = new Uint8Array(0);
+  function outSize(w, h) {
+    if (w <= outW && h <= outH) return;
+    outW = Math.max(w, outW); outH = Math.max(h, outH);
+    gl.activeTexture(gl.TEXTURE10); gl.bindTexture(gl.TEXTURE_2D, outTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, outW, outH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, outFb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, outTex, 0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.activeTexture(gl.TEXTURE0);
+  }
+  /** Big saves leave a big surface behind: give that memory back. */
+  function outShrink() {
+    if (outW * outH <= 1700 * 1700) return;
+    outW = outH = 0; pix = new Uint8Array(0);
+    gl.activeTexture(gl.TEXTURE10); gl.bindTexture(gl.TEXTURE_2D, outTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); gl.activeTexture(gl.TEXTURE0);
+  }
+  /** Draw one tile of a photo and put the pixels into a 2D canvas at (dx, dy). */
+  function drawTile(source, tile, ctx2d, dx, dy) {
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, imgTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
-    canvas.width = tile[2]; canvas.height = tile[3];
-    gl.viewport(0, 0, tile[2], tile[3]);
+    const w = tile[2], h = tile[3];
+    outSize(w, h);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, outFb);
+    gl.viewport(0, 0, w, h);
     gl.uniform4f(U.tile, ...tile);
-    gl.uniform1i(U.flipY, !!flip);
+    gl.uniform1i(U.flipY, true);                       // first row read back = top of the photo
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    if (pix.length < w * h * 4) pix = new Uint8Array(w * h * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pix);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    ctx2d.putImageData(new ImageData(new Uint8ClampedArray(pix.buffer, 0, w * h * 4), w, h), dx, dy);
   }
 
   /** Render a small image (preview or thumbnail) into a 2D canvas. */
@@ -927,9 +970,8 @@ const R = (() => {
     gl.useProgram(prog);
     const w = source.width, h = source.height;
     setLook(look, opts.n || 33, opts.full || [w, h], opts);
-    drawTile(source, [0, 0, w, h], false);
-    dest.width = w; dest.height = h;
-    dest.getContext("2d").drawImage(canvas, 0, 0);
+    if (dest.width !== w || dest.height !== h) { dest.width = w; dest.height = h; }
+    drawTile(source, [0, 0, w, h], dest.getContext("2d"), 0, 0);
   }
 
   /** Full-resolution render in tiles; returns a canvas the size of the photo. */
@@ -943,11 +985,11 @@ const R = (() => {
     for (let y = 0; y < H; y += T) for (let x = 0; x < W; x += T) {
       const tw = Math.min(T, W - x), th = Math.min(T, H - y);
       const part = (x === 0 && y === 0 && tw === W && th === H) ? bitmap : await createImageBitmap(bitmap, x, y, tw, th);
-      drawTile(part, [x, H - y - th, tw, th], false);
-      octx.drawImage(canvas, x, y);
+      drawTile(part, [x, H - y - th, tw, th], octx, x, y);
       if (part !== bitmap) part.close?.();
       await new Promise(r => setTimeout(r, 0));
     }
+    outShrink();
     return out;
   }
   /** Draw a live camera frame with the look, then copy it to the visible viewfinder canvas. */
@@ -957,7 +999,7 @@ const R = (() => {
     const sc = Math.min(1, maxSide / Math.max(w, h)), cw = Math.round(w * sc), ch = Math.round(h * sc);
     gl.useProgram(prog);
     setLook(look, 33, [cw, ch], opts);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, imgTex);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, liveTex);      // its own texture: photo work never forces a rebuild
     if (w !== liveW || h !== liveH) { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video); liveW = w; liveH = h; }
     else gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, video);
     if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
@@ -1095,6 +1137,25 @@ async function loadPhoto(file, extra = {}) {
   return { file, name: file.name, w, h, preview, stripSrc, small, glow: null, analysis: analyzeImage(small), thumbUrl: tcv.toDataURL("image/jpeg", 0.8),
            date: await photoDate(file), ...extra };
 }
+/** Big screen copies take a lot of memory: keep them for the photo on screen and the newest few only. */
+function trimPhotos() {
+  const n = state.photos.length, keep = new Set([state.cur, n - 1, n - 2, n - 3]);
+  if (RV.p) keep.add(state.photos.indexOf(RV.p));
+  state.photos.forEach((p, i) => { if (!keep.has(i) && p.preview) { p.preview.close?.(); p.preview = null; } });
+}
+const previewJobs = new Map();
+function ensurePreview(p) {
+  if (p.preview) return Promise.resolve();
+  if (previewJobs.has(p)) return previewJobs.get(p);
+  const job = (async () => {
+    const bmp = await createImageBitmap(p.file, { imageOrientation: "from-image" });
+    const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    p.preview = await createImageBitmap(bmp, { resizeWidth: Math.max(1, Math.round(bmp.width * k)), resizeHeight: Math.max(1, Math.round(bmp.height * k)), resizeQuality: "high" });
+    bmp.close?.();
+  })().finally(() => previewJobs.delete(p));
+  previewJobs.set(p, job);
+  return job;
+}
 function analyzeImage(img) {
   const as = Math.min(1, 256 / Math.max(img.width, img.height)), cv = document.createElement("canvas");
   cv.width = Math.max(1, Math.round(img.width * as)); cv.height = Math.max(1, Math.round(img.height * as));
@@ -1108,7 +1169,7 @@ async function addFiles(files) {
   let failed = 0;
   for (const file of list) {
     try {
-      state.photos.push(await loadPhoto(file));
+      state.photos.push(await loadPhoto(file)); trimPhotos();
     } catch (e) { console.error(e); failed++; }
   }
   showBusy(false);
@@ -1122,6 +1183,7 @@ function selectPhoto(i) {
   state.cur = i;
   if (first && !state.userPicked) { const top = LOOKS.find(l => l.id === state.photos[i].analysis.suggest[0]); if (top) state.look = top; }
   $("empty").hidden = true; $("editor").hidden = false; $("addBtn").hidden = false; $("camBtn2").hidden = false;
+  trimPhotos();
   renderPhotos(); renderStrip(); renderInfo(); renderView(); $("saveBtn").disabled = !state.look;
 }
 function renderPhotos() {
@@ -1146,6 +1208,7 @@ function renderView() {
     const p = cur(); if (!p) return;
     const lk = state.look;
     if (lk && !R.hasLut(lk, 65)) R.ensureLut(lk, 65).then(() => { if (state.look === lk) renderView(); });
+    if (!p.preview) { ensurePreview(p).then(() => renderView()); return; }
     renderPreview($("view"), p, lk, viewOriginal);
     $("badge").style.opacity = viewOriginal ? 1 : 0;
   });
@@ -1153,8 +1216,9 @@ function renderView() {
 /** The photo at screen size with the look, adjustments and effects: exactly what Save makes, just smaller. */
 const viewTmp = document.createElement("canvas");
 function renderPreview(dest, p, lk, original) {
+  if (!p.preview) return;
   const scale = p.preview.width / p.w;     // grain sized for how the photo looks on screen
-  const opts = { n: 65, amount: state.amount, grainScale: Math.min(1, Math.max(0.35, Math.sqrt(scale) * 1.4)), original, ...preFor(p), ...fxFor(p, lk) };
+  const opts = { n: 65, amount: state.amount, grainScale: Math.min(1, Math.max(0.35, Math.sqrt(scale) * 1.4)), original, ...preFor(p, lk), ...fxFor(p, lk) };
   if (original || (!state.fx.date && state.fx.frame === "none")) { R.renderTo(dest, p.preview, lk, opts); return; }
   R.renderTo(viewTmp, p.preview, lk, opts);
   const out = finishFx(viewTmp, state.fx, p.date);
@@ -1204,7 +1268,7 @@ async function renderStrip() {
     if (token !== stripToken) return;
     await R.ensureLut(lk, 33); if (token !== stripToken) return;      // built in the background
     const tmp = document.createElement("canvas");
-    R.renderTo(tmp, p.stripSrc, lk, { n: 33, amount: 1, glow: lk.halation ? glowOf(p) : null, grainScale: 0.6, ...preFor(p) });
+    R.renderTo(tmp, p.stripSrc, lk, { n: 33, amount: 1, glow: lk.halation ? glowOf(p) : null, grainScale: 0.6, ...preFor(p, lk) });
     const ctx = cv.getContext("2d"), s = Math.min(tmp.width, tmp.height);
     cv.width = 152; cv.height = 152;
     ctx.drawImage(tmp, (tmp.width - s) / 2, (tmp.height - s) / 2, s, s, 0, 0, 152, 152);
@@ -1235,6 +1299,14 @@ $("amount").oninput = () => { state.amount = $("amount").value / 100; $("amountO
 
 $("compareBtn").addEventListener("click", (e) => { e.stopPropagation(); viewOriginal = !viewOriginal; $("compareBtn").setAttribute("aria-pressed", viewOriginal); haptic(); renderView(); });
 $("compareBtn").addEventListener("pointerdown", (e) => e.stopPropagation());
+$("fullBtn").addEventListener("pointerdown", (e) => e.stopPropagation());
+$("fullBtn").addEventListener("click", (e) => {
+  e.stopPropagation(); haptic();
+  const on = !document.body.classList.contains("fullview"); document.body.classList.toggle("fullview", on); $("fullBtn").setAttribute("aria-pressed", on);
+  $("fullBtn").innerHTML = on ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>'
+                             : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  setTimeout(renderView, 30);
+});
 // Hold to compare
 const stage = $("stage");
 const holdOn = (e) => { if (e.target.closest("button")) return; viewOriginal = true; $("hint").hidden = true; renderView(); };
@@ -1278,7 +1350,7 @@ function fixOrientation(seg) {
 async function makeJpeg(p, lk) {
   const bmp = await createImageBitmap(p.file, { imageOrientation: "from-image" });
   try {
-    const raw = await R.renderFull(bmp, lk, { amount: state.amount, ...preFor(p), ...fxFor(p, lk) });
+    const raw = await R.renderFull(bmp, lk, { amount: state.amount, ...preFor(p, lk), ...fxFor(p, lk) });
     const out = finishFx(raw, state.fx, p.date);
     const blob = await new Promise((res, rej) => out.toBlob(b => b ? res(b) : rej(new Error("Couldn't make the JPEG")), "image/jpeg", settings.quality));
     out.width = out.height = 0; raw.width = raw.height = 0;
@@ -1337,9 +1409,10 @@ async function saveOne(p, lk, withOriginal) {
   if (state.busy) return false; state.busy = true;
   try {
     let file;
-    if (lk || fxActive()) { const blob = await makeJpeg(p, lk); file = new File([blob], outName(p, lk), { type: "image/jpeg" }); download(blob, file.name); }
+    const changedIt = lk || fxActive() || adjusted();
+    if (changedIt) { const blob = await makeJpeg(p, lk); file = new File([blob], outName(p, lk), { type: "image/jpeg" }); download(blob, file.name); }
     else { file = p.file; download(p.file, p.name); }
-    if (withOriginal && (lk || fxActive())) download(p.file, p.name);
+    if (withOriginal && changedIt) download(p.file, p.name);
     Gallery.add(p, lk).catch(() => {});
     haptic(15);
     toast((p.mode ? p.mode + " · " : "") + (lk ? `Saved with ${lk.name}` : "Saved") + (withOriginal && lk ? " + original" : ""), "", navigator.canShare ? { label: "Share", run: () => shareFiles([file]) } : null);
@@ -1354,10 +1427,12 @@ async function saveOne(p, lk, withOriginal) {
 /* ======================= Review: see it before it's saved ======================= */
 const RV = { p: null, mode: "", orig: false };
 function openReview(p, mode) {
-  RV.p = p; RV.mode = mode; RV.orig = false; RV.closing = false; RV.open = (RV.open || 0) + 1;
+  RV.p = p; RV.mode = mode; RV.orig = false; RV.closing = false; RV.open = (RV.open || 0) + 1; $("review").style.pointerEvents = "";
   if (mode === "camera") Cam.reviewing = true;
   const rv = $("review"); rv.classList.remove("out"); rv.hidden = false;
-  $("rvLooks").hidden = mode !== "camera"; $("rvHint").hidden = mode !== "camera";
+  $("rvLooks").hidden = mode !== "camera";
+  const hint = $("rvHint"); hint.hidden = mode !== "camera" || store.get("rvHintSeen", 0) > 2; hint.style.opacity = 1;
+  if (!hint.hidden) { store.set("rvHintSeen", store.get("rvHintSeen", 0) + 1); setTimeout(() => hint.style.opacity = 0, 2600); }
   const acts = $("rvActs");
   const icon = { del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12.5A1.5 1.5 0 0 0 8.5 21h7a1.5 1.5 0 0 0 1.5-1.5L18 7M9 7V4.5h6V7"/></svg>',
     edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg>',
@@ -1380,11 +1455,13 @@ function openReview(p, mode) {
 }
 function closeReview(silent) {
   const rv = $("review"); if (rv.hidden || RV.closing) return;
-  RV.closing = true;
+  RV.closing = true; RV.tok = (RV.tok || 0) + 1;        // stop drawing look previews
+  rv.style.pointerEvents = "none";                        // the screen behind works straight away
   if (RV.hist) { RV.hist = false; RV.skipPop = true; history.back(); }
   rv.classList.add("out");
   const tok = RV.open;
-  setTimeout(() => { if (tok !== RV.open) return; rv.hidden = true; rv.classList.remove("out"); RV.closing = false; }, 210);
+  const done = () => { if (tok !== RV.open || rv.hidden) return; rv.hidden = true; rv.classList.remove("out"); rv.style.pointerEvents = ""; RV.closing = false; };
+  rv.addEventListener("animationend", done, { once: true }); setTimeout(done, 260);
   if (RV.mode === "camera") { Cam.reviewing = false; renderCamUI(); if (!silent && !RV.saved && state.photos.includes(RV.p)) toast("Not saved · it's still here until you close the app", "", { label: "Edit", run: () => { const i = state.photos.indexOf(RV.p); closeCamera(); if (i >= 0) selectPhoto(i); } }); }
   else if (state.cur >= 0) { renderView(); }
   RV.saved = false;
@@ -1396,6 +1473,7 @@ function renderReview() {
   requestAnimationFrame(() => {
     rvRaf = false;
     const p = RV.p; if (!p || $("review").hidden) return;
+    if (!p.preview) { ensurePreview(p).then(renderReview); return; }
     const lk = state.look;
     if (lk && !R.hasLut(lk, 65)) R.ensureLut(lk, 65).then(() => { if (state.look === lk) renderReview(); });
     renderPreview($("rvView"), p, lk, RV.orig);
@@ -1409,6 +1487,7 @@ function renderReview() {
 async function renderReviewLooks() {
   const box = $("rvLooks"), p = RV.p, list = camList(), token = (RV.tok = (RV.tok || 0) + 1);
   box.innerHTML = "";
+  box.append(noneChip(() => reviewPick(null)));
   for (const l of list) {
     const b = document.createElement("button"); b.className = "cchip"; b.dataset.id = l.id; b.setAttribute("aria-pressed", state.look === l);
     b.innerHTML = `<i class="sw" style="background:linear-gradient(135deg,${l.swatch[0]},${l.swatch[1]})"></i>${l.code}`;
@@ -1418,9 +1497,9 @@ async function renderReviewLooks() {
   box.querySelector('[aria-pressed="true"]')?.scrollIntoView({ inline: "center", block: "nearest" });
   for (const c of box.children) {
     if (token !== RV.tok) return;
-    const l = LOOKS.find(x => x.id === c.dataset.id);
-    await R.ensureLut(l, 33); if (token !== RV.tok || $("review").hidden) return;
-    const tmp = document.createElement("canvas"); R.renderTo(tmp, p.stripSrc, l, { n: 33, amount: 1, grainScale: 0, ...preFor(p) });
+    const l = LOOKS.find(x => x.id === c.dataset.id); if (!l) continue;
+    await R.ensureLut(l, 33); if (token !== RV.tok || $("review").hidden || RV.closing) return;
+    const tmp = document.createElement("canvas"); R.renderTo(tmp, p.stripSrc, l, { n: 33, amount: 1, ...preFor(p, l), grainScale: 0 });
     const cv = document.createElement("canvas"); cv.width = cv.height = 96; const sq = Math.min(tmp.width, tmp.height);
     cv.getContext("2d").drawImage(tmp, (tmp.width - sq) / 2, (tmp.height - sq) / 2, sq, sq, 0, 0, 96, 96);
     c.querySelector("i.sw")?.replaceWith(cv);
@@ -1429,10 +1508,11 @@ async function renderReviewLooks() {
   renderReview();      // the thumbnails used the same drawing surface
 }
 function reviewPick(l) {
-  if (!l || l === state.look) return;
+  if (l === undefined || l === state.look) return;
   state.look = l; state.userPicked = true; haptic();
-  for (const c of $("rvLooks").children) c.setAttribute("aria-pressed", c.dataset.id === l.id);
-  $("rvLooks").querySelector(`[data-id="${l.id}"]`)?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  const id = idOf(l);
+  for (const c of $("rvLooks").children) c.setAttribute("aria-pressed", c.dataset.id === id);
+  $("rvLooks").querySelector(`[data-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   renderReview();
 }
 async function reviewSave() {
@@ -1456,7 +1536,7 @@ $("rvFx").onclick = () => { const s = sheet(`<h3>Effects</h3><div class="pane sc
     if (!start || RV.mode !== "camera") { start = null; return; }
     const dx = e.clientX - start.x, dy = e.clientY - start.y; start = null;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-      const list = camList(); if (!list.length) return;
+      const list = dialList();
       const i = Math.max(0, list.indexOf(state.look));
       reviewPick(list[(i + (dx < 0 ? 1 : -1) + list.length) % list.length]);
     }
@@ -1481,7 +1561,7 @@ const Gallery = {
   async list() { const all = await this.tx("readonly", st => st.getAll()); return (all || []).sort((a, b) => b.id - a.id); },
   async add(p, lk) {
     const tmp = document.createElement("canvas");
-    R.renderTo(tmp, p.stripSrc, lk, { n: 33, amount: state.amount, grainScale: 0.5, ...preFor(p), ...fxFor(p, lk) });
+    R.renderTo(tmp, p.stripSrc, lk, { n: 33, amount: state.amount, grainScale: 0.5, ...preFor(p, lk), ...fxFor(p, lk) });
     const fin = finishFx(tmp, state.fx, p.date), cv = document.createElement("canvas"), sq = Math.min(fin.width, fin.height);
     cv.width = cv.height = 240; cv.getContext("2d").drawImage(fin, (fin.width - sq) / 2, (fin.height - sq) / 2, sq, sq, 0, 0, 240, 240);
     const item = { id: Date.now(), name: p.name, blob: p.file, look: lk ? lk.id : null, code: lk ? lk.code : "", thumb: cv.toDataURL("image/jpeg", 0.82), fx: { ...state.fx }, amount: state.amount };
@@ -1526,7 +1606,7 @@ async function openRecent(it) {
     const p = await loadPhoto(file);
     state.photos.push(p);
     const lk = LOOKS.find(l => l.id === it.look); state.look = lk || null; state.userPicked = true;
-    if (it.fx) state.fx = { ...FX_OFF, ...it.fx };
+    if (it.fx) state.fx = normFx(it.fx);
     if (it.amount) { state.amount = it.amount; $("amount").value = Math.round(it.amount * 100); $("amountOut").textContent = $("amount").value + "%"; }
     selectPhoto(state.photos.length - 1); renderDots();
   } catch (e) { console.error(e); toast("Couldn't open that photo", "err"); }
@@ -1570,7 +1650,7 @@ $("menuBtn").onclick = () => {
   const all = s.el.querySelector("#mAll"); if (all) all.onclick = () => { s.close(); saveJobs(state.photos.map(p => [p, state.look]), `Saving ${state.photos.length} photos`); };
   const sg = s.el.querySelector("#mSug"); if (sg) sg.onclick = () => { s.close(); saveJobs(cur().analysis.suggest.map(id => [cur(), LOOKS.find(l => l.id === id)]).filter(j => j[1]), "Saving suggested looks"); };
   const fv = s.el.querySelector("#mFav"); if (fv) fv.onclick = () => { s.close(); saveJobs(LOOKS.filter(isFav).map(lk => [cur(), lk]), "Saving favourite looks"); };
-  const clr = s.el.querySelector("#mClear"); if (clr) clr.onclick = () => { s.close(); state.photos = []; state.cur = -1; $("editor").hidden = true; $("empty").hidden = false; $("addBtn").hidden = true; $("camBtn2").hidden = true; renderRecent(); };
+  const clr = s.el.querySelector("#mClear"); if (clr) clr.onclick = () => { s.close(); state.photos = []; state.cur = -1; $("editor").hidden = true; $("empty").hidden = false; $("addBtn").hidden = true; $("camBtn2").hidden = true; document.body.classList.remove("fullview"); renderRecent(); };
 };
 /* ---------- shared controls ---------- */
 function slRow(label, min, max, value, fmt, onInput, dflt) {
@@ -1645,16 +1725,17 @@ function buildFx(box, changed) {
     halation: slRow("Halation", 0, 100, Math.round(fx.halation * 100), pct, (v) => { fx.halation = v / 100; changed(); }, 0),
     bloom: slRow("Soft bloom", 0, 100, Math.round(fx.bloom * 100), pct, (v) => { fx.bloom = v / 100; changed(); }, 0),
     vignette: slRow("Vignette", 0, 100, Math.round(fx.vignette * 100), pct, (v) => { fx.vignette = v / 100; changed(); }, 0),
-    grain: slRow("Grain", 0, 300, Math.round(fx.grain * 100), pct, (v) => { fx.grain = v / 100; changed(); }, 100),
+    grain: slRow("Grain", 0, 300, Math.round((fx.grain ?? grainOf(state.look).v) * 10), (v) => fx.grain === null ? "Auto" : (v / 10).toFixed(1), (v) => { fx.grain = v / 10; changed(); }, 0),
   };
+  rows.grain.querySelector("input").ondblclick = () => { fx.grain = null; rows.grain.set(Math.round(grainOf(state.look).v * 10)); haptic(); changed(); };
   rows.dust.title = "Dust & scratches";
   const date = switchRow("Date stamp", "Orange date in the corner, like a film camera", fx.date, (v) => { fx.date = v; changed(); });
   const frames = chipRow(FRAMES, fx.frame, (v) => { fx.frame = v; changed(); });
   const acts = document.createElement("div"); acts.className = "fxacts";
   acts.innerHTML = `<button class="btn tonal" data-a="reset">Reset</button><button class="btn tonal" data-a="def">Save as default</button>`;
   acts.querySelector('[data-a="reset"]').onclick = () => { Object.assign(fx, FX_OFF); haptic(); changed(); buildFx(box, changed); };
-  acts.querySelector('[data-a="def"]').onclick = () => { store.set("fxDefault", { ...fx }); haptic(15); toast(fxActive() ? "These effects are now your default" : "Effects default: all off"); };
-  box.append(lh, styles, leakRow, sep(), head("Film texture & light", "Double-tap a slider to reset"), rows.dust, rows.halation, rows.bloom, rows.vignette, rows.grain,
+  acts.querySelector('[data-a="def"]').onclick = () => { store.set("fxDefault", { ...fx, v: 2 }); haptic(15); toast(fxActive() ? "These effects are now your default" : "Effects default: all off"); };
+  box.append(lh, styles, leakRow, sep(), head("Film texture & light", "Double-tap a slider to reset · Grain: Auto = the look's own"), rows.dust, rows.halation, rows.bloom, rows.vignette, rows.grain,
              sep(), date, head("Frame"), frames, acts);
 }
 
@@ -1714,9 +1795,9 @@ const isNight = () => Cam.night === "on" || (Cam.night === "auto" && Cam.dark);
 const camList = () => looksForTab(Cam.tab, Cam.analysis ? Cam.analysis.suggest : []);
 
 function camPre() {
-  const a = state.adj, m0 = settings.autofix && Cam.analysis ? Cam.analysis.mul : [1, 1, 1], ev = Math.pow(2, a.light);
+  const a = state.adj, auto = !!state.look, m0 = settings.autofix && auto && Cam.analysis ? Cam.analysis.mul : [1, 1, 1], ev = Math.pow(2, a.light);
   return { mul: [m0[0] * ev * (1 + 0.12 * a.warmth), m0[1] * ev, m0[2] * ev * (1 - 0.12 * a.warmth)], contrast: a.contrast,
-           grainMul: a.grain, tone: settings.hdr ? Cam.tone : null, toneAmt: settings.hdr ? 0.5 : 0 };
+           grain: grainOf(state.look), tone: settings.hdr && auto ? Cam.tone : null, toneAmt: settings.hdr && auto ? 0.5 : 0 };
 }
 
 /* ---------- screen ---------- */
@@ -1725,10 +1806,21 @@ function renderCamUI() {
   renderCarousel();
   updateModes();
 }
+const NONE_SW = `<i class="sw none-sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M6.5 17.5l11-11"/></svg></i>`;
+/** The look dial: "None" (the photo as it is) first, then the looks. */
+const dialList = () => [null, ...camList()];
+const idOf = (l) => l ? l.id : "none";
+const lookById = (id) => id === "none" ? null : LOOKS.find(l => l.id === id) || null;
+function noneChip(onPick) {
+  const b = document.createElement("button"); b.className = "cchip"; b.dataset.id = "none";
+  b.setAttribute("aria-pressed", state.look === null); b.innerHTML = NONE_SW + "None"; b.onclick = onPick;
+  return b;
+}
 function renderCarousel() {
   const box = $("camStrip"), list = camList(), sug = new Set(Cam.analysis ? Cam.analysis.suggest : []);
   box.innerHTML = "";
-  if (!list.length) { box.innerHTML = `<div style="color:#aaa;font-size:13px;padding:18px 0;white-space:nowrap">Long-press a look in the editor to add favourites</div>`; return; }
+  box.append(noneChip(() => camPick(null, true)));
+  if (!list.length) box.insertAdjacentHTML("beforeend", `<div style="color:#aaa;font-size:13px;padding:18px 0;white-space:nowrap">Long-press a look in the editor to add favourites</div>`);
   for (const l of list) {
     const b = document.createElement("button"); b.className = "cchip"; b.dataset.id = l.id;
     b.setAttribute("aria-pressed", state.look === l);
@@ -1747,21 +1839,25 @@ function renderCarousel() {
     if (ignore) return;
     clearTimeout(t);
     t = setTimeout(() => {
+      if (performance.now() < (Cam.pickLock || 0)) return;      // a tapped look is gliding to the middle: keep it
       const mid = box.getBoundingClientRect().left + box.clientWidth / 2;
       let best = null, bd = 1e9;
       for (const c of box.children) { if (!c.dataset.id) continue; const r = c.getBoundingClientRect(); const d = Math.abs(r.left + r.width / 2 - mid); if (d < bd) { bd = d; best = c; } }
-      if (best && (!state.look || best.dataset.id !== state.look.id)) { ignore = true; camPick(LOOKS.find(l => l.id === best.dataset.id), false); setTimeout(() => ignore = false, 300); }
+      if (best && best.dataset.id !== idOf(state.look)) { ignore = true; camPick(lookById(best.dataset.id), false); setTimeout(() => ignore = false, 300); }
     }, 110);
   }, { passive: true });
 })();
 function camPick(l, scroll) {
-  if (!l) return;
+  if (l === undefined) return;
   state.look = l; state.userPicked = true; haptic();
-  for (const c of $("camStrip").children) c.setAttribute("aria-pressed", c.dataset.id === l.id);
-  if (scroll) $("camStrip").querySelector(`[data-id="${l.id}"]`)?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  const bn = $("bigName"); bn.querySelector("b").textContent = `${l.code} · ${l.name}`; bn.querySelector("span").textContent = "Inspired by " + l.inspired;
+  if (scroll) Cam.pickLock = performance.now() + 900;
+  const id = idOf(l);
+  for (const c of $("camStrip").children) if (c.dataset.id) c.setAttribute("aria-pressed", c.dataset.id === id);
+  if (scroll) $("camStrip").querySelector(`[data-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  const bn = $("bigName"); bn.querySelector("b").textContent = l ? `${l.code} · ${l.name}` : "No look";
+  bn.querySelector("span").textContent = l ? "Inspired by " + l.inspired : "The photo exactly as the camera takes it";
   bn.classList.add("on"); clearTimeout(Cam.nameTimer); Cam.nameTimer = setTimeout(() => bn.classList.remove("on"), 1300);
-  R.ensureLut(l, 33).then(() => R.ensureLut(l, 65));   // built in the background: no hitch when switching
+  if (l) R.ensureLut(l, 33).then(() => R.ensureLut(l, 65));   // built in the background: no hitch when switching
 }
 function updateModes() {
   const n = isNight(), h = hdrNow();
@@ -1784,7 +1880,7 @@ function drawThumbs() {
     const r = c.getBoundingClientRect(); if (r.right < br.left - 80 || r.left > br.right + 80) continue;
     const l = LOOKS.find(x => x.id === c.dataset.id); if (!l) continue;
     if (!R.hasLut(l, 33)) { R.ensureLut(l, 33).then(() => { Cam.wantThumbs = true; }); continue; }   // built in the background
-    if (drawn >= 3) { Cam.wantThumbs = true; break; }                                                  // spread over frames
+    if (drawn >= 2) { Cam.wantThumbs = true; break; }                                                  // spread over frames
     R.renderTo(tmp, Cam.snap, l, { n: 33, amount: 1, grainScale: 0 });
     let cv = c.querySelector("canvas");
     if (!cv) { cv = document.createElement("canvas"); cv.width = cv.height = 108; c.querySelector("i.sw")?.replaceWith(cv); }
@@ -1832,6 +1928,11 @@ async function startStreamRaw() {
   if (Cam.deviceId) video.deviceId = { exact: Cam.deviceId }; else video.facingMode = { ideal: Cam.facing };
   Cam.stream = await navigator.mediaDevices.getUserMedia({ video, audio: false });
   Cam.track = Cam.stream.getVideoTracks()[0];
+  Cam.track.addEventListener("ended", () => {
+    if (!Cam.live || document.hidden || Cam.measuring || Cam.restarting) return;
+    Cam.restarting = true;
+    setTimeout(async () => { try { await startStream(); } catch (e) { closeCamera(); camError(e); } finally { Cam.restarting = false; } }, 400);
+  });
   Cam.video.srcObject = Cam.stream; await Cam.video.play();
   R.resetLive();
   Cam.caps = Cam.track.getCapabilities ? Cam.track.getCapabilities() : {};
@@ -2062,7 +2163,7 @@ async function measureLenses(force) {
     if (!start) return;
     const dx = e.clientX - start.x, dy = e.clientY - start.y;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-      const list = camList(); if (!list.length) return;
+      const list = dialList();
       const i = Math.max(0, list.indexOf(state.look));
       camPick(list[(i + (dx < 0 ? 1 : -1) + list.length) % list.length], true);
     } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) focusAt(e.clientX, e.clientY);
@@ -2266,7 +2367,7 @@ async function shoot() {
     const name = `ACE_${stamp()}.jpg`;
     const file = new File([blob], name, { type: "image/jpeg", lastModified: Date.now() });
     const p = await loadPhoto(file, { camera: true, fused: night || hdr, mode: hdr ? "HDR" : night ? "Night" : "", zoom: (Cam.zoom || 1) * (Cam.swZoom || 1) });
-    state.photos.push(p);
+    state.photos.push(p); trimPhotos();
     $("camLast").innerHTML = `<img alt="" src="${p.thumbUrl}">`;
     const last = $("camLast"); last.classList.remove("pop"); void last.offsetWidth; last.classList.add("pop");
     if (settings.instantSave) {
@@ -2335,6 +2436,25 @@ async function showCamInfo() {
 $("nativeBtn").onclick = () => $("nativeCam").click();
 $("nativeCam").onchange = () => { addFiles($("nativeCam").files); $("nativeCam").value = ""; };
 document.addEventListener("visibilitychange", () => { if (document.hidden && Cam.live) closeCamera(); });
+
+/* ======================= Safety nets ======================= */
+let lastErr = 0;
+function reportError(e) {
+  console.error(e);
+  const msg = String((e && (e.message || e.reason?.message || e.reason)) || e || "");
+  if (/ResizeObserver|AbortError|The play\(\) request/i.test(msg)) return;          // harmless browser noise
+  if (Date.now() - lastErr < 8000) return; lastErr = Date.now();
+  toast(/memory|allocation/i.test(msg) ? "The phone is low on memory. Close other apps, or save and start over." : "Something went wrong, but your photos are safe. Try that again.", "err");
+}
+window.addEventListener("error", (e) => reportError(e.error || e.message));
+window.addEventListener("unhandledrejection", (e) => reportError(e.reason));
+// Android can pause the graphics chip to save memory; recover instead of showing a black screen
+$("gl").addEventListener("webglcontextlost", (e) => {
+  e.preventDefault();
+  if (Cam.live) closeCamera();
+  toast("The phone paused graphics to save memory.", "err", { label: "Reload", run: () => location.reload() });
+});
+$("gl").addEventListener("webglcontextrestored", () => location.reload());
 
 /* ======================= Start ======================= */
 (async () => {
