@@ -151,7 +151,21 @@
     return { mul: wbm.map(x => Math.round(gain * x * 1e4) / 1e4), tags, suggest: codeToId ? picks.map(c => codeToId[c]).filter(Boolean) : picks };
   }
 
-  const softClip = (x) => (x > 0.9 ? 0.9 + 0.1 * Math.tanh((x - 0.9) / 0.1) : Math.max(x, 0));
+  /* Print stage: like film paper, very bright or very saturated colours fade gently into the
+     edge of what a photo can show (keeping their hue) instead of being clipped flat. */
+  function finish(c) {
+    const L = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    const Lc = L > 0.9 ? 0.9 + 0.1 * Math.tanh((L - 0.9) / 0.1) : Math.max(L, 0);
+    let r = 0;
+    for (let i = 0; i < 3; i++) {
+      const d = c[i] + (Lc - L) - Lc;                                   // colour, measured from grey
+      const room = d > 0 ? 1 - Lc : Lc;                                 // how far it may go before clipping
+      if (d !== 0) r = Math.max(r, Math.abs(d) / Math.max(room, 1e-6));
+    }
+    const t = 0.8, k = r > t ? (t + (1 - t) * Math.tanh((r - t) / (1 - t))) / r : 1;
+    for (let i = 0; i < 3; i++) c[i] = clamp(Lc + (c[i] + (Lc - L) - Lc) * k, 0, 1);
+    return c;
+  }
 
   /** Build a 3D colour table: Float32Array of n*n*n*4 (RGBA, red changes fastest). */
   function buildLut(look, n) {
@@ -169,7 +183,8 @@
           c[0] = c[0] * (1 - m) + x0 * k * m; c[1] = c[1] * (1 - m) + x1 * k * m; c[2] = c[2] * (1 - m) + x2 * k * m;
         }
       }
-      out[o++] = clamp(softClip(c[0]), 0, 1); out[o++] = clamp(softClip(c[1]), 0, 1); out[o++] = clamp(softClip(c[2]), 0, 1); out[o++] = 1;
+      finish(c);
+      out[o++] = c[0]; out[o++] = c[1]; out[o++] = c[2]; out[o++] = 1;
     }
     return out;
   }

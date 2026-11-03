@@ -108,7 +108,7 @@
    "inspired": "Kodak Gold 200",
    "style": "Golden-yellow everyday film. Rich reds and yellows, a holiday-snapshot feel.",
    "grain": 5,
-   "grain_size": 1.0,
+   "grain_size": 0.9,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -207,7 +207,7 @@
    "inspired": "Kodak Ektar 100",
    "style": "Vivid, clean and very fine grained. Bold reds and blues, made for scenery.",
    "grain": 1.5,
-   "grain_size": 1.0,
+   "grain_size": 0.75,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -664,7 +664,7 @@
      0.28
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.9,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -958,7 +958,7 @@
      0.3
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.95,
    "halation": 0,
    "mono": false,
    "skin": 0.45,
@@ -1042,7 +1042,7 @@
      0.25
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.9,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -1128,7 +1128,7 @@
      0.28
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 1.2,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -1226,7 +1226,7 @@
      0.28
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.9,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -1311,7 +1311,7 @@
      0.25
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.75,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -1425,7 +1425,7 @@
    "inspired": "Fujifilm Velvia 50",
    "style": "Very saturated landscape slide film. Deep greens and blues, strong contrast.",
    "grain": 1.5,
-   "grain_size": 1.0,
+   "grain_size": 0.7,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -1515,7 +1515,7 @@
    "inspired": "Kodak Kodachrome 64",
    "style": "The classic magazine slide: deep reds, dark blue skies, warm mid-tones.",
    "grain": 2.5,
-   "grain_size": 1.0,
+   "grain_size": 0.75,
    "vignette": 0.25,
    "halation": 0,
    "mono": false,
@@ -1670,7 +1670,7 @@
      0.15
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.75,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -1756,7 +1756,7 @@
      0.18
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.75,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -1836,7 +1836,7 @@
      0.2
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.75,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -1916,7 +1916,7 @@
      0.25
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.75,
    "vignette": 0,
    "halation": 0,
    "mono": false,
@@ -2203,7 +2203,7 @@
      0.25
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.7,
    "vignette": 0,
    "mono": false,
    "skin": 0.45,
@@ -2298,7 +2298,7 @@
      0.32
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.9,
    "mono": false,
    "skin": 0.45,
    "maker": "Kodak"
@@ -2462,7 +2462,7 @@
      0.32
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 1.15,
    "mono": false,
    "maker": "Kodak"
   },
@@ -3408,7 +3408,7 @@
    "inspired": "Fujifilm Acros",
    "style": "Very fine grain and smooth tones, with rich mid-greys.",
    "grain": 2,
-   "grain_size": 1.0,
+   "grain_size": 0.75,
    "vignette": 0,
    "halation": 0,
    "mono": true,
@@ -3721,7 +3721,7 @@
      ]
     ]
    ],
-   "grain_size": 1.0,
+   "grain_size": 0.75,
    "vignette": 0,
    "halation": 0,
    "maker": "Kodak"

@@ -32,7 +32,7 @@ import numpy as np
 
 LUT_SIZE = 65
 LUT_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "ace-studio" / "luts"
-LUT_VERSION = "7"
+LUT_VERSION = "8"
 
 
 # --------------------------------------------------------------------------
@@ -150,9 +150,16 @@ def mono(c, r=0.3, g=0.59, b=0.11):
 
 
 def soft_clip(c):
-    """Roll off anything pushed past white instead of hard-clipping it."""
-    over = c > 0.9
-    return np.where(over, 0.9 + 0.1 * np.tanh((c - 0.9) / 0.1), np.maximum(c, 0))
+    """Print stage: like film paper, very bright or very saturated colours fade gently into the
+    edge of what a photo can show (keeping their hue) instead of being clipped flat."""
+    L = c[..., 0] * 0.2126 + c[..., 1] * 0.7152 + c[..., 2] * 0.0722
+    Lc = np.where(L > 0.9, 0.9 + 0.1 * np.tanh((L - 0.9) / 0.1), np.maximum(L, 0))
+    d = c + (Lc - L)[..., None] - Lc[..., None]
+    room = np.where(d > 0, (1 - Lc)[..., None], Lc[..., None])
+    r = np.where(d != 0, np.abs(d) / np.maximum(room, 1e-6), 0).max(-1)
+    t = 0.8
+    k = np.where(r > t, (t + (1 - t) * np.tanh((r - t) / (1 - t))) / np.maximum(r, 1e-9), 1.0)
+    return np.clip(Lc[..., None] + d * k[..., None], 0, 1)
 
 
 # --------------------------------------------------------------------------
@@ -374,7 +381,7 @@ def catalog() -> list[dict]:
 def lut_path(look: Look) -> Path:
     """Write the look's .cube file once (cached) and return its path."""
     import inspect
-    src = (json.dumps(look.ops) + str(look.skin) + inspect.getsource(hue) + inspect.getsource(split)
+    src = (json.dumps(look.ops) + str(look.skin) + inspect.getsource(soft_clip) + inspect.getsource(hue) + inspect.getsource(split)
            + inspect.getsource(film) + inspect.getsource(protect_skin) + inspect.getsource(skin_mask))
     key = hashlib.sha1((LUT_VERSION + src).encode()).hexdigest()[:10]
     path = LUT_DIR / f"{look.id}-{key}.cube"

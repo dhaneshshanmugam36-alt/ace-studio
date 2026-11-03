@@ -87,13 +87,17 @@ Updates arrive by themselves the next time you open it with internet.
 - **Film camera:** see the film look live while you shoot. Swipe to change looks, tap to focus, pinch to zoom (up to 3×).
   Daylight shots use the camera's full-resolution stills. In the dark, **Night mode** merges 8 frames to cut
   noise, and **Smart HDR** brings out shadows. After each shot you see it first, then **Save**, **Edit** or
-  **Delete**. Saved shots keep the look *and* a clean original.
+  **Delete**. Saved shots keep the look *and* a clean original. **PRO** uses your phone's own camera (real zoom
+  lens, its own HDR and night mode) and brings the photo straight back with your look.
 - **Your photos:** choose photos from your gallery, use your phone's own camera app, or share photos to Ace Looks
   from the gallery.
 - **Tabs by maker:** Kodak, Fujifilm, Ricoh, Leica, CineStill, CCD digicams and more, plus For you and Favourites.
 - **For you:** the 4 looks that suit each photo (people, landscape, sky, night, indoor) show first.
 - **Simple controls:** three tabs, **Looks**, **Adjust** (light, contrast, warmth) and **Effects**. Hold the photo
   to compare with the original. **Auto fix** and natural skin tones are on by default.
+- **Film quality:** every look is a 65-point 3D colour table read with tetrahedral interpolation (like pro colour
+  tools), with a print stage that fades very bright or saturated colours gently instead of clipping them, and
+  film grain sized to each film's speed: fine for Ektar 100, gritty for Tri-X, clumpy for Delta 3200.
 - **Effects:** light leaks (6 styles + shuffle), dust & scratches, halation, soft bloom, vignette, grain, an orange
   date stamp, and frames (Polaroid, 35 mm film strip, white or black border). Live in the camera too.
 - **Preview before saving:** see exactly what will be saved, at its real size, before anything is downloaded.
