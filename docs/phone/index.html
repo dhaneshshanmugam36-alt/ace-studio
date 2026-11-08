@@ -500,7 +500,7 @@ select { appearance: none; -webkit-appearance: none; background: var(--surface-2
 <script src="engine.js"></script>
 <script>
 "use strict";
-const APP_VERSION = "2.3 · build 12";
+const APP_VERSION = "2.3 · build 13";
 const $ = (id) => document.getElementById(id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem("acelooks." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
@@ -679,7 +679,12 @@ const R = (() => {
       yc = min(yc, 0.97);
       vec3 rec = lu * (yc / max(yu, 1e-4));
       float m = max(max(c.r, c.g), c.b);
-      float w = smoothstep(0.7, 0.96, m) * step(0.0, t.x) * step(t.x, 1.0) * step(0.0, t.y) * step(t.y, 1.0);
+      // no ghosts: only trust the dark frame where it agrees with the photo. A blown area must really be
+      // at least as bright in the dark frame; an area that isn't blown must be about as bright.
+      float ratio = yu / max(Yl(l), 1e-4);
+      float agree = smoothstep(0.75, 0.92, ratio) * mix(1.0 - smoothstep(1.2, 1.5, ratio), 1.0, smoothstep(0.9, 0.98, m));
+      vec2 e = min(t, 1.0 - t);                                        // fade out at the dark frame's edges: no hard rectangle
+      float w = smoothstep(0.7, 0.96, m) * agree * smoothstep(0.0, 0.04, e.x) * smoothstep(0.0, 0.04, e.y);
       l = mix(l, rec, w);
     }
     l *= mul;
@@ -797,10 +802,12 @@ const R = (() => {
       vec3 bl = (texture(img, tx + vec2(ts.x, 0)).rgb + texture(img, tx - vec2(ts.x, 0)).rgb + texture(img, tx + vec2(0, ts.y)).rgb + texture(img, tx - vec2(0, ts.y)).rgb
                + texture(img, tx + ts).rgb + texture(img, tx - ts).rgb + texture(img, tx + vec2(ts.x, -ts.y)).rgb + texture(img, tx + vec2(-ts.x, ts.y)).rgb) * 0.125;
       vec2 t = (vec2(px.x / full.x, 1.0 - px.y / full.y) - 0.5) * fuseScale + 0.5 + fuseOff;
-      if (t.x >= 0.0 && t.y >= 0.0 && t.x <= 1.0 && t.y <= 1.0) {
+      vec2 e = min(t, 1.0 - t);
+      float we = smoothstep(0.0, 0.04, e.x) * smoothstep(0.0, 0.04, e.y);     // soft edges: no rectangle
+      if (we > 0.0) {
         vec3 m = toLin(texture(fuseTex, t).rgb);
         float r = clamp((Yl(toLin(src)) + 0.002) / (Yl(toLin(mix(bl, src, 0.25))) + 0.002), 0.45, 2.2);
-        src = clamp(toSrgb(m * pow(r, fuseDetail)), 0.0, 1.0);
+        src = mix(src, clamp(toSrgb(m * pow(r, fuseDetail)), 0.0, 1.0), we);
       }
     }
     if (usePre) src = pre(src, px);
@@ -2425,7 +2432,7 @@ async function settle(target, dir) {
   }
 }
 const canHdr = () => !!(Cam.caps.exposureCompensation && Cam.caps.exposureCompensation.min <= -1 && Cam.ic && Cam.photoCaps);
-const hdrNow = () => canHdr() && !isNight() && (Cam.hdr === "on" || (Cam.hdr === "auto" && Cam.clipped > 0.006));
+const hdrNow = () => canHdr() && !isNight() && (Cam.hdr === "on" || (Cam.hdr === "auto" && Cam.clipped > 0.01));
 /** A full-resolution photo from the camera sensor. */
 async function takeStill() {
   if (!Cam.ic || !Cam.photoCaps) return null;
@@ -2445,7 +2452,7 @@ async function hdrShot() {
   const m0 = meanLuma(base);
   let dark = null;
   if (await setEV(-2)) { await settle(m0 * 0.6, -1); dark = await multiFrame(2, "HDR · hold still", true); }
-  await setEV(0); if (dark) await settle(m0 * 0.9, 0);
+  await setEV(0); if (dark) { await settle(m0 * 0.9, 0); await new Promise(r => setTimeout(r, 250)); }
   const blob = await takeStill();
   if (!blob || !dark) return blob;
   const bmp = await createImageBitmap(blob, { imageOrientation: "from-image" });
@@ -2457,6 +2464,7 @@ async function hdrShot() {
   const k = ratios.length > 50 ? ratios[ratios.length >> 1] : 0;
   if (k < 1.4) { bmp.close?.(); return blob; }                 // exposure didn't change: nothing to blend
   const m = matchZoom(normLuma(bmp, 160), normLuma(dark, 160), [0.94, 0.97, 1, 1.03, 1.06], 3);
+  if (!(m.e > 0.8)) { bmp.close?.(); return blob; }              // you or the subject moved: keep the clean photo, never a ghost
   const under = { img: dark, k: Math.min(8, k), scale: m.z, off: [m.dx, m.dy] };
   const out = await fullRender(bmp, null, { amount: 0, mul: [1, 1, 1], contrast: 0, under, tone: R.toneFor(await smallOf(bmp)), toneAmt: settings.hdr ? 0.45 : 0.3 });
   const res = await canvasBlob(out, 0.95); out.width = out.height = 0; bmp.close?.();
@@ -2476,6 +2484,7 @@ async function nightShot() {
   if (!sameShape(bmp, merged) || bmp.width < merged.width) { bmp.close?.(); return canvasBlob(merged, 0.96); }
   $("holdTxt").textContent = "Night · finishing";
   const m = matchZoom(normLuma(bmp, 160), normLuma(merged, 160), [0.94, 0.97, 1, 1.03, 1.06], 3);
+  if (!(m.e > 0.75)) { bmp.close?.(); return blob; }             // frames don't line up: the plain photo beats a ghosted one
   const out = await fullRender(bmp, null, { amount: 0, mul: [1, 1, 1], contrast: 0,
     fuse: { img: merged, scale: m.z, off: [m.dx, m.dy], detail: 0.8, r: Math.max(1.5, bmp.width / merged.width) },
     tone: R.toneFor(await smallOf(merged)), toneAmt: settings.hdr ? 0.35 : 0 });
