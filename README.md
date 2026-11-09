@@ -9,15 +9,15 @@
 <td width="50%" valign="top">
 
 ### 📱 Ace Looks
-**For your phone** (Android + Chrome)
+**For your phone** (Android or iPhone)
 
 54 film looks, effects and a film camera for your photos.
 Works with **any photo**. No Insta360 camera needed.
 
 <a href="https://dhaneshshanmugam36-alt.github.io/ace-studio/phone/"><img alt="Open Ace Looks" src="https://img.shields.io/badge/Open%20Ace%20Looks-on%20your%20phone-F2B66D?style=for-the-badge"></a>
 
-1. Open the link above **on your phone** in Chrome
-2. Tap **⋮** → **Install app**
+1. Open the link above **on your phone** (Chrome on Android, Safari on iPhone)
+2. Android: tap **⋮** → **Install app**. iPhone: tap **Share** → **Add to Home Screen**
 3. Done. No app store, no account, no download
 
 [More about Ace Looks ↓](#-ace-looks-phone-app)
@@ -60,7 +60,8 @@ cd ace-studio && ./install.sh
 | Report a problem or ask for a feature | [Issues](https://github.com/dhaneshshanmugam36-alt/ace-studio/issues/new/choose) |
 
 > **Good to know:** Ace Looks is **not** on the Play Store or App Store. The link above is the only official way to get it.
-> It's made for Android phones with Chrome; on iPhone or a computer it opens, but the camera may not work fully.
+> It works on Android (Chrome) and iPhone (Safari). On iPhone, tap **PRO** in the camera for full-resolution photos,
+> and saved photos go to Photos with one tap.
 > Ace Studio is for Linux only. Both are free and open source: no sign-up, no ads, no payment.
 
 ---
@@ -91,10 +92,13 @@ Updates arrive by themselves the next time you open it with internet.
   lens, its own HDR and night mode) and brings the photo straight back with your look.
 - **Your photos:** choose photos from your gallery, use your phone's own camera app, or share photos to Ace Looks
   from the gallery.
-- **Tabs by maker:** Kodak, Fujifilm, Ricoh, Leica, CineStill, CCD digicams and more, plus For you and Favourites.
+- **Organised by style:** Colour film, Slide, Cinema, B&W, Camera colours, Instant & creative and CCD (or switch to
+  browse by brand), plus For you and Favourites.
 - **For you:** the 4 looks that suit each photo (people, landscape, sky, night, indoor) show first.
 - **Simple controls:** three tabs, **Looks**, **Adjust** (light, contrast, warmth) and **Effects**. Hold the photo
   to compare with the original. **Auto fix** and natural skin tones are on by default.
+- **Wide colour kept:** photos in Display P3 (most new phones) are edited in their own colour space and keep their
+  profile, so vivid colours aren't squeezed.
 - **Film quality:** every look is a 65-point 3D colour table read with tetrahedral interpolation (like pro colour
   tools), with a print stage that fades very bright or saturated colours gently instead of clipping them, and
   film grain sized to each film's speed: fine for Ektar 100, gritty for Tri-X, clumpy for Delta 3200.
@@ -267,7 +271,10 @@ Yes, free. No ads, no accounts, no tracking.
 No. Ace Looks runs completely on your phone, and Ace Studio runs on your computer.
 
 **Does Ace Looks work on iPhone?**
-It's built and tested for Chrome on Android. Safari on iPhone may open it, but the camera and saving may not work fully.
+Yes, in Safari (iOS 16 or newer). Add it to your Home Screen for full screen. Editing, looks, effects and saving to
+Photos all work. Safari only gives websites video-size frames from the camera, so for full-resolution shots tap **PRO**:
+it opens the iPhone camera and brings the photo straight back with your look. Very large photos (over about 16 MP) are
+saved at up to 16.7 MP, which is Safari's limit.
 
 **Will Ace Studio work with my other Insta360 camera?**
 Maybe. It's tested on the Ace Pro 2. The camera library it uses was built on the X3 and X4. Please

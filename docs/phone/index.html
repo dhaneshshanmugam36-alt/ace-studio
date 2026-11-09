@@ -8,7 +8,11 @@
 <meta name="theme-color" content="#14171A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ace Looks">
 <style>
 :root {
   --bg: #111316; --surface: #1A1D21; --surface-2: #22262B; --surface-3: #2B3036; --line: #3A4047;
@@ -352,6 +356,13 @@ select { appearance: none; -webkit-appearance: none; background: var(--surface-2
 .seg-chips { display: flex; gap: 6px; }
 .seg-chips .chip { height: 34px; }
 .opt select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23999' stroke-width='2'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; background-color: var(--surface); }
+.tab.browse { display: inline-flex; align-items: center; gap: 5px; opacity: .8; margin-left: 4px; border-left: 1px solid var(--line); border-radius: 0; padding-left: 12px; }
+.tab.browse svg { width: 15px; height: 15px; }
+.cam .tab.browse { border-left-color: rgba(255,255,255,.2); }
+.ioshint { display: flex; gap: 12px; align-items: center; text-align: left; max-width: 520px; margin: 22px auto 0; padding: 12px 8px 12px 16px; border-radius: var(--r-md); background: var(--surface-2); }
+.ioshint > svg { width: 24px; height: 24px; flex: none; color: var(--primary); }
+.ioshint div { flex: 1; } .ioshint b { font-weight: 600; } .ioshint small { display: block; color: var(--muted); font-size: 13px; line-height: 18px; margin-top: 2px; }
+.ioshint .ibtn { flex: none; }
 /* top bar back button */
 .bar .back { margin-left: -10px; color: var(--text); }
 .bar h1 small { font: 500 13px var(--font); color: var(--muted); margin-left: 6px; }
@@ -407,6 +418,11 @@ select { appearance: none; -webkit-appearance: none; background: var(--surface-2
     <button class="linkbtn" id="nativeBtn" hidden>Use my phone's camera app</button>
     </div>
 
+  </div>
+  <div class="ioshint" id="iosHint" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+    <div><b>Install on iPhone</b><small>Tap Share <span aria-hidden="true">⬆</span> below, then <b>Add to Home Screen</b>. It opens full screen like an app.</small></div>
+    <button class="ibtn" id="iosHintX" aria-label="Dismiss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
   <div class="recent" id="recent" hidden>
     <div class="rh"><b>Recent</b><span id="recentCount"></span><button class="linkbtn" id="recentClear">Clear</button></div>
@@ -500,7 +516,7 @@ select { appearance: none; -webkit-appearance: none; background: var(--surface-2
 <script src="engine.js"></script>
 <script>
 "use strict";
-const APP_VERSION = "2.3 · build 13";
+const APP_VERSION = "2.4 · build 14";
 const $ = (id) => document.getElementById(id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem("acelooks." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
@@ -1038,6 +1054,10 @@ const R = (() => {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.activeTexture(gl.TEXTURE0);
   }
   /** Big saves leave a big surface behind: give that memory back. */
+  async function cutTile(src, x, y, w, h) {
+    try { return await createImageBitmap(src, x, y, w, h); }
+    catch { const c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").drawImage(src, x, y, w, h, 0, 0, w, h); c.close = () => { c.width = c.height = 0; }; return c; }
+  }
   function outShrink() {
     if (outW * outH <= 1700 * 1700) return;
     outW = outH = 0; pix = new Uint8Array(0);
@@ -1080,7 +1100,7 @@ const R = (() => {
     const octx = out.getContext("2d");
     for (let y = 0; y < H; y += T) for (let x = 0; x < W; x += T) {
       const tw = Math.min(T, W - x), th = Math.min(T, H - y);
-      const part = (x === 0 && y === 0 && tw === W && th === H) ? bitmap : await createImageBitmap(bitmap, x, y, tw, th);
+      const part = (x === 0 && y === 0 && tw === W && th === H) ? bitmap : await cutTile(bitmap, x, y, tw, th);
       drawTile(part, [x, H - y - th, tw, th], octx, x, y);
       if (part !== bitmap) part.close?.();
       await new Promise(r => setTimeout(r, 0));
@@ -1221,8 +1241,8 @@ const R = (() => {
 /* ======================= Photos ======================= */
 /** Read a photo: small copies for the screen, plus what's in it (for Auto fix and For you). */
 async function loadPhoto(file, extra = {}) {
-  const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
-  const rs = (k, q = "high") => createImageBitmap(bmp, { resizeWidth: Math.max(1, Math.round(bmp.width * k)), resizeHeight: Math.max(1, Math.round(bmp.height * k)), resizeQuality: q });
+  const bmp = await bitmap(file, { imageOrientation: "from-image" });
+  const rs = (k, q = "high") => bitmap(bmp, { resizeWidth: Math.max(1, Math.round(bmp.width * k)), resizeHeight: Math.max(1, Math.round(bmp.height * k)), resizeQuality: q });
   const preview = await rs(Math.min(1, 1600 / Math.max(bmp.width, bmp.height)));
   const thumb = await rs(Math.min(1, 140 / Math.min(bmp.width, bmp.height)));
   const small = await rs(Math.min(1, 480 / Math.max(bmp.width, bmp.height)), "medium");
@@ -1244,9 +1264,9 @@ function ensurePreview(p) {
   if (p.preview) return Promise.resolve();
   if (previewJobs.has(p)) return previewJobs.get(p);
   const job = (async () => {
-    const bmp = await createImageBitmap(p.file, { imageOrientation: "from-image" });
+    const bmp = await bitmap(p.file, { imageOrientation: "from-image" });
     const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
-    p.preview = await createImageBitmap(bmp, { resizeWidth: Math.max(1, Math.round(bmp.width * k)), resizeHeight: Math.max(1, Math.round(bmp.height * k)), resizeQuality: "high" });
+    p.preview = await bitmap(bmp, { resizeWidth: Math.max(1, Math.round(bmp.width * k)), resizeHeight: Math.max(1, Math.round(bmp.height * k)), resizeQuality: "high" });
     bmp.close?.();
   })().finally(() => previewJobs.delete(p));
   previewJobs.set(p, job);
@@ -1353,6 +1373,7 @@ function renderInfo() {
 }
 function renderFams() {
   if (!TABS.includes(state.fam)) state.fam = "All";
+  if (!TABS.includes(Cam.tab)) Cam.tab = "All";
   renderTabs($("fams"), state.fam, (t) => { state.fam = t; store.set("tab", t); renderFams(); renderStrip(); });
 }
 let stripToken = 0;
@@ -1464,20 +1485,88 @@ function fixOrientation(seg) {
   }
 }
 
+/* ---------- iPhone (Safari) support ---------- */
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const MAX_PIXELS = IS_IOS ? 16.7e6 : 64e6;           // Safari can't make a canvas bigger than ~16.7 MP
+/** Open a photo or resize an image, the same way on every phone. Returns something drawable with width/height. */
+async function bitmap(src, opts = {}) {
+  if (!IS_IOS) { try { return await createImageBitmap(src, opts); } catch (e) { if (!(src instanceof Blob)) throw e; } }
+  let img = src;
+  if (src instanceof Blob) {                          // <img> decodes HEIC/JPEG and applies the photo's rotation on iPhone
+    const url = URL.createObjectURL(src); img = new Image(); img.src = url;
+    try { await img.decode(); } finally { URL.revokeObjectURL(url); }
+  }
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  let w = opts.resizeWidth || iw, h = opts.resizeHeight || ih;
+  if (w * h > MAX_PIXELS) { const k = Math.sqrt(MAX_PIXELS / (w * h)); w = Math.floor(w * k); h = Math.floor(h * k); }
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(img, 0, 0, w, h);
+  c.close = () => { c.width = c.height = 0; };
+  return c;
+}
+
+/* Wide colour: phones save photos in Display P3, which holds more vivid colours than standard sRGB.
+   We edit the photo in its own colour space and keep its colour profile, so nothing gets squeezed. */
+async function readIcc(file) {
+  try {
+    if (!/jpe?g$/i.test(file.type.split("/")[1] || file.name)) return null;
+    const b = new Uint8Array(await file.slice(0, 512 * 1024).arrayBuffer());
+    if (b[0] !== 0xFF || b[1] !== 0xD8) return null;
+    const segs = []; let i = 2;
+    while (i + 4 < b.length && b[i] === 0xFF) {
+      const m = b[i + 1], len = (b[i + 2] << 8) | b[i + 3];
+      if (m === 0xDA) break;
+      if (m === 0xE2 && String.fromCharCode(...b.subarray(i + 4, i + 15)) === "ICC_PROFILE") segs.push(b.slice(i, i + 2 + len));
+      i += 2 + len;
+    }
+    return segs.length ? segs : null;
+  } catch { return null; }
+}
+/** Put the photo's colour profile into the saved JPEG (replacing any the browser added). */
+async function withIcc(blob, segs) {
+  if (!segs) return blob;
+  const b = new Uint8Array(await blob.arrayBuffer()), keep = [b.subarray(0, 2)]; let i = 2, insertAt = 1;
+  while (i + 4 < b.length && b[i] === 0xFF) {
+    const m = b[i + 1], len = (b[i + 2] << 8) | b[i + 3];
+    if (m === 0xDA) break;
+    const isIcc = m === 0xE2 && String.fromCharCode(...b.subarray(i + 4, i + 15)) === "ICC_PROFILE";
+    if (!isIcc) { keep.push(b.subarray(i, i + 2 + len)); if (m === 0xE0 || m === 0xE1) insertAt = keep.length; }
+    i += 2 + len;
+  }
+  keep.splice(insertAt, 0, ...segs);               // after JFIF/Exif, before everything else
+  keep.push(b.subarray(i));
+  return new Blob(keep, { type: "image/jpeg" });
+}
 async function makeJpeg(p, lk) {
-  const bmp = await createImageBitmap(p.file, { imageOrientation: "from-image" });
+  const icc = IS_IOS ? null : await readIcc(p.file);
+  const bmp = await bitmap(p.file, icc ? { imageOrientation: "from-image", colorSpaceConversion: "none" } : { imageOrientation: "from-image" });
   try {
     const raw = await R.renderFull(bmp, lk, { amount: state.amount, ...preFor(p, lk), ...fxFor(p, lk) });
     const out = finishFx(raw, state.fx, p.date);
     const blob = await new Promise((res, rej) => out.toBlob(b => b ? res(b) : rej(new Error("Couldn't make the JPEG")), "image/jpeg", settings.quality));
     out.width = out.height = 0; raw.width = raw.height = 0;
-    return await withExif(blob, p.file);
+    return await withIcc(await withExif(blob, p.file), icc);
   } finally { bmp.close?.(); }
 }
 function download(blob, name) {
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+/** iPhone: Safari can't drop files into Photos by itself, so we hand them over with one tap (Share → Save Image). */
+function offerSave(files, title) {
+  const many = files.length > 1;
+  const s = sheet(`<h3></h3><p>Tap <b>Save to Photos</b>, then choose <b>Save ${many ? files.length + " Images" : "Image"}</b>.</p>
+    <div class="acts" style="padding:0;grid-template-columns:1fr"><button class="btn fill" data-a="photos">Save to Photos</button><button class="btn tonal" data-a="files">Save to Files instead</button></div>`);
+  s.el.querySelector("h3").textContent = title;
+  s.el.querySelector('[data-a="photos"]').onclick = async () => {
+    for (let i = 0; i < files.length; i += 10) {             // the share sheet takes up to about 10 at a time
+      const ok = await shareFiles(files.slice(i, i + 10));
+      if (!ok) { toast("Couldn't open the share sheet. Try Save to Files.", "err"); return; }
+    }
+    s.close(); toast("Saved");
+  };
+  s.el.querySelector('[data-a="files"]').onclick = () => { s.close(); files.forEach(f => download(f, f.name)); };
 }
 async function shareFiles(files) {
   if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files }); return true; } catch (e) { if (e.name === "AbortError") return true; } }
@@ -1508,15 +1597,15 @@ async function saveJobs(jobs, title) {
       const blob = await makeJpeg(p, lk);
       const file = new File([blob], outName(p, lk), { type: "image/jpeg" });
       done.push(file);
-      download(blob, file.name);
-      await new Promise(r => setTimeout(r, 250));   // let the browser start each download
+      if (!IS_IOS) { download(blob, file.name); await new Promise(r => setTimeout(r, 250)); }   // let the browser start each download
     }
     ui.set(jobs.length, jobs.length, "Done");
   } catch (e) {
     console.error(e);
     toast(e.message && /memory|allocation|size/i.test(e.message) ? "This photo is too big for the phone's memory. Close other apps and try again." : "Saving failed: " + e.message, "err");
   } finally { ui.close(); state.busy = false; }
-  if (done.length) {
+  if (done.length && IS_IOS) offerSave(done, `${done.length} photo${done.length > 1 ? "s are" : " is"} ready`);
+  else if (done.length) {
     toast(`Saved ${done.length} photo${done.length > 1 ? "s" : ""} to Downloads`, "", navigator.canShare ? { label: "Share", run: () => shareFiles(done) } : null);
   }
 }
@@ -1527,12 +1616,17 @@ async function saveOne(p, lk, withOriginal) {
   try {
     let file;
     const changedIt = lk || fxActive() || adjusted();
-    if (changedIt) { const blob = await makeJpeg(p, lk); file = new File([blob], outName(p, lk), { type: "image/jpeg" }); download(blob, file.name); }
-    else { file = p.file; download(p.file, p.name); }
-    if (withOriginal && changedIt) download(p.file, p.name);
+    if (changedIt) { const blob = await makeJpeg(p, lk); file = new File([blob], outName(p, lk), { type: "image/jpeg" }); }
+    else file = p.file instanceof File ? p.file : new File([p.file], p.name, { type: "image/jpeg" });
+    const files = [file];
+    if (withOriginal && changedIt) files.push(p.file instanceof File ? p.file : new File([p.file], p.name, { type: "image/jpeg" }));
     Gallery.add(p, lk).catch(() => {});
     haptic(15);
-    toast((p.mode ? p.mode + " · " : "") + (lk ? `Saved with ${lk.name}` : "Saved") + (withOriginal && lk ? " + original" : ""), "", navigator.canShare ? { label: "Share", run: () => shareFiles([file]) } : null);
+    if (IS_IOS) offerSave(files, (lk ? lk.name : "Your photo") + " is ready");
+    else {
+      files.forEach(f => download(f, f.name));
+      toast((p.mode ? p.mode + " · " : "") + (lk ? `Saved with ${lk.name}` : "Saved") + (files.length > 1 ? " + original" : ""), "", navigator.canShare ? { label: "Share", run: () => shareFiles([file]) } : null);
+    }
     return true;
   } catch (e) {
     console.error(e);
@@ -1904,25 +1998,46 @@ $("pickBtn").onclick = $("addBtn").onclick = () => $("file").click();
 $("file").onchange = () => { addFiles($("file").files); $("file").value = ""; };
 
 /* ======================= Film camera ======================= */
-const TABS = ["All", "For you", "★ Favourites", "Kodak", "Fujifilm", "Ricoh", "Leica", "CineStill", "CCD", "More"];
+/* Two ways to browse: by style (how photographers think, the default) or by brand. */
+const STYLE_TABS = [["Colour film", ["Colour negative"]], ["Slide", ["Slide & chrome"]], ["Cinema", ["Cinema"]], ["B&W", ["Black & white"]],
+                    ["Camera colours", ["Compact camera", "Rangefinder"]], ["Instant & creative", ["Instant & creative"]], ["CCD", ["CCD digicam"]]];
+const BRAND_TABS = ["Kodak", "Fujifilm", "Ricoh", "Leica", "CineStill", "CCD", "More"];
+let browseBy = store.get("browseBy", "style");
+const groupTabs = () => browseBy === "brand" ? BRAND_TABS : STYLE_TABS.map(t => t[0]);
+const TABS = { includes: (t) => ["All", "For you", "★ Favourites", ...groupTabs()].includes(t) };
+/* A tidy order everywhere: by style, then brand, then film speed (slow to fast). */
+const STYLE_ORDER = STYLE_TABS.flatMap(t => t[1]), BRAND_ORDER = ["Kodak", "Fujifilm", "CineStill", "Ricoh", "Leica", "More", "CCD"];
+const iso = (l) => { const m = /\b(\d{2,4})[DT]?\b/.exec(l.inspired); return m ? +m[1] : 400; };
+const ORDERED = [...LOOKS].sort((a, b) => (STYLE_ORDER.indexOf(a.family) - STYLE_ORDER.indexOf(b.family)) ||
+  (BRAND_ORDER.indexOf(a.maker) - BRAND_ORDER.indexOf(b.maker)) || (iso(a) - iso(b)) || (LOOKS.indexOf(a) - LOOKS.indexOf(b)));
 /** Looks shown in a tab. "All" puts the suggested ones first, then favourites. */
 function looksForTab(tab, sug) {
   const byId = (id) => LOOKS.find(l => l.id === id);
   if (tab === "For you") return sug.map(byId).filter(Boolean);
   if (tab.includes("Favourites")) return LOOKS.filter(isFav);
-  if (tab !== "All") return LOOKS.filter(l => l.maker === tab);
+  const st = STYLE_TABS.find(t => t[0] === tab);
+  if (st) return ORDERED.filter(l => st[1].includes(l.family));
+  if (tab !== "All") return ORDERED.filter(l => l.maker === tab);
   const first = sug.map(byId).filter(Boolean);
-  return [...first, ...LOOKS.filter(l => isFav(l) && !sug.includes(l.id)), ...LOOKS.filter(l => !sug.includes(l.id) && !isFav(l))];
+  return [...first, ...ORDERED.filter(l => isFav(l) && !sug.includes(l.id)), ...ORDERED.filter(l => !sug.includes(l.id) && !isFav(l))];
 }
 function renderTabs(box, current, onPick) {
   box.innerHTML = "";
-  for (const t of TABS) {
+  for (const t of ["All", "For you", "★ Favourites", ...groupTabs()]) {
     if (t.includes("Favourites") && !favs.size) continue;
     const b = document.createElement("button"); b.className = "tab"; b.setAttribute("role", "tab");
     b.textContent = t; b.setAttribute("aria-selected", t === current);
     b.onclick = () => { haptic(); onPick(t); };
     box.append(b);
   }
+  // switch between browsing by style and by brand
+  const sw = document.createElement("button"); sw.className = "tab browse";
+  sw.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/></svg>${browseBy === "brand" ? "By style" : "By brand"}`;
+  sw.onclick = () => {
+    haptic(); browseBy = browseBy === "brand" ? "style" : "brand"; store.set("browseBy", browseBy);
+    onPick(groupTabs().includes(current) ? current : "All");
+  };
+  box.append(sw);
   box.querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: "center", block: "nearest" });
 }
 const haptic = (ms = 8) => { try { navigator.vibrate?.(ms); } catch {} };
@@ -1946,7 +2061,8 @@ function camPre() {
 
 /* ---------- screen ---------- */
 function renderCamUI() {
-  renderTabs($("camTabs"), Cam.tab, (t) => { Cam.tab = t; store.set("camTab", t); renderCamUI(); });
+  if (!TABS.includes(Cam.tab)) Cam.tab = "All";
+  renderTabs($("camTabs"), Cam.tab, (t) => { Cam.tab = t; store.set("camTab", t); if (state.cur >= 0 && !TABS.includes(state.fam)) { renderFams(); renderStrip(); } renderCamUI(); });
   renderCarousel();
   updateModes();
 }
@@ -2047,6 +2163,7 @@ async function openCamera() {
   const c = R.canvas; c.hidden = false; $("finder").prepend(c);
   try { await startStream(); } catch (e) { closeCamera(); camError(e); return; }
   $("finder").classList.toggle("grid", store.get("grid", false));
+  if (!Cam.ic && !store.get("proTip", false)) { store.set("proTip", true); toast("Tip: tap PRO for full-resolution photos from your phone's own camera."); }
   Cam.live = true; scheduleFrame(); analysisTick();
   renderCamUI(); renderDots(); setTimeout(placeGrid, 120);
   if (!store.get("camHintSeen", false)) { const h = $("camHint"); h.hidden = false; h.style.opacity = 1; setTimeout(() => { h.style.opacity = 0; setTimeout(() => h.hidden = true, 500); }, 3500); store.set("camHintSeen", true); }
@@ -2188,11 +2305,11 @@ function analysisTick() {
     Cam.tone = R.toneFor(snap);
     markSuggested(); updateModes(); updateThumbs(false);
   };
-  if (R.canBitmap()) {
+  if (R.canBitmap() && !IS_IOS && !Cam.noBitmap) {
     // shrink the frame on the graphics chip, then read its pixels in the background worker
     createImageBitmap(v, { resizeWidth: w, resizeHeight: h, resizeQuality: "low" })
       .then(async snap => { const copy = await createImageBitmap(snap); return [await R.analyzeBitmap(copy), snap]; })
-      .then(([a, snap]) => done(a, snap), () => { Cam.analysing = false; });
+      .then(([a, snap]) => done(a, snap), () => { Cam.analysing = false; Cam.noBitmap = true; });
     return;
   }
   tiny.width = w; tiny.height = h;
@@ -2443,7 +2560,7 @@ async function takeStill() {
   try { return await Cam.ic.takePhoto(o); } catch { try { return await Cam.ic.takePhoto(); } catch { return null; } }
 }
 const sameShape = (a, b) => Math.abs(a.width / a.height - b.width / b.height) < 0.02;
-async function smallOf(src, w = 480) { return createImageBitmap(src, { resizeWidth: w, resizeHeight: Math.max(1, Math.round(w * src.height / src.width)) }); }
+async function smallOf(src, w = 480) { return bitmap(src, { resizeWidth: w, resizeHeight: Math.max(1, Math.round(w * src.height / src.width)) }); }
 
 /** HDR: a darker shot for the bright parts + the normal full-resolution photo, blended. */
 async function hdrShot() {
@@ -2455,7 +2572,7 @@ async function hdrShot() {
   await setEV(0); if (dark) { await settle(m0 * 0.9, 0); await new Promise(r => setTimeout(r, 250)); }
   const blob = await takeStill();
   if (!blob || !dark) return blob;
-  const bmp = await createImageBitmap(blob, { imageOrientation: "from-image" });
+  const bmp = await bitmap(blob, { imageOrientation: "from-image" });
   if (!sameShape(bmp, dark)) { bmp.close?.(); return blob; }
   $("holdTxt").textContent = "HDR · blending";
   const A = lumaSmall(bmp, 200), B = lumaSmall(dark, 200), ratios = [];
@@ -2480,7 +2597,7 @@ async function nightShot() {
   const blob = await takeStill();
   if (raised) setEV(0);
   if (!blob) return canvasBlob(merged, 0.96);
-  const bmp = await createImageBitmap(blob, { imageOrientation: "from-image" });
+  const bmp = await bitmap(blob, { imageOrientation: "from-image" });
   if (!sameShape(bmp, merged) || bmp.width < merged.width) { bmp.close?.(); return canvasBlob(merged, 0.96); }
   $("holdTxt").textContent = "Night · finishing";
   const m = matchZoom(normLuma(bmp, 160), normLuma(merged, 160), [0.94, 0.97, 1, 1.03, 1.06], 3);
@@ -2505,7 +2622,7 @@ async function shoot() {
     blob = night ? await nightShot() : hdr ? await hdrShot() : await takeStill();
     if (!blob) blob = await canvasBlob(await multiFrame(3, "Hold still"), 0.96);
     if (Cam.swZoom > 1.01) {                     // zoom without a zoom lens: keep the middle of the full photo
-      const bm = await createImageBitmap(blob, { imageOrientation: "from-image" });
+      const bm = await bitmap(blob, { imageOrientation: "from-image" });
       const w = Math.round(bm.width / Cam.swZoom), h = Math.round(bm.height / Cam.swZoom);
       const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
       cv.getContext("2d").drawImage(bm, (bm.width - w) / 2, (bm.height - h) / 2, w, h, 0, 0, w, h); bm.close?.();
@@ -2639,6 +2756,8 @@ $("gl").addEventListener("webglcontextrestored", () => location.reload());
   catch { toast("Couldn't load the looks. Check your connection once, then it works offline.", "err"); return; }
   state.look = LOOKS[0];
   renderFams(); renderInfo(); renderDots(); renderRecent(); setTitle();
+  if (IS_IOS && !navigator.standalone && !store.get("iosHintDone", false)) $("iosHint").hidden = false;
+  $("iosHintX").onclick = () => { $("iosHint").hidden = true; store.set("iosHintDone", true); };
   document.querySelectorAll("input[type=range]").forEach(paintRange);
   // photos shared from the gallery (Android share menu)
   if (location.search.includes("shared=1") && "caches" in window) {
