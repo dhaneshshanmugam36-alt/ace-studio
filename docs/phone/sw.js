@@ -1,5 +1,5 @@
 // Ace Looks service worker: works offline, and receives photos shared from the gallery.
-const CACHE = "ace-looks-v14";
+const CACHE = "ace-looks-v15";
 const SHELL = ["./", "index.html", "engine.js", "engine-worker.js", "looks.json", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", (e) => {

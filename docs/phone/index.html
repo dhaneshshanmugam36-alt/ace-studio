@@ -516,7 +516,7 @@ select { appearance: none; -webkit-appearance: none; background: var(--surface-2
 <script src="engine.js"></script>
 <script>
 "use strict";
-const APP_VERSION = "2.4 · build 14";
+const APP_VERSION = "2.4 · build 15";
 const $ = (id) => document.getElementById(id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem("acelooks." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
@@ -2008,18 +2008,26 @@ const TABS = { includes: (t) => ["All", "For you", "★ Favourites", ...groupTab
 /* A tidy order everywhere: by style, then brand, then film speed (slow to fast). */
 const STYLE_ORDER = STYLE_TABS.flatMap(t => t[1]), BRAND_ORDER = ["Kodak", "Fujifilm", "CineStill", "Ricoh", "Leica", "More", "CCD"];
 const iso = (l) => { const m = /\b(\d{2,4})[DT]?\b/.exec(l.inspired); return m ? +m[1] : 400; };
-const ORDERED = [...LOOKS].sort((a, b) => (STYLE_ORDER.indexOf(a.family) - STYLE_ORDER.indexOf(b.family)) ||
-  (BRAND_ORDER.indexOf(a.maker) - BRAND_ORDER.indexOf(b.maker)) || (iso(a) - iso(b)) || (LOOKS.indexOf(a) - LOOKS.indexOf(b)));
+let orderedCache = null, orderedFor = 0;
+/** Sorted when first needed (the looks load after the page starts), and again if the list ever changes. */
+function ordered() {
+  if (!orderedCache || orderedFor !== LOOKS.length) {
+    orderedFor = LOOKS.length;
+    orderedCache = [...LOOKS].sort((a, b) => (STYLE_ORDER.indexOf(a.family) - STYLE_ORDER.indexOf(b.family)) ||
+      (BRAND_ORDER.indexOf(a.maker) - BRAND_ORDER.indexOf(b.maker)) || (iso(a) - iso(b)) || (LOOKS.indexOf(a) - LOOKS.indexOf(b)));
+  }
+  return orderedCache;
+}
 /** Looks shown in a tab. "All" puts the suggested ones first, then favourites. */
 function looksForTab(tab, sug) {
   const byId = (id) => LOOKS.find(l => l.id === id);
   if (tab === "For you") return sug.map(byId).filter(Boolean);
   if (tab.includes("Favourites")) return LOOKS.filter(isFav);
   const st = STYLE_TABS.find(t => t[0] === tab);
-  if (st) return ORDERED.filter(l => st[1].includes(l.family));
-  if (tab !== "All") return ORDERED.filter(l => l.maker === tab);
+  if (st) return ordered().filter(l => st[1].includes(l.family));
+  if (tab !== "All") return ordered().filter(l => l.maker === tab);
   const first = sug.map(byId).filter(Boolean);
-  return [...first, ...ORDERED.filter(l => isFav(l) && !sug.includes(l.id)), ...ORDERED.filter(l => !sug.includes(l.id) && !isFav(l))];
+  return [...first, ...ordered().filter(l => isFav(l) && !sug.includes(l.id)), ...ordered().filter(l => !sug.includes(l.id) && !isFav(l))];
 }
 function renderTabs(box, current, onPick) {
   box.innerHTML = "";
@@ -2080,7 +2088,7 @@ function renderCarousel() {
   const box = $("camStrip"), list = camList(), sug = new Set(Cam.analysis ? Cam.analysis.suggest : []);
   box.innerHTML = "";
   box.append(noneChip(() => camPick(null, true)));
-  if (!list.length) box.insertAdjacentHTML("beforeend", `<div style="color:#aaa;font-size:13px;padding:18px 0;white-space:nowrap">Long-press a look in the editor to add favourites</div>`);
+  if (!list.length) box.insertAdjacentHTML("beforeend", `<div style="color:#aaa;font-size:13px;padding:18px 0;white-space:nowrap">${Cam.tab.includes("Favourites") ? "Long-press a look in the editor to add favourites" : Cam.tab === "For you" ? "Suggestions appear in a moment" : "No looks here"}</div>`);
   for (const l of list) {
     const b = document.createElement("button"); b.className = "cchip"; b.dataset.id = l.id;
     b.setAttribute("aria-pressed", state.look === l);
